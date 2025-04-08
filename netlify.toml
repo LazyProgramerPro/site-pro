@@ -1,3 +1,7 @@
+[build]
+  command = "npm run build" # or "yarn build"
+  publish = "dist" # or whatever your build directory is (could be "build" for CRA)
+
 [[headers]]
   for = "/*.js"
   [headers.values]
