@@ -22,7 +22,6 @@ import AddEditBusinessForm from "./AddEditBusinessForm";
 export default function Business() {
   const { styles } = useStyle();
   const [open, setOpen] = useState(false);
-  const [activeRowId, setActiveRowId] = useState(null);
 
   const businessList = useSelector((state) => state.business.businessList);
   const loading = useSelector((state) => state.business.loading);
@@ -44,12 +43,10 @@ export default function Business() {
   const showDrawer = (businessId) => {
     setOpen(true);
     dispatch(startEditingBusiness(businessId));
-    setActiveRowId(businessId);
   };
 
   const onClose = () => {
     setOpen(false);
-    setActiveRowId(null);
     dispatch(cancelEditingBusiness());
   };
 
@@ -144,16 +141,11 @@ export default function Business() {
                 showSizeChanger: true,
                 pageSizeOptions: [10, 20],
               }}
-              scroll={{ x: "max-content", y: 400 }}
+              scroll={{ x: "max-content", y: 450 }}
               size="middle"
               rowClassName={(record) =>
-                record.id === activeRowId ? "active-row" : ""
+                editingBusiness?.id === record.id ? "active-row" : ""
               }
-              onRow={(record) => ({
-                onClick: () => {
-                  setActiveRowId(record.id);
-                },
-              })}
             />
           </TableContainer>
         )}
@@ -177,6 +169,14 @@ const SearchInput = styled(Input)`
 const TableContainer = styled.div`
   width: 100%;
   overflow: hidden;
+  .active-row {
+    background-color: #e6f7ff;
+    border-left: 3px solid #1890ff;
+
+    td {
+      background-color: #e6f7ff !important; /* Force the background on all cells */
+    }
+  }
 `;
 
 const WrapperIcons = styled.div`

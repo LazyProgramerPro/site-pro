@@ -40,7 +40,7 @@ export default function ContractAddendumDrawer(props) {
     <Drawer
       width={"85%"}
       title={`Danh sách phụ lục của hợp đồng ${
-        initialValues && initialValues?.name
+        initialValues && initialValues?.contractCode
       }`}
       placement="right"
       onClose={onClose}
@@ -49,7 +49,6 @@ export default function ContractAddendumDrawer(props) {
       {!isEmpty(selectedContract) && isEmpty(initialValues) ? (
         <Spin></Spin>
       ) : (
-        // thêm props vào ContractAddendum
         <ContractAddendum />
       )}
     </Drawer>

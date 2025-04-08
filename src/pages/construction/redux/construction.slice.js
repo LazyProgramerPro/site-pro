@@ -9,26 +9,78 @@ const initialState = {
 };
 
 const fakeConstructionList = [
-  // Keep your example data
   {
-    id: "1",
-    name: "John Brown",
-    description: "New York No. 1 Lake Park",
-    price: 32,
-    category: "New York No. 1 Lake Park",
-    subCategory: "New York No. 1 Lake Park",
-    quantity: 32,
+    id: '1',
+    code: 'CT-2023-001',
+    name: 'Chung cư Sky Garden',
+    projectName: 'Dự án Phát triển Đô thị Xanh',
   },
   {
-    id: "2",
-    name: "Jim Green",
-    description: "London No. 1 Lake Park",
-    price: 42,
-    category: "London No. 1 Lake Park",
-    subCategory: "London No. 1 Lake Park",
-    quantity: 42,
+    id: '2',
+    code: 'CT-2023-002',
+    name: 'Cầu Vượt Sông Hồng',
+    projectName: 'Dự án Giao thông Đô thị',
   },
-  // ... (rest of the data remains unchanged)
+  {
+    id: '3',
+    code: 'CT-2023-003',
+    name: 'Trung tâm Thương mại Sunshine',
+    projectName: 'Dự án Phát triển Khu đô thị mới',
+  },
+  {
+    id: '4',
+    code: 'CT-2023-004',
+    name: 'Khu nhà ở Thủ Đức',
+    projectName: 'Dự án Nhà ở Xã hội',
+  },
+  {
+    id: '5',
+    code: 'CT-2023-005',
+    name: 'Trường Đại học Công nghệ',
+    projectName: 'Dự án Phát triển Giáo dục',
+  },
+  {
+    id: '6',
+    code: 'CT-2023-006',
+    name: 'Bệnh viện Đa khoa Quốc tế',
+    projectName: 'Dự án Y tế Cộng đồng',
+  },
+  {
+    id: '7',
+    code: 'CT-2023-007',
+    name: 'Hầm chui Nguyễn Trãi',
+    projectName: 'Dự án Giao thông Đô thị',
+  },
+  {
+    id: '8',
+    code: 'CT-2023-008',
+    name: 'Nhà máy Xử lý Nước thải',
+    projectName: 'Dự án Môi trường Xanh',
+  },
+  {
+    id: '9',
+    code: 'CT-2023-009',
+    name: 'Khu Công nghệ cao Hòa Lạc',
+    projectName: 'Dự án Phát triển Công nghệ',
+  },
+  {
+    id: '10',
+    code: 'CT-2023-010',
+    name: 'Cảng biển Cái Mép',
+    projectName: 'Dự án Phát triển Hạ tầng',
+  },
+  {
+    id: '11',
+    code: 'CT-2023-011',
+    name: 'Khu Đô thị Thủ Thiêm',
+    projectName: 'Dự án Phát triển Đô thị',
+  },
+  {
+    id: '12',
+    code: 'CT-2023-012',
+    name: 'Đường sắt Đô thị Nhổn - Ga Hà Nội',
+    projectName: 'Dự án Giao thông Công cộng',
+  }
 ];
 
 export const getConstructionList = createAsyncThunk(

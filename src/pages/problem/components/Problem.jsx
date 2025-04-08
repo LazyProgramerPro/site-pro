@@ -1,24 +1,14 @@
-import { useStyle } from "@/hooks/useStyle";
-import {
-  DeleteOutlined,
-  EditOutlined,
-  EyeOutlined,
-  PlusOutlined,
-} from "@ant-design/icons";
-import { Button, Card, Input, Popconfirm, Space, Table } from "antd";
-import { Fragment, useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import styled from "styled-components";
-import { SkeletonTable } from "../../../components/table/SkeletonTable";
-import { useAppDispatch } from "../../../redux/store";
-import {
-  cancelEditingProblem,
-  deleteProblem,
-  getProblemList,
-  startEditingProblem,
-} from "../redux/problem.slice";
-import AddEditProblemForm from "./AddEditProblemForm";
-import ViewProblem from "./ViewProblem";
+import { useStyle } from '@/hooks/useStyle';
+import { DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
+import { Button, Card, Input, Popconfirm, Space, Table, Tag } from 'antd';
+import { Fragment, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import styled from 'styled-components';
+import { SkeletonTable } from '../../../components/table/SkeletonTable';
+import { useAppDispatch } from '../../../redux/store';
+import { cancelEditingProblem, deleteProblem, getProblemList, startEditingProblem } from '../redux/problem.slice';
+import AddEditProblemForm from './AddEditProblemForm';
+import ViewProblem from './ViewProblem';
 
 export default function Problem() {
   const { styles } = useStyle();
@@ -30,7 +20,7 @@ export default function Problem() {
   const loading = useSelector((state) => state.problem.loading);
 
   const editingProblem = useSelector((state) => state.problem.editingProblem);
-  console.log("editingProblem1:", editingProblem);
+  console.log('editingProblem1:', editingProblem);
 
   const dispatch = useAppDispatch();
 
@@ -71,65 +61,75 @@ export default function Problem() {
 
   const columns = [
     {
-      title: "Mã vấn đề",
-      dataIndex: "name",
-      key: "name",
-      width: "10%",
-      fixed: "left",
+      title: 'Mã vấn đề',
+      dataIndex: 'code',
+      key: 'code',
+      width: '10%',
+      fixed: 'left',
     },
     {
-      title: "Tên vấn đề",
-      dataIndex: "name",
-      key: "name",
-      width: "10%",
+      title: 'Tên vấn đề',
+      dataIndex: 'name',
+      key: 'name',
+      width: '10%',
     },
     {
-      title: "Loại vấn đề",
-      dataIndex: "name",
-      key: "name",
-      width: "10%",
+      title: 'Loại vấn đề',
+      dataIndex: 'type',
+      key: 'type',
+      width: '10%',
     },
     {
-      title: "Dự án",
-      dataIndex: "description",
-      key: "description",
-      width: "10%",
+      title: 'Dự án',
+      dataIndex: 'project',
+      key: 'project',
+      width: '10%',
     },
     {
-      title: "Phụ lục hợp đồng",
-      dataIndex: "price",
-      key: "price",
-      width: "10%",
+      title: 'Phụ lục hợp đồng',
+      dataIndex: 'contractAppendix',
+      key: 'contractAppendix',
+      width: '10%',
     },
     {
-      title: "Người tạo",
-      dataIndex: "category",
-      key: "category",
-      width: "10%",
+      title: 'Người tạo',
+      dataIndex: 'creator',
+      key: 'creator',
+      width: '10%',
     },
     {
-      title: "Thời gian tạo",
-      dataIndex: "subCategory",
-      key: "subCategory",
-      width: "10%",
+      title: 'Thời gian tạo',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      width: '10%',
     },
     {
-      title: "Trạng thái",
-      dataIndex: "quantity",
-      key: "quantity",
-      width: "10%",
+      title: 'Trạng thái',
+      dataIndex: 'status',
+      key: 'status',
+      width: '10%',
+      //render tag status
+      render: (status) => {
+        let color = 'green';
+        if (status === 'Đang xử lý') {
+          color = 'orange';
+        } else if (status === 'Đã giải quyết') {
+          color = 'red';
+        }
+        return <Tag color={color}>{status}</Tag>;
+      },
     },
     {
-      title: "Hành động",
-      key: "action",
-      width: "10%",
-      fixed: "right",
+      title: 'Hành động',
+      key: 'action',
+      width: '10%',
+      fixed: 'right',
       render: (record) => (
         <Space size="middle">
-          <WrapperIcons onClick={() => handleViewProblem(record?.id)}>
+          <WrapperIcons title="Xem chi tiết vấn đề" onClick={() => handleViewProblem(record?.id)}>
             <EyeOutlined />
           </WrapperIcons>
-          <WrapperIcons>
+          <WrapperIcons title="Xóa vấn đề">
             <Popconfirm
               cancelText="Hủy bỏ"
               okText="Xóa"
@@ -151,18 +151,14 @@ export default function Problem() {
         title={
           <>
             <SearchInput placeholder="Search..." />
-            <Button type="primary" onClick={() => {}}>
+            <Button type="primary" icon={<SearchOutlined />} onClick={() => {}}>
               Tìm kiếm
             </Button>
           </>
         }
         extra={
-          <Button
-            type="primary"
-            onClick={() => showDrawer(null)}
-            icon={<PlusOutlined />}
-          >
-            Thêm
+          <Button type="primary" onClick={() => showDrawer(null)} icon={<PlusOutlined />}>
+            Thêm vấn đề
           </Button>
         }
       >
@@ -183,16 +179,15 @@ export default function Problem() {
                 showSizeChanger: true,
                 pageSizeOptions: [10, 20],
               }}
-              scroll={{ x: "max-content" }}
+              scroll={{ x: 'max-content', y: 450 }}
               size="middle"
+              rowClassName={(record) => (editingProblem?.id === record.id ? 'active-row' : '')}
             />
           </TableContainer>
         )}
       </Card>
       {open && <AddEditProblemForm open={open} onClose={onClose} />}
-      {openDetail && (
-        <ViewProblem open={openDetail} onClose={handleCloseDetail} />
-      )}
+      {openDetail && <ViewProblem open={openDetail} onClose={handleCloseDetail} />}
     </>
   );
 }
@@ -211,6 +206,14 @@ const SearchInput = styled(Input)`
 const TableContainer = styled.div`
   width: 100%;
   overflow: hidden;
+  .active-row {
+    background-color: #e6f7ff;
+    border-left: 3px solid #1890ff;
+
+    td {
+      background-color: #e6f7ff !important; /* Force the background on all cells */
+    }
+  }
 `;
 
 const WrapperIcons = styled.div`

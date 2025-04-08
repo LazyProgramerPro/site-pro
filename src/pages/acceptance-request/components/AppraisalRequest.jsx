@@ -28,13 +28,14 @@ export default function AppraisalRequest() {
           <Col span={24}>
             <Form.Item
               label="Ghi chú"
-              name="userName"
+              name="comment"
               rules={[
                 {
                   required: true,
-                  message: "Bạn phải nhập mã dự án!",
+                  message: "Bạn phải nhập ghi chú!",
                 },
               ]}
+
             >
               <TextArea />
             </Form.Item>
@@ -44,7 +45,7 @@ export default function AppraisalRequest() {
           <Button type="primary" htmlType="submit" style={{ marginRight: 8 }}>
             Phê duyệt
           </Button>
-          <Button type="dashed">Từ chối</Button>
+          <Button type="dashed" htmlType="submit">Từ chối</Button>
         </Form.Item>
       </Form>
     </div>

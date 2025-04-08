@@ -1,40 +1,13 @@
-import {
-  Button,
-  Col,
-  DatePicker,
-  Drawer,
-  Form,
-  Input,
-  Row,
-  Select,
-  Spin,
-  notification,
-  Upload,
-} from "antd";
-import { isEmpty } from "lodash";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAppDispatch } from "../../../redux/store";
-import { useSelector } from "react-redux";
-import TextArea from "antd/es/input/TextArea";
-import {
-  DeleteOutlined,
-  EditOutlined,
-  PlusOutlined,
-  InboxOutlined,
-} from "@ant-design/icons";
+import { InboxOutlined } from '@ant-design/icons';
+import { Button, Col, DatePicker, Drawer, Form, Input, notification, Row, Select, Spin, Upload } from 'antd';
+import TextArea from 'antd/es/input/TextArea';
+import { isEmpty } from 'lodash';
+import moment from 'moment';
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
-const initialState = {
-  userName: "",
-  fullName: "",
-  password: "",
-  confirmPassword: "",
-  email: "",
-  phoneNumber: "",
-  role: "",
-  company: "",
-  position: "",
-};
+const initialState = {};
 
 // Thêm code để xử lý việc upload
 const normFile = (e) => {
@@ -53,12 +26,24 @@ export default function AddEditProjectForm(props) {
   const loading = useSelector((state) => state.project.loading);
 
   const selectedProject = useSelector((state) => state.project.editingProject);
-  console.log("editingProject:", selectedProject);
-  const dispatch = useAppDispatch();
+  console.log('editingProject:', selectedProject);
 
   useEffect(() => {
-    setInitialValues(selectedProject || initialState);
+    // Transform dates from string to moment objects with explicit format
+    if (selectedProject) {
+      const formattedProject = {
+        ...selectedProject,
+        startDate: selectedProject.startDate ? moment(selectedProject.startDate, "DD/MM/YYYY") : null,
+        endDate: selectedProject.endDate ? moment(selectedProject.endDate, "DD/MM/YYYY") : null,
+      };
+      setInitialValues(formattedProject);
+    } else {
+      setInitialValues(initialState);
+    }
   }, [selectedProject]);
+
+
+  console.log("selectedProject1111:", selectedProject);
 
   const onFinish = async (values) => {
     try {
@@ -66,41 +51,37 @@ export default function AddEditProjectForm(props) {
         // dispatch(createProject(values));
 
         notification.success({
-          message: "Success",
-          description: "Add project successfully",
+          message: 'Success',
+          description: 'Add project successfully',
         });
       } else {
         // dispatch(updateProject({ ...values, id: selectedProject }));
 
         notification.success({
-          message: "Success",
-          description: "Update project successfully",
+          message: 'Success',
+          description: 'Update project successfully',
         });
       }
 
       onClose();
 
-      navigate("/dashboard/administration/project");
+      navigate('/dashboard/administration/project');
     } catch (error) {
-      console.log("error:", error);
+      console.log('error:', error);
     }
   };
 
   const onFinishFailed = (errorInfo) => {
-    console.log("Failed:", errorInfo);
+    console.log('Failed:', errorInfo);
     notification.error({
-      message: "Errors",
+      message: 'Errors',
       description: errorInfo.message,
     });
   };
   return (
     <Drawer
       width={720}
-      title={
-        isEmpty(selectedProject)
-          ? "Thêm mới dự án"
-          : `Sửa dự án ${initialValues && initialValues?.name}`
-      }
+      title={isEmpty(selectedProject) ? 'Thêm mới dự án' : `Sửa dự án ${initialValues && initialValues?.projectCode}`}
       placement="right"
       onClose={onClose}
       open={open}
@@ -121,11 +102,11 @@ export default function AddEditProjectForm(props) {
             <Col span={12}>
               <Form.Item
                 label="Mã dự án"
-                name="userName"
+                name="projectCode"
                 rules={[
                   {
                     required: true,
-                    message: "Bạn phải nhập mã dự án!",
+                    message: 'Bạn phải nhập mã dự án!',
                   },
                 ]}
               >
@@ -133,14 +114,14 @@ export default function AddEditProjectForm(props) {
               </Form.Item>
             </Col>
             <Col span={12}>
-              {" "}
+              {' '}
               <Form.Item
                 label="Tên dự án"
-                name="fullName"
+                name="projectName"
                 rules={[
                   {
                     required: true,
-                    message: "Bạn phải nhập tên dự án!",
+                    message: 'Bạn phải nhập tên dự án!',
                   },
                 ]}
               >
@@ -151,19 +132,15 @@ export default function AddEditProjectForm(props) {
 
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item
-                label="Đia chỉ"
-                name="password"
-                rules={[{ required: true, message: "Bạn phải nhập địa chỉ" }]}
-              >
+              <Form.Item label="Đia chỉ" name="address" rules={[{ required: true, message: 'Bạn phải nhập địa chỉ' }]}>
                 <TextArea />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
                 label="Mô tả"
-                name="confirmPassword"
-                rules={[{ required: true, message: "Bạn phải nhập mô tả!" }]}
+                name="description"
+                rules={[{ required: true, message: 'Bạn phải nhập mô tả!' }]}
               >
                 <TextArea />
               </Form.Item>
@@ -178,27 +155,36 @@ export default function AddEditProjectForm(props) {
                 rules={[
                   {
                     required: true,
-                    message: "Bạn phải nhập ngày bắt đầu!",
+                    message: 'Bạn phải nhập ngày bắt đầu!',
                   },
                 ]}
               >
-                <DatePicker />
+                <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
                 label="Ngày kết thúc"
-                name="phoneNumber"
+                name="endDate"
                 rules={[
                   {
                     required: true,
-                    message: "Bạn phải nhập ngày kết thúc!",
+                    message: 'Bạn phải nhập ngày kết thúc!',
                   },
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      if (!value || !getFieldValue('startDate')) {
+                        return Promise.resolve();
+                      }
+                      if (value.isSameOrAfter(getFieldValue('startDate'))) {
+                        return Promise.resolve();
+                      }
+                      return Promise.reject(new Error('Ngày kết thúc phải sau ngày bắt đầu!'));
+                    },
+                  }),
                 ]}
-                dependencies={["startDate"]}
-                hasFeedback
               >
-                <DatePicker />
+                <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" />
               </Form.Item>
             </Col>
           </Row>
@@ -207,52 +193,44 @@ export default function AddEditProjectForm(props) {
             <Col span={12}>
               <Form.Item
                 label="Nhà thầu thi công"
-                name="role"
+                name="contractor"
                 rules={[
                   {
                     required: true,
-                    message: "Bạn phải nhập nhà thầu thi công!",
+                    message: 'Bạn phải nhập nhà thầu thi công!',
                   },
                 ]}
               >
-                <Select showSearch allowClear placeholder="Select an item role">
-                  {["Apple", "Samsung", "Microsoft", "Lenovo", "ASUS"].map(
-                    (b, index) => {
-                      return (
-                        <Select.Option value={b} key={index}>
-                          {b}
-                        </Select.Option>
-                      );
-                    }
-                  )}
+                <Select showSearch allowClear placeholder="Chọn nhà thầu thi công">
+                  {['Apple', 'Samsung', 'Microsoft', 'Lenovo', 'ASUS'].map((b, index) => {
+                    return (
+                      <Select.Option value={b} key={index}>
+                        {b}
+                      </Select.Option>
+                    );
+                  })}
                 </Select>
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
                 label="Tư vấn giám sát"
-                name="company"
+                name="supervisor"
                 rules={[
                   {
                     required: true,
-                    message: "Bạn phải nhập tư vấn giám sát!",
+                    message: 'Bạn phải nhập tư vấn giám sát!',
                   },
                 ]}
               >
-                <Select
-                  showSearch
-                  allowClear
-                  placeholder="Select an item company"
-                >
-                  {["Apple", "Samsung", "Microsoft", "Lenovo", "ASUS"].map(
-                    (b, index) => {
-                      return (
-                        <Select.Option value={b} key={index}>
-                          {b}
-                        </Select.Option>
-                      );
-                    }
-                  )}
+                <Select showSearch allowClear placeholder="Chọn tư vấn giám sát">
+                  {['Apple', 'Samsung', 'Microsoft', 'Lenovo', 'ASUS'].map((b, index) => {
+                    return (
+                      <Select.Option value={b} key={index}>
+                        {b}
+                      </Select.Option>
+                    );
+                  })}
                 </Select>
               </Form.Item>
             </Col>
@@ -262,28 +240,22 @@ export default function AddEditProjectForm(props) {
             <Col span={12}>
               <Form.Item
                 label="Tư vấn thiết kế"
-                name="position"
+                name="designer"
                 rules={[
                   {
                     required: true,
-                    message: "Bạn phải nhập tư vấn thiết kế!",
+                    message: 'Bạn phải nhập tư vấn thiết kế!',
                   },
                 ]}
               >
-                <Select
-                  showSearch
-                  allowClear
-                  placeholder="Select an item position"
-                >
-                  {["Apple", "Samsung", "Microsoft", "Lenovo", "ASUS"].map(
-                    (b, index) => {
-                      return (
-                        <Select.Option value={b} key={index}>
-                          {b}
-                        </Select.Option>
-                      );
-                    }
-                  )}
+                <Select showSearch allowClear placeholder="Chọn tư vấn thiết kế">
+                  {['Apple', 'Samsung', 'Microsoft', 'Lenovo', 'ASUS'].map((b, index) => {
+                    return (
+                      <Select.Option value={b} key={index}>
+                        {b}
+                      </Select.Option>
+                    );
+                  })}
                 </Select>
               </Form.Item>
             </Col>
@@ -299,7 +271,7 @@ export default function AddEditProjectForm(props) {
                 rules={[
                   {
                     required: false,
-                    message: "Vui lòng upload hình ảnh dự án",
+                    message: 'Vui lòng upload hình ảnh dự án',
                   },
                 ]}
               >
@@ -313,12 +285,9 @@ export default function AddEditProjectForm(props) {
                   <p className="ant-upload-drag-icon">
                     <InboxOutlined />
                   </p>
-                  <p className="ant-upload-text">
-                    Kéo thả hoặc nhấp để tải lên hình ảnh
-                  </p>
+                  <p className="ant-upload-text">Kéo thả hoặc nhấp để tải lên hình ảnh</p>
                   <p className="ant-upload-hint">
-                    Hỗ trợ tải lên nhiều file cùng lúc. Chỉ chấp nhận file ảnh
-                    (JPG, PNG, GIF...)
+                    Hỗ trợ tải lên nhiều file cùng lúc. Chỉ chấp nhận file ảnh (JPG, PNG, GIF...)
                   </p>
                 </Upload.Dragger>
               </Form.Item>
@@ -335,7 +304,7 @@ export default function AddEditProjectForm(props) {
                 rules={[
                   {
                     required: false,
-                    message: "Vui lòng upload tài liệu dự án",
+                    message: 'Vui lòng upload tài liệu dự án',
                   },
                 ]}
               >
@@ -348,12 +317,9 @@ export default function AddEditProjectForm(props) {
                   <p className="ant-upload-drag-icon">
                     <InboxOutlined />
                   </p>
-                  <p className="ant-upload-text">
-                    Kéo thả hoặc nhấp để tải lên tài liệu
-                  </p>
+                  <p className="ant-upload-text">Kéo thả hoặc nhấp để tải lên tài liệu</p>
                   <p className="ant-upload-hint">
-                    Hỗ trợ tải lên nhiều file cùng lúc. Chấp nhận các định dạng:
-                    PDF, DOC, DOCX, XLS, XLSX, TXT
+                    Hỗ trợ tải lên nhiều file cùng lúc. Chấp nhận các định dạng: PDF, DOC, DOCX, XLS, XLSX, TXT
                   </p>
                 </Upload.Dragger>
               </Form.Item>
@@ -362,7 +328,7 @@ export default function AddEditProjectForm(props) {
 
           <Form.Item>
             <Button type="primary" htmlType="submit" disabled={loading}>
-              {isEmpty(selectedProject) ? "Thêm" : "Cập nhật"}
+              {isEmpty(selectedProject) ? 'Thêm dự án' : 'Cập nhật'}
             </Button>
           </Form.Item>
         </Form>

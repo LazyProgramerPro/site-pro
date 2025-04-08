@@ -8,24 +8,10 @@ import AppraisalConstructionDiary from "./AppraisalConstructionDiary";
 import OverviewConstructionDiary from "./OverviewConstructionDiary";
 
 const initialState = {
-  userName: "",
-  fullName: "",
-  password: "",
-  confirmPassword: "",
-  email: "",
-  phoneNumber: "",
-  role: "",
-  company: "",
-  position: "",
+
 };
 
-// Thêm code để xử lý việc upload
-const normFile = (e) => {
-  if (Array.isArray(e)) {
-    return e;
-  }
-  return e?.fileList;
-};
+
 
 export default function ViewConstructionDiary(props) {
   const navigate = useNavigate();

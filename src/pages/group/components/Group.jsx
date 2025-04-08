@@ -1,5 +1,5 @@
 import { useStyle } from "@/hooks/useStyle";
-import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import { Button, Card, Input, Popconfirm, Space, Table } from "antd";
 import { Fragment, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -54,21 +54,21 @@ export default function Group() {
   const columns = [
     {
       title: "Mã nhóm",
-      dataIndex: "name",
-      key: "name",
+      dataIndex: "groupCode",
+      key: "groupCode",
       width: "30%",
       fixed: "left",
     },
     {
       title: "Tên nhóm",
-      dataIndex: "name",
-      key: "name",
+      dataIndex: "groupName",
+      key: "groupName",
       width: "30%",
     },
     {
       title: "Hạng mục",
-      dataIndex: "description",
-      key: "description",
+      dataIndex: "category",
+      key: "category",
       width: "30%",
     },
 
@@ -79,11 +79,11 @@ export default function Group() {
       fixed: "right",
       render: (record) => (
         <Space size="middle">
-          <WrapperIcons onClick={() => handleEditGroup(record?.id)}>
+          <WrapperIcons title="Sửa nhóm hạng mục" onClick={() => handleEditGroup(record?.id)}>
             <EditOutlined />
           </WrapperIcons>
 
-          <WrapperIcons>
+          <WrapperIcons title="Xóa nhóm hạng mục">
             <Popconfirm
               cancelText="Hủy bỏ"
               okText="Xóa"
@@ -105,7 +105,7 @@ export default function Group() {
         title={
           <>
             <SearchInput placeholder="Search..." />
-            <Button type="primary" onClick={() => {}}>
+            <Button type="primary" icon={<SearchOutlined />} onClick={() => {}}>
               Tìm kiếm
             </Button>
           </>
@@ -116,7 +116,7 @@ export default function Group() {
             onClick={() => showDrawer(null)}
             icon={<PlusOutlined />}
           >
-            Thêm
+            Thêm nhóm hạng mục
           </Button>
         }
       >
@@ -137,8 +137,11 @@ export default function Group() {
                 showSizeChanger: true,
                 pageSizeOptions: [10, 20],
               }}
-              scroll={{ x: "max-content" }}
+              scroll={{ x: "max-content", y: 450 }}
               size="middle"
+              rowClassName={(record) =>
+                editingGroup?.id === record.id ? "active-row" : ""
+              }
             />
           </TableContainer>
         )}
@@ -162,6 +165,15 @@ const SearchInput = styled(Input)`
 const TableContainer = styled.div`
   width: 100%;
   overflow: hidden;
+
+  .active-row {
+    background-color: #e6f7ff;
+    border-left: 3px solid #1890ff;
+
+    td {
+      background-color: #e6f7ff !important; /* Force the background on all cells */
+    }
+  }
 `;
 
 const WrapperIcons = styled.div`

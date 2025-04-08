@@ -7,15 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../../../redux/store";
 
 const initialState = {
-  userName: "",
-  fullName: "",
-  password: "",
-  confirmPassword: "",
-  email: "",
-  phoneNumber: "",
-  role: "",
-  company: "",
-  position: "",
+
 };
 
 // Thêm code để xử lý việc upload
@@ -47,7 +39,7 @@ export default function ImportExcel(props) {
   const onFinish = (values) => {};
   const onFinishFailed = (errorInfo) => {};
 
-  // TODO: Xác nhận lại xem thêm cho hợp đô
+  // TODO: Xác nhận lại xem thêm cho hợp đồng
   return (
     <Drawer
       width={500}
@@ -60,7 +52,7 @@ export default function ImportExcel(props) {
         <Spin></Spin>
       ) : (
         <Form
-          name="form-add-edit-contract"
+          name="form-excel-contract-addendum"
           form={form}
           initialValues={initialValues}
           onFinish={onFinish}
@@ -72,15 +64,15 @@ export default function ImportExcel(props) {
             <Col span={24}>
               <Form.Item
                 label="Tên dự án"
-                name="role"
+                name="projectName"
                 rules={[
                   {
                     required: true,
-                    message: "Please input your role!",
+                    message: "Vui lòng nhập tên dự án!",
                   },
                 ]}
               >
-                <Select showSearch allowClear placeholder="Select an item role">
+                <Select showSearch allowClear placeholder="Chọn tên dự án">
                   {["Apple", "Samsung", "Microsoft", "Lenovo", "ASUS"].map(
                     (b, index) => {
                       return (
@@ -99,18 +91,18 @@ export default function ImportExcel(props) {
             <Col span={24}>
               <Form.Item
                 label="Tên hợp đồng"
-                name="company"
+                name="contractName"
                 rules={[
                   {
                     required: true,
-                    message: "Please input your company!",
+                    message: "Vui lòng nhập tên hợp đồng!",
                   },
                 ]}
               >
                 <Select
                   showSearch
                   allowClear
-                  placeholder="Select an item company"
+                  placeholder="Chọn tên hợp đồng"
                 >
                   {["Apple", "Samsung", "Microsoft", "Lenovo", "ASUS"].map(
                     (b, index) => {
@@ -130,7 +122,7 @@ export default function ImportExcel(props) {
             <Col span={24}>
               <Form.Item
                 label="Hình ảnh hợp đồng"
-                name="projectImages"
+                name="contractImages"
                 valuePropName="fileList"
                 getValueFromEvent={normFile}
                 rules={[
@@ -141,7 +133,7 @@ export default function ImportExcel(props) {
                 ]}
               >
                 <Upload.Dragger
-                  name="projectImages"
+                  name="contractImages"
                   listType="picture-card"
                   multiple
                   beforeUpload={() => false} // Ngăn upload tự động

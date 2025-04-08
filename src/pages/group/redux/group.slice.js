@@ -9,37 +9,117 @@ const initialState = {
 };
 
 const fakeGroupList = [
-  // Keep your example data
   {
-    id: "1",
-    name: "John Brown",
-    description: "New York No. 1 Lake Park",
-    price: 32,
-    category: "New York No. 1 Lake Park",
-    subCategory: "New York No. 1 Lake Park",
-    quantity: 32,
+    id: '1',
+    groupCode: 'G001',
+    groupName: 'Nhóm Móng',
+    category: 'Phần móng'
   },
   {
-    id: "2",
-    name: "Jim Green",
-    description: "London No. 1 Lake Park",
-    price: 42,
-    category: "London No. 1 Lake Park",
-    subCategory: "London No. 1 Lake Park",
-    quantity: 42,
+    id: '2',
+    groupCode: 'G002',
+    groupName: 'Nhóm Cốt thép',
+    category: 'Phần kết cấu'
   },
-
   {
-    id: "3",
-    name: "Joe Black",
-    description: "Sydney No. 1 Lake Park",
-    price: 32,
-    category: "Sydney No. 1 Lake Park",
-    subCategory: "Sydney No. 1 Lake Park",
-    quantity: 32,
+    id: '3',
+    groupCode: 'G003',
+    groupName: 'Nhóm Bê tông',
+    category: 'Phần kết cấu'
   },
-  // ... (rest of the data remains unchanged)
+  {
+    id: '4',
+    groupCode: 'G004',
+    groupName: 'Nhóm Điện',
+    category: 'Hệ thống điện'
+  },
+  {
+    id: '5',
+    groupCode: 'G005',
+    groupName: 'Nhóm Nước',
+    category: 'Hệ thống nước'
+  },
+  {
+    id: '6',
+    groupCode: 'G006',
+    groupName: 'Nhóm Hoàn thiện',
+    category: 'Phần hoàn thiện'
+  },
+  {
+    id: '7',
+    groupCode: 'G007',
+    groupName: 'Nhóm Xây gạch',
+    category: 'Công tác xây gạch'
+  },
+  {
+    id: '8',
+    groupCode: 'G008',
+    groupName: 'Nhóm Lắp kính',
+    category: 'Công tác lắp kính'
+  },
+  {
+    id: '9',
+    groupCode: 'G009',
+    groupName: 'Nhóm PCCC',
+    category: 'Hệ thống PCCC'
+  },
+  {
+    id: '10',
+    groupCode: 'G010',
+    groupName: 'Nhóm Điều hòa',
+    category: 'Hệ thống điều hòa'
+  },
+  {
+    id: '11',
+    groupCode: 'G011',
+    groupName: 'Nhóm Sơn',
+    category: 'Công tác sơn'
+  },
+  {
+    id: '12',
+    groupCode: 'G012',
+    groupName: 'Nhóm Lát sàn',
+    category: 'Công tác lát sàn'
+  },
+  {
+    id: '13',
+    groupCode: 'G013',
+    groupName: 'Nhóm Cấp thoát nước',
+    category: 'Hệ thống cấp thoát nước'
+  },
+  {
+    id: '14',
+    groupCode: 'G014',
+    groupName: 'Nhóm Thông tin',
+    category: 'Hệ thống thông tin liên lạc'
+  },
+  {
+    id: '15',
+    groupCode: 'G015',
+    groupName: 'Nhóm Đường',
+    category: 'Công tác mặt đường'
+  },
+  {
+    id: '16',
+    groupCode: 'G016',
+    groupName: 'Nhóm Thạch cao',
+    category: 'Trần thạch cao'
+  },
+  {
+    id: '17',
+    groupCode: 'G017',
+    groupName: 'Nhóm Cửa',
+    category: 'Lắp đặt cửa'
+  },
+  {
+    id: '18',
+    groupCode: 'G018',
+    groupName: 'Nhóm Vật liệu',
+    category: 'Quản lý vật liệu'
+  }
 ];
+
+
 
 export const getGroupList = createAsyncThunk(
   "group/getGroupList",

@@ -16,15 +16,7 @@ import { useAppDispatch } from "../../../redux/store";
 import { useSelector } from "react-redux";
 
 const initialState = {
-  userName: "",
-  fullName: "",
-  password: "",
-  confirmPassword: "",
-  email: "",
-  phoneNumber: "",
-  role: "",
-  company: "",
-  position: "",
+ 
 };
 
 export default function AddEditCategoryForm(props) {
@@ -84,7 +76,7 @@ export default function AddEditCategoryForm(props) {
       title={
         isEmpty(selectedCategory)
           ? "Thêm mới hạng mục"
-          : `Sửa hạng mục ${initialValues && initialValues?.name}`
+          : `Sửa hạng mục ${initialValues && initialValues?.categoryCode}`
       }
       placement="right"
       onClose={onClose}
@@ -106,7 +98,7 @@ export default function AddEditCategoryForm(props) {
             <Col span={24}>
               <Form.Item
                 label="Mã hạng mục"
-                name="userName"
+                name="categoryCode"
                 rules={[
                   {
                     required: true,
@@ -120,10 +112,9 @@ export default function AddEditCategoryForm(props) {
           </Row>
           <Row gutter={16}>
             <Col span={24}>
-              {" "}
               <Form.Item
                 label="Tên hạng mục"
-                name="fullName"
+                name="categoryName"
                 rules={[
                   {
                     required: true,
@@ -136,12 +127,13 @@ export default function AddEditCategoryForm(props) {
             </Col>
           </Row>
 
+
           <Row gutter={16}>
             <Col span={24}>
               {" "}
               <Form.Item
                 label="Công trình"
-                name="fullName"
+                name="constructionName"
                 rules={[
                   {
                     required: true,
@@ -156,7 +148,7 @@ export default function AddEditCategoryForm(props) {
 
           <Form.Item>
             <Button type="primary" htmlType="submit" disabled={loading}>
-              {isEmpty(selectedCategory) ? "Thêm" : "Cập nhật"}
+              {isEmpty(selectedCategory) ? "Thêm hạng mục" : "Cập nhật"}
             </Button>
           </Form.Item>
         </Form>

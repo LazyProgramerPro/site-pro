@@ -16,15 +16,7 @@ import { useAppDispatch } from "../../../redux/store";
 import { useSelector } from "react-redux";
 
 const initialState = {
-  userName: "",
-  fullName: "",
-  password: "",
-  confirmPassword: "",
-  email: "",
-  phoneNumber: "",
-  role: "",
-  company: "",
-  position: "",
+
 };
 
 export default function AddEditGroupForm(props) {
@@ -82,7 +74,7 @@ export default function AddEditGroupForm(props) {
       title={
         isEmpty(selectedGroup)
           ? "Thêm mới nhóm"
-          : `Sửa nhóm ${initialValues && initialValues?.name}`
+          : `Sửa nhóm ${initialValues && initialValues?.groupCode}`
       }
       placement="right"
       onClose={onClose}
@@ -104,7 +96,7 @@ export default function AddEditGroupForm(props) {
             <Col span={24}>
               <Form.Item
                 label="Mã nhóm"
-                name="userName"
+                name="groupCode"
                 rules={[
                   {
                     required: true,
@@ -121,7 +113,7 @@ export default function AddEditGroupForm(props) {
               {" "}
               <Form.Item
                 label="Tên nhóm"
-                name="fullName"
+                name="groupName"
                 rules={[
                   {
                     required: true,
@@ -139,7 +131,7 @@ export default function AddEditGroupForm(props) {
               {" "}
               <Form.Item
                 label="Hạng mục"
-                name="fullName"
+                name="category"
                 rules={[
                   {
                     required: true,
@@ -154,7 +146,7 @@ export default function AddEditGroupForm(props) {
 
           <Form.Item>
             <Button type="primary" htmlType="submit" disabled={loading}>
-              {isEmpty(selectedGroup) ? "Thêm" : "Cập nhật"}
+              {isEmpty(selectedGroup) ? "Thêm nhóm hạng mục" : "Cập nhật"}
             </Button>
           </Form.Item>
         </Form>

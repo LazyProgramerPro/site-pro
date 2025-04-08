@@ -16,7 +16,7 @@ export default function AppraisalConstructionDiary() {
   return (
     <div>
       <Form
-        name="form-add-edit-project"
+        name="form-add-edit-construction-diary"
         form={form}
         initialValues={initialValues}
         onFinish={onFinish}
@@ -28,11 +28,11 @@ export default function AppraisalConstructionDiary() {
           <Col span={24}>
             <Form.Item
               label="Ghi chú"
-              name="userName"
+              name="note"
               rules={[
                 {
                   required: true,
-                  message: "Bạn phải nhập mã dự án!",
+                  message: "Bạn phải nhập ghi chú!",
                 },
               ]}
             >
@@ -44,7 +44,7 @@ export default function AppraisalConstructionDiary() {
           <Button type="primary" htmlType="submit" style={{ marginRight: 8 }}>
             Đã giải quyết
           </Button>
-          <Button type="dashed">Từ chối</Button>
+          <Button type="dashed" htmlType="submit">Từ chối</Button>
         </Form.Item>
       </Form>
     </div>

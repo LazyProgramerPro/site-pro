@@ -1,109 +1,120 @@
-import { InboxOutlined } from "@ant-design/icons";
 import {
-  Button,
-  Col,
-  DatePicker,
   Descriptions,
   Drawer,
-  Form,
-  Input,
-  notification,
-  Row,
-  Select,
-  Spin,
-  Upload,
+  Spin
 } from "antd";
-import TextArea from "antd/es/input/TextArea";
 import { isEmpty } from "lodash";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
-import { useAppDispatch } from "../../../redux/store";
 
 const initialState = {
-  userName: "",
-  fullName: "",
-  password: "",
-  confirmPassword: "",
-  email: "",
-  phoneNumber: "",
-  role: "",
-  company: "",
-  position: "",
+
 };
 
-// Thêm code để xử lý việc upload
-const normFile = (e) => {
-  if (Array.isArray(e)) {
-    return e;
-  }
-  return e?.fileList;
-};
 
 export default function ViewProject(props) {
-  const navigate = useNavigate();
   const { onClose, open } = props;
-  const [form] = Form.useForm();
   const [initialValues, setInitialValues] = useState(initialState);
 
   const loading = useSelector((state) => state.project.loading);
 
   const selectedProject = useSelector((state) => state.project.editingProject);
   console.log("editingProject:", selectedProject);
-  const dispatch = useAppDispatch();
 
   const items = [
     {
-      label: "Product",
-      children: "Cloud Database",
+      key: '1',
+      label: "Mã dự án",
+      children: selectedProject?.projectCode || "N/A",
     },
     {
-      label: "Billing",
-      children: "Prepaid",
+      key: '2',
+      label: "Tên dự án",
+      children: selectedProject?.projectName || "N/A",
     },
     {
-      label: "Time",
-      children: "18:00:00",
+      key: '3',
+      label: "Địa chỉ",
+      children: selectedProject?.address || "N/A",
     },
     {
-      label: "Amount",
-      children: "$80.00",
+      key: '4',
+      label: "Mô tả",
+      children: selectedProject?.description || "N/A",
     },
     {
-      label: "Discount",
-      span: { xl: 2, xxl: 2 },
-      children: "$20.00",
+      key: '5',
+      label: "Ngày bắt đầu",
+      children: selectedProject?.startDate || "N/A",
     },
     {
-      label: "Official",
-      span: { xl: 2, xxl: 2 },
-      children: "$60.00",
+      key: '6',
+      label: "Ngày kết thúc",
+      children: selectedProject?.endDate || "N/A",
     },
     {
-      label: "Config Info",
+      key: '7',
+      label: "Nhà thầu thi công",
+      children: selectedProject?.contractor || "N/A",
+    },
+    {
+      key: '8',
+      label: "Tư vấn giám sát",
+      children: selectedProject?.supervisor || "N/A",
+    },
+    {
+      key: '9',
+      label: "Tư vấn thiết kế",
+      children: selectedProject?.designer || "N/A",
+    },
+    {
+      key: '10',
+      label: "Trạng thái",
+      children: selectedProject?.status || "Đang thực hiện",
+    },
+    {
+      key: '11',
+      label: "Tiến độ",
       span: { xs: 1, sm: 2, md: 3, lg: 3, xl: 2, xxl: 2 },
       children: (
         <>
-          Data disk type: MongoDB
-          <br />
-          Database version: 3.4
-          <br />
-          Package: dds.mongo.mid
+          <div>Hoàn thành: 35%</div>
+          <div>Dự kiến: Đúng tiến độ</div>
         </>
       ),
     },
     {
-      label: "Hardware Info",
+      key: '12',
+      label: "Ngân sách",
       span: { xs: 1, sm: 2, md: 3, lg: 3, xl: 2, xxl: 2 },
       children: (
         <>
-          CPU: 6 Core 3.5 GHz
-          <br />
-          Storage space: 10 GB
-          <br />
-          Replication factor: 3
-          <br />
-          Region: East China 1
+          <div>Tổng ngân sách: 15.5 tỷ VND</div>
+          <div>Đã giải ngân: 6.2 tỷ VND</div>
+        </>
+      ),
+    },
+    {
+      key: '13',
+      label: "Tài liệu",
+      span: { xs: 1, sm: 2, md: 3, lg: 3, xl: 2, xxl: 2 },
+      children: (
+        <>
+          <div>Hợp đồng thi công</div>
+          <div>Bản vẽ thiết kế</div>
+          <div>Báo cáo hàng tháng</div>
+        </>
+      ),
+    },
+    {
+      key: '14',
+      label: "Thành viên dự án",
+      span: { xs: 1, sm: 2, md: 3, lg: 3, xl: 2, xxl: 2 },
+      children: (
+        <>
+          <div>Nguyễn Văn A - Giám đốc dự án</div>
+          <div>Trần Thị B - Kỹ sư xây dựng</div>
+          <div>Lê Văn C - Giám sát công trình</div>
         </>
       ),
     },
@@ -116,7 +127,7 @@ export default function ViewProject(props) {
   return (
     <Drawer
       width={1000}
-      title={`Chi tiết dự án ${initialValues && initialValues?.name}`}
+      title={`Chi tiết dự án ${initialValues && initialValues?.projectCode}`}
       placement="right"
       onClose={onClose}
       open={open}

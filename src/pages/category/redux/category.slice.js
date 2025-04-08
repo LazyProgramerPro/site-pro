@@ -9,27 +9,98 @@ const initialState = {
 };
 
 const fakeCategoryList = [
-  // Keep your example data
   {
-    id: "1",
-    name: "John Brown",
-    description: "New York No. 1 Lake Park",
-    price: 32,
-    category: "New York No. 1 Lake Park",
-    subCategory: "New York No. 1 Lake Park",
-    quantity: 32,
+    id: '1',
+    categoryCode: 'HM-001',
+    categoryName: 'Phần móng',
+    constructionName: 'Chung cư Sky Garden',
   },
   {
-    id: "2",
-    name: "Jim Green",
-    description: "London No. 1 Lake Park",
-    price: 42,
-    category: "London No. 1 Lake Park",
-    subCategory: "London No. 1 Lake Park",
-    quantity: 42,
+    id: '2',
+    categoryCode: 'HM-002',
+    categoryName: 'Phần kết cấu',
+    constructionName: 'Chung cư Sky Garden',
   },
-  // ... (rest of the data remains unchanged)
+  {
+    id: '3',
+    categoryCode: 'HM-003',
+    categoryName: 'Hệ thống điện',
+    constructionName: 'Trung tâm Thương mại Sunshine',
+  },
+  {
+    id: '4',
+    categoryCode: 'HM-004',
+    categoryName: 'Hệ thống nước',
+    constructionName: 'Trung tâm Thương mại Sunshine',
+  },
+  {
+    id: '5',
+    categoryCode: 'HM-005',
+    categoryName: 'Phần hoàn thiện',
+    constructionName: 'Khu nhà ở Thủ Đức',
+  },
+  {
+    id: '6',
+    categoryCode: 'HM-006',
+    categoryName: 'Công tác xây gạch',
+    constructionName: 'Khu nhà ở Thủ Đức',
+  },
+  {
+    id: '7',
+    categoryCode: 'HM-007',
+    categoryName: 'Công tác lắp kính',
+    constructionName: 'Bệnh viện Đa khoa Quốc tế',
+  },
+  {
+    id: '8',
+    categoryCode: 'HM-008',
+    categoryName: 'Hệ thống PCCC',
+    constructionName: 'Bệnh viện Đa khoa Quốc tế',
+  },
+  {
+    id: '9',
+    categoryCode: 'HM-009',
+    categoryName: 'Hệ thống điều hòa',
+    constructionName: 'Trường Đại học Công nghệ',
+  },
+  {
+    id: '10',
+    categoryCode: 'HM-010',
+    categoryName: 'Công tác sơn',
+    constructionName: 'Trường Đại học Công nghệ',
+  },
+  {
+    id: '11',
+    categoryCode: 'HM-011',
+    categoryName: 'Công tác lát sàn',
+    constructionName: 'Cầu Vượt Sông Hồng',
+  },
+  {
+    id: '12',
+    categoryCode: 'HM-012',
+    categoryName: 'Hệ thống cấp thoát nước',
+    constructionName: 'Nhà máy Xử lý Nước thải',
+  },
+  {
+    id: '13',
+    categoryCode: 'HM-013',
+    categoryName: 'Hệ thống thông tin liên lạc',
+    constructionName: 'Khu Công nghệ cao Hòa Lạc',
+  },
+  {
+    id: '14',
+    categoryCode: 'HM-014',
+    categoryName: 'Công tác mặt đường',
+    constructionName: 'Đường sắt Đô thị Nhổn - Ga Hà Nội',
+  },
+  {
+    id: '15',
+    categoryCode: 'HM-015',
+    categoryName: 'Trần thạch cao',
+    constructionName: 'Khu Đô thị Thủ Thiêm',
+  },
 ];
+
 
 export const getCategoryList = createAsyncThunk(
   "category/getCategoryList",

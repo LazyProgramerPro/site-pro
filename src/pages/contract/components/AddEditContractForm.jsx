@@ -103,7 +103,7 @@ export default function AddEditContractForm(props) {
       title={
         isEmpty(selectedContract)
           ? "Thêm mới hợp đồng"
-          : `Sửa hợp đồng ${initialValues && initialValues?.name}`
+          : `Sửa hợp đồng ${initialValues && initialValues?.contractCode}`
       }
       placement="right"
       onClose={onClose}
@@ -125,11 +125,11 @@ export default function AddEditContractForm(props) {
             <Col span={12}>
               <Form.Item
                 label="Mã hợp đồng"
-                name="userName"
+                name="contractCode"
                 rules={[
                   {
                     required: true,
-                    message: "Bạn phải nhập mã hợp đồng!",
+                    message: "Vui lòng nhập mã hợp đồng!",
                   },
                 ]}
               >
@@ -140,11 +140,11 @@ export default function AddEditContractForm(props) {
               {" "}
               <Form.Item
                 label="Tên hợp đồng"
-                name="fullName"
+                name="contractName"
                 rules={[
                   {
                     required: true,
-                    message: "Bạn phải nhập tên hợp đồng!",
+                    message: "Vui lòng nhập tên hợp đồng!",
                   },
                 ]}
               >
@@ -157,16 +157,16 @@ export default function AddEditContractForm(props) {
             <Col span={12}>
               <Form.Item
                 label="Tên dự án"
-                name="role"
+                name="projectName"
                 rules={[
                   {
                     required: true,
-                    message: "Please input your role!",
+                    message: "Vui lòng chọn tên dự án!",
                   },
                 ]}
               >
-                <Select showSearch allowClear placeholder="Select an item role">
-                  {["Apple", "Samsung", "Microsoft", "Lenovo", "ASUS"].map(
+                <Select showSearch allowClear placeholder="Chọn dự án">
+                  {["Dự án A", "Dự án B", "Dự án C", "Dự án D", "Dự án E"].map(
                     (b, index) => {
                       return (
                         <Select.Option value={b} key={index}>
@@ -181,20 +181,20 @@ export default function AddEditContractForm(props) {
             <Col span={12}>
               <Form.Item
                 label="Tên công trình"
-                name="company"
+                name="construction"
                 rules={[
                   {
                     required: true,
-                    message: "Please input your company!",
+                    message: "Vui lòng chọn tên công trình!",
                   },
                 ]}
               >
                 <Select
                   showSearch
                   allowClear
-                  placeholder="Select an item company"
+                  placeholder="Chọn công trình"
                 >
-                  {["Apple", "Samsung", "Microsoft", "Lenovo", "ASUS"].map(
+                  {["Công trình 1", "Công trình 2", "Công trình 3", "Công trình 4", "Công trình 5"].map(
                     (b, index) => {
                       return (
                         <Select.Option value={b} key={index}>
@@ -212,16 +212,16 @@ export default function AddEditContractForm(props) {
             <Col span={12}>
               <Form.Item
                 label="Bên A"
-                name="role"
+                name="partyA"
                 rules={[
                   {
                     required: true,
-                    message: "Please input your role!",
+                    message: "Vui lòng chọn Bên A!",
                   },
                 ]}
               >
-                <Select showSearch allowClear placeholder="Select an item role">
-                  {["Apple", "Samsung", "Microsoft", "Lenovo", "ASUS"].map(
+                <Select showSearch allowClear placeholder="Chọn Bên A">
+                  {["Công ty A", "Công ty B", "Công ty C", "Công ty D", "Công ty E"].map(
                     (b, index) => {
                       return (
                         <Select.Option value={b} key={index}>
@@ -236,20 +236,20 @@ export default function AddEditContractForm(props) {
             <Col span={12}>
               <Form.Item
                 label="Bên B"
-                name="company"
+                name="partyB"
                 rules={[
                   {
                     required: true,
-                    message: "Please input your company!",
+                    message: "Vui lòng chọn Bên B!",
                   },
                 ]}
               >
                 <Select
                   showSearch
                   allowClear
-                  placeholder="Select an item company"
+                  placeholder="Chọn Bên B"
                 >
-                  {["Apple", "Samsung", "Microsoft", "Lenovo", "ASUS"].map(
+                  {["Đối tác X", "Đối tác Y", "Đối tác Z", "Đối tác K", "Đối tác L"].map(
                     (b, index) => {
                       return (
                         <Select.Option value={b} key={index}>
@@ -268,11 +268,11 @@ export default function AddEditContractForm(props) {
               {" "}
               <Form.Item
                 label="Mô tả"
-                name="fullName"
+                name="description"
                 rules={[
                   {
                     required: true,
-                    message: "Bạn phải nhập tên hợp đồng!",
+                    message: "Vui lòng nhập mô tả hợp đồng!",
                   },
                 ]}
               >
@@ -286,7 +286,7 @@ export default function AddEditContractForm(props) {
             <Col span={24}>
               <Form.Item
                 label="Hình ảnh hợp đồng"
-                name="projectImages"
+                name="contractImages"
                 valuePropName="fileList"
                 getValueFromEvent={normFile}
                 rules={[
@@ -297,7 +297,7 @@ export default function AddEditContractForm(props) {
                 ]}
               >
                 <Upload.Dragger
-                  name="projectImages"
+                  name="contractImages"
                   listType="picture-card"
                   multiple
                   beforeUpload={() => false} // Ngăn upload tự động
@@ -322,7 +322,7 @@ export default function AddEditContractForm(props) {
             <Col span={24}>
               <Form.Item
                 label="Tài liệu hợp đồng"
-                name="projectDocuments"
+                name="contractDocuments"
                 valuePropName="fileList"
                 getValueFromEvent={normFile}
                 rules={[
@@ -333,7 +333,7 @@ export default function AddEditContractForm(props) {
                 ]}
               >
                 <Upload.Dragger
-                  name="projectDocuments"
+                  name="contractDocuments"
                   multiple
                   beforeUpload={() => false} // Ngăn upload tự động
                   accept=".pdf,.doc,.docx,.xls,.xlsx,.txt"
@@ -355,7 +355,7 @@ export default function AddEditContractForm(props) {
 
           <Form.Item>
             <Button type="primary" htmlType="submit" disabled={loading}>
-              {isEmpty(selectedContract) ? "Thêm" : "Cập nhật"}
+              {isEmpty(selectedContract) ? "Thêm hợp đồng" : "Cập nhật"}
             </Button>
           </Form.Item>
         </Form>

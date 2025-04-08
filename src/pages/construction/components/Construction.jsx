@@ -1,5 +1,5 @@
 import { useStyle } from "@/hooks/useStyle";
-import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import { Button, Card, Input, Popconfirm, Space, Table } from "antd";
 import { Fragment, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -58,8 +58,8 @@ export default function Construction() {
   const columns = [
     {
       title: "Mã công trình",
-      dataIndex: "name",
-      key: "name",
+      dataIndex: "code",
+      key: "code",
       width: "30%",
       fixed: "left",
     },
@@ -70,9 +70,9 @@ export default function Construction() {
       width: "30%",
     },
     {
-      title: "Dự án",
-      dataIndex: "description",
-      key: "description",
+      title: "Tên dự án",
+      dataIndex: "projectName",
+      key: "projectName",
       width: "30%",
     },
 
@@ -83,11 +83,11 @@ export default function Construction() {
       fixed: "right",
       render: (record) => (
         <Space size="middle">
-          <WrapperIcons onClick={() => handleEditConstruction(record?.id)}>
+          <WrapperIcons title="Sửa công trình" onClick={() => handleEditConstruction(record?.id)}>
             <EditOutlined />
           </WrapperIcons>
 
-          <WrapperIcons>
+          <WrapperIcons title="Xóa công trình">
             <Popconfirm
               cancelText="Hủy bỏ"
               okText="Xóa"
@@ -109,7 +109,7 @@ export default function Construction() {
         title={
           <>
             <SearchInput placeholder="Search..." />
-            <Button type="primary" onClick={() => {}}>
+            <Button type="primary" icon={<SearchOutlined />} onClick={() => {}}>
               Tìm kiếm
             </Button>
           </>
@@ -120,7 +120,7 @@ export default function Construction() {
             onClick={() => showDrawer(null)}
             icon={<PlusOutlined />}
           >
-            Thêm
+            Thêm công trình
           </Button>
         }
       >
@@ -141,8 +141,11 @@ export default function Construction() {
                 showSizeChanger: true,
                 pageSizeOptions: [10, 20],
               }}
-              scroll={{ x: "max-content" }}
+              scroll={{ x: "max-content", y: 450 }}
               size="middle"
+              rowClassName={(record) =>
+                editingConstruction?.id === record.id ? "active-row" : ""
+              }
             />
           </TableContainer>
         )}
@@ -166,6 +169,15 @@ const SearchInput = styled(Input)`
 const TableContainer = styled.div`
   width: 100%;
   overflow: hidden;
+
+  .active-row {
+    background-color: #e6f7ff;
+    border-left: 3px solid #1890ff;
+
+    td {
+      background-color: #e6f7ff !important; /* Force the background on all cells */
+    }
+  }
 `;
 
 const WrapperIcons = styled.div`

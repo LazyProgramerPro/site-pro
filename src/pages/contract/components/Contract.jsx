@@ -5,6 +5,7 @@ import {
   EyeOutlined,
   PlusOutlined,
   ReconciliationOutlined,
+  SearchOutlined,
 } from "@ant-design/icons";
 import { Button, Card, Input, Popconfirm, Select, Space, Table } from "antd";
 import { Fragment, useEffect, useState } from "react";
@@ -86,36 +87,35 @@ export default function Contract() {
   const columns = [
     {
       title: "Mã hợp đồng",
-      dataIndex: "name",
-      key: "name",
+      dataIndex: "contractCode",
+      key: "contractCode",
       width: "10%",
       fixed: "left",
     },
     {
       title: "Tên hợp đồng",
-      dataIndex: "name",
-      key: "name",
+      dataIndex: "contractName",
+      key: "contractName",
       width: "20%",
     },
     {
       title: "Tên dự án",
-      dataIndex: "description",
-      key: "description",
+      dataIndex: "projectName",
+      key: "projectName",
       width: "20%",
     },
     {
       title: "Công trình",
-      dataIndex: "price",
-      key: "price",
+      dataIndex: "construction",
+      key: "construction",
       width: "20%",
     },
     {
       title: "Bên B",
-      dataIndex: "category",
-      key: "category",
+      dataIndex: "partyB",
+      key: "partyB",
       width: "20%",
     },
-
     {
       title: "Hành động",
       key: "action",
@@ -123,17 +123,17 @@ export default function Contract() {
       fixed: "right",
       render: (record) => (
         <Space size="middle">
-          <WrapperIcons onClick={() => handleViewContract(record?.id)}>
+          <WrapperIcons title="Xem chi tiết hợp đồng" onClick={() => handleViewContract(record?.id)}>
             <EyeOutlined />
           </WrapperIcons>
-          <WrapperIcons onClick={() => handleEditContract(record?.id)}>
+          <WrapperIcons title="Sửa hợp đồng" onClick={() => handleEditContract(record?.id)}>
             <EditOutlined />
           </WrapperIcons>
-          <WrapperIcons onClick={() => handleViewContractAddendum(record?.id)}>
+          <WrapperIcons title="Xem danh sách phụ lục hợp đồng" onClick={() => handleViewContractAddendum(record?.id)}>
             <ReconciliationOutlined />
           </WrapperIcons>
 
-          <WrapperIcons>
+          <WrapperIcons title="Xóa hợp đồng">
             <Popconfirm
               cancelText="Hủy bỏ"
               okText="Xóa"
@@ -163,7 +163,7 @@ export default function Contract() {
               <Select.Option value="active">Đang hoạt động</Select.Option>
             </Select>
             <SearchInput placeholder="Search..." />
-            <Button type="primary" onClick={() => {}}>
+            <Button type="primary" icon={<SearchOutlined />} onClick={() => {}}>
               Tìm kiếm
             </Button>
           </>
@@ -174,7 +174,7 @@ export default function Contract() {
             onClick={() => showDrawer(null)}
             icon={<PlusOutlined />}
           >
-            Thêm
+            Thêm hợp đồng
           </Button>
         }
       >
@@ -195,8 +195,11 @@ export default function Contract() {
                 showSizeChanger: true,
                 pageSizeOptions: [10, 20],
               }}
-              scroll={{ x: "max-content" }}
+              scroll={{ x: "max-content", y: 450 }}
               size="middle"
+              rowClassName={(record) =>
+                editingContract?.id === record.id ? "active-row" : ""
+              }
             />
           </TableContainer>
         )}
@@ -229,6 +232,15 @@ const SearchInput = styled(Input)`
 const TableContainer = styled.div`
   width: 100%;
   overflow: hidden;
+
+  .active-row {
+    background-color: #e6f7ff;
+    border-left: 3px solid #1890ff;
+
+    td {
+      background-color: #e6f7ff !important; /* Force the background on all cells */
+    }
+  }
 `;
 
 const WrapperIcons = styled.div`

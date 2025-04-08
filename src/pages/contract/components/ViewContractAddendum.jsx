@@ -1,19 +1,9 @@
-import { InboxOutlined } from "@ant-design/icons";
 import {
-  Button,
-  Col,
-  DatePicker,
   Descriptions,
   Drawer,
   Form,
-  Input,
-  notification,
-  Row,
-  Select,
-  Spin,
-  Upload,
+  Spin
 } from "antd";
-import TextArea from "antd/es/input/TextArea";
 import { isEmpty } from "lodash";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -21,23 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../../../redux/store";
 
 const initialState = {
-  userName: "",
-  fullName: "",
-  password: "",
-  confirmPassword: "",
-  email: "",
-  phoneNumber: "",
-  role: "",
-  company: "",
-  position: "",
-};
 
-// Thêm code để xử lý việc upload
-const normFile = (e) => {
-  if (Array.isArray(e)) {
-    return e;
-  }
-  return e?.fileList;
 };
 
 export default function ViewContractAddendum(props) {
@@ -56,56 +30,104 @@ export default function ViewContractAddendum(props) {
 
   const items = [
     {
-      label: "Product",
-      children: "Cloud Database",
+      key: '1',
+      label: "Mã phụ lục",
+      children: selectedContractAddendum?.code || "N/A",
     },
     {
-      label: "Billing",
-      children: "Prepaid",
+      key: '2',
+      label: "Tên phụ lục",
+      children: selectedContractAddendum?.name || "N/A",
     },
     {
-      label: "Time",
-      children: "18:00:00",
+      key: '3',
+      label: "Dự án",
+      children: selectedContractAddendum?.project || "N/A",
     },
     {
-      label: "Amount",
-      children: "$80.00",
+      key: '4',
+      label: "Hạng mục",
+      children: selectedContractAddendum?.category || "N/A",
     },
     {
-      label: "Discount",
-      span: { xl: 2, xxl: 2 },
-      children: "$20.00",
+      key: '5',
+      label: "Hợp đồng gốc",
+      children: selectedContractAddendum?.contract || "N/A",
     },
     {
-      label: "Official",
-      span: { xl: 2, xxl: 2 },
-      children: "$60.00",
+      key: '6',
+      label: "Nhà thầu thi công",
+      children: selectedContractAddendum?.contractor || "N/A",
     },
     {
-      label: "Config Info",
+      key: '7',
+      label: "Tư vấn giám sát",
+      children: selectedContractAddendum?.supervisor || "N/A",
+    },
+    {
+      key: '8',
+      label: "Tư vấn thiết kế",
+      children: selectedContractAddendum?.designer || "N/A",
+    },
+    {
+      key: '9',
+      label: "Ngày ký phụ lục",
+      children: selectedContractAddendum?.signDate || "N/A",
+    },
+    {
+      key: '10',
+      label: "Ngày có hiệu lực",
+      children: selectedContractAddendum?.effectiveDate || "N/A",
+    },
+    {
+      key: '11',
+      label: "Giá trị phụ lục",
+      children: selectedContractAddendum?.amount || "N/A",
+    },
+    {
+      key: '12',
+      label: "Nội dung phụ lục",
+      span: { xs: 1, sm: 2, md: 3, lg: 3, xl: 2, xxl: 2 },
+      children: selectedContractAddendum?.content || "N/A",
+    },
+    {
+      key: '13',
+      label: "Lý do điều chỉnh",
+      span: { xs: 1, sm: 2, md: 3, lg: 3, xl: 2, xxl: 2 },
+      children: selectedContractAddendum?.reason || "N/A",
+    },
+    {
+      key: '14',
+      label: "Tác động đến tiến độ",
+      children: "Kéo dài thêm 15 ngày làm việc",
+    },
+    {
+      key: '15',
+      label: "Tác động đến ngân sách",
+      children: "Tăng 8.5% so với hợp đồng ban đầu",
+    },
+    {
+      key: '16',
+      label: "Phê duyệt bởi",
       span: { xs: 1, sm: 2, md: 3, lg: 3, xl: 2, xxl: 2 },
       children: (
         <>
-          Data disk type: MongoDB
-          <br />
-          Database version: 3.4
-          <br />
-          Package: dds.mongo.mid
+          <div>- Chủ đầu tư: Ông Nguyễn Văn A - 20/12/2023</div>
+          <div>- Tư vấn giám sát: Ông Lê Minh B - 18/12/2023</div>
+          <div>- Nhà thầu: Ông Trần Thanh C - 15/12/2023</div>
         </>
       ),
     },
     {
-      label: "Hardware Info",
+      key: '17',
+      label: "Tài liệu đính kèm",
       span: { xs: 1, sm: 2, md: 3, lg: 3, xl: 2, xxl: 2 },
       children: (
         <>
-          CPU: 6 Core 3.5 GHz
-          <br />
-          Storage space: 10 GB
-          <br />
-          Replication factor: 3
-          <br />
-          Region: East China 1
+          <div>- Biên bản thỏa thuận điều chỉnh</div>
+          <div>- Bản vẽ thiết kế điều chỉnh</div>
+          <div>- Bảng dự toán chi phí bổ sung</div>
+          <div>- Biên bản họp kỹ thuật</div>
         </>
       ),
     },
@@ -119,7 +141,7 @@ export default function ViewContractAddendum(props) {
     <Drawer
       width={1000}
       title={`Chi tiết phụ lục hợp đồng ${
-        initialValues && initialValues?.name
+        initialValues && initialValues?.code
       }`}
       placement="right"
       onClose={onClose}

@@ -1,39 +1,30 @@
-import { useStyle } from "@/hooks/useStyle";
-import {
-  DeleteOutlined,
-  EditOutlined,
-  PlusOutlined,
-  EyeOutlined,
-} from "@ant-design/icons";
-import { Button, Card, Input, Popconfirm, Select, Space, Table } from "antd";
-import { Fragment, useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import styled from "styled-components";
-import { SkeletonTable } from "../../../components/table/SkeletonTable";
-import { useAppDispatch } from "../../../redux/store";
+import { useStyle } from '@/hooks/useStyle';
+import { DeleteOutlined, EditOutlined, PlusOutlined, EyeOutlined, SearchOutlined } from '@ant-design/icons';
+import { Button, Card, Input, Popconfirm, Select, Space, Table, Tag } from 'antd';
+import { Fragment, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import styled from 'styled-components';
+import { SkeletonTable } from '../../../components/table/SkeletonTable';
+import { useAppDispatch } from '../../../redux/store';
 import {
   cancelEditingConstructionDiary,
   deleteConstructionDiary,
   getConstructionDiaryList,
   startEditingConstructionDiary,
-} from "../redux/constructionDiary.slice";
-import AddEditConstructionDiaryForm from "./AddEditConstructionDiaryForm";
-import ViewConstructionDiary from "./ViewConstructionDiary";
+} from '../redux/constructionDiary.slice';
+import AddEditConstructionDiaryForm from './AddEditConstructionDiaryForm';
+import ViewConstructionDiary from './ViewConstructionDiary';
 
 export default function ConstructionDiary() {
   const { styles } = useStyle();
   const [open, setOpen] = useState(false);
   const [openDetail, setOpenDetail] = useState(false);
 
-  const constructionDiaryList = useSelector(
-    (state) => state.constructionDiary.constructionDiaryList
-  );
+  const constructionDiaryList = useSelector((state) => state.constructionDiary.constructionDiaryList);
   const loading = useSelector((state) => state.constructionDiary.loading);
 
-  const editingConstructionDiary = useSelector(
-    (state) => state.constructionDiary.editingConstructionDiary
-  );
-  console.log("editingConstructionDiary:", editingConstructionDiary);
+  const editingConstructionDiary = useSelector((state) => state.constructionDiary.editingConstructionDiary);
+  console.log('editingConstructionDiary:', editingConstructionDiary);
 
   const dispatch = useAppDispatch();
 
@@ -74,64 +65,73 @@ export default function ConstructionDiary() {
 
   const columns = [
     {
-      title: "Mã nhật ký",
-      dataIndex: "name",
-      key: "name",
-      width: "10%",
-      fixed: "left",
+      title: 'Mã nhật ký',
+      dataIndex: 'diaryCode',
+      key: 'diaryCode',
+      width: '10%',
+      fixed: 'left',
     },
     {
-      title: "Tên nhật ký",
-      dataIndex: "name",
-      key: "name",
-      width: "10%",
+      title: 'Tên nhật ký',
+      dataIndex: 'name',
+      key: 'name',
+      width: '10%',
     },
     {
-      title: "Tên dự án",
-      dataIndex: "description",
-      key: "description",
-      width: "15%",
+      title: 'Tên dự án',
+      dataIndex: 'projectName',
+      key: 'projectName',
+      width: '15%',
     },
     {
-      title: "Công trình",
-      dataIndex: "price",
-      key: "price",
-      width: "8%",
+      title: 'Công trình',
+      dataIndex: 'construction',
+      key: 'construction',
+      width: '8%',
     },
     {
-      title: "Loại nhật ký",
-      dataIndex: "category",
-      key: "category",
-      width: "10%",
+      title: 'Loại nhật ký',
+      dataIndex: 'type',
+      key: 'type',
+      width: '10%',
     },
     {
-      title: "Ngày tạo",
-      dataIndex: "subCategory",
-      key: "subCategory",
-      width: "15%",
+      title: 'Ngày tạo',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      width: '15%',
     },
     {
-      title: "Trạng thái",
-      dataIndex: "quantity",
-      key: "quantity",
-      width: "8%",
+      title: 'Trạng thái',
+      dataIndex: 'status',
+      key: 'status',
+      width: '8%',
+      render: (status) => {
+        let color = 'green';
+        if (status === 'Mới tạo') {
+          color = 'orange';
+        } else if (status === 'Đang xem xét') {
+          color = 'red';
+        }
+        return <Tag color={color}>{status}</Tag>;
+      },
     },
     {
-      title: "Hành động",
-      key: "action",
-      width: "10%",
-      fixed: "right",
+      title: 'Hành động',
+      key: 'action',
+      width: '10%',
+      fixed: 'right',
       render: (record) => (
         <Space size="middle">
-          <WrapperIcons onClick={() => handleViewConstructionDiary(record?.id)}>
+          <WrapperIcons title="Xem chi tiết nhật ký" onClick={() => handleViewConstructionDiary(record?.id)}>
             <EyeOutlined />
           </WrapperIcons>
 
-          <WrapperIcons onClick={() => handleEditConstructionDiary(record?.id)}>
+          <WrapperIcons title="Sửa nhật ký" onClick={() => handleEditConstructionDiary(record?.id)}>
             <EditOutlined />
           </WrapperIcons>
 
-          <WrapperIcons>
+          <WrapperIcons title="Xóa nhật ký">
             <Popconfirm
               cancelText="Hủy bỏ"
               okText="Xóa"
@@ -152,27 +152,19 @@ export default function ConstructionDiary() {
       <Card
         title={
           <>
-            <Select
-              style={{ width: 200, marginRight: 10 }}
-              defaultValue="all"
-              placeholder="Tên dự án"
-            >
+            <Select style={{ width: 200, marginRight: 10 }} defaultValue="all" placeholder="Tên dự án">
               <Select.Option value="all">Tất cả</Select.Option>
               <Select.Option value="active">Đang hoạt động</Select.Option>
             </Select>
             <SearchInput placeholder="Search..." />
-            <Button type="primary" onClick={() => {}}>
+            <Button type="primary" icon={<SearchOutlined />} onClick={() => {}}>
               Tìm kiếm
             </Button>
           </>
         }
         extra={
-          <Button
-            type="primary"
-            onClick={() => showDrawer(null)}
-            icon={<PlusOutlined />}
-          >
-            Thêm
+          <Button type="primary" onClick={() => showDrawer(null)} icon={<PlusOutlined />}>
+            Thêm nhật ký
           </Button>
         }
       >
@@ -193,16 +185,15 @@ export default function ConstructionDiary() {
                 showSizeChanger: true,
                 pageSizeOptions: [10, 20],
               }}
-              scroll={{ x: "max-content" }}
+              scroll={{ x: 'max-content', y: 450 }}
               size="middle"
+              rowClassName={(record) => (editingConstructionDiary?.id === record.id ? 'active-row' : '')}
             />
           </TableContainer>
         )}
       </Card>
       {open && <AddEditConstructionDiaryForm open={open} onClose={onClose} />}
-      {openDetail && (
-        <ViewConstructionDiary open={openDetail} onClose={handleCloseDetail} />
-      )}
+      {openDetail && <ViewConstructionDiary open={openDetail} onClose={handleCloseDetail} />}
     </>
   );
 }
@@ -221,6 +212,14 @@ const SearchInput = styled(Input)`
 const TableContainer = styled.div`
   width: 100%;
   overflow: hidden;
+  .active-row {
+    background-color: #e6f7ff;
+    border-left: 3px solid #1890ff;
+
+    td {
+      background-color: #e6f7ff !important; /* Force the background on all cells */
+    }
+  }
 `;
 
 const WrapperIcons = styled.div`

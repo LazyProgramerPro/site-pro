@@ -1,5 +1,5 @@
 import { useStyle } from "@/hooks/useStyle";
-import { DeleteOutlined, EditOutlined, PlusOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import { Button, Card, Input, Popconfirm, Space, Table } from "antd";
 import { Fragment, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -56,21 +56,21 @@ export default function Category() {
   const columns = [
     {
       title: "Mã hạng mục",
-      dataIndex: "name",
-      key: "name",
+      dataIndex: "categoryCode",
+      key: "categoryCode",
       width: "30%",
       fixed: "left",
     },
     {
       title: "Tên hạng mục",
-      dataIndex: "name",
-      key: "name",
+      dataIndex: "categoryName",
+      key: "categoryName",
       width: "30%",
     },
     {
-      title: "Công trình",
-      dataIndex: "description",
-      key: "description",
+      title: "Tên công trình",
+      dataIndex: "constructionName",
+      key: "constructionName",
       width: "30%",
     },
 
@@ -81,11 +81,11 @@ export default function Category() {
       fixed: "right",
       render: (record) => (
         <Space size="middle">
-          <WrapperIcons onClick={() => handleEditCategory(record?.id)}>
+          <WrapperIcons title="Sửả hạng mục" onClick={() => handleEditCategory(record?.id)}>
             <EditOutlined />
           </WrapperIcons>
 
-          <WrapperIcons>
+          <WrapperIcons title="Xóa hạng mục">
             <Popconfirm
               cancelText="Hủy bỏ"
               okText="Xóa"
@@ -107,7 +107,7 @@ export default function Category() {
         title={
           <>
             <SearchInput placeholder="Search..." />
-            <Button type="primary" onClick={() => {}}>
+            <Button type="primary" icon={<SearchOutlined />} onClick={() => {}}>
               Tìm kiếm
             </Button>
           </>
@@ -118,7 +118,7 @@ export default function Category() {
             onClick={() => showDrawer(null)}
             icon={<PlusOutlined />}
           >
-            Thêm
+            Thêm hạng mục
           </Button>
         }
       >
@@ -139,8 +139,11 @@ export default function Category() {
                 showSizeChanger: true,
                 pageSizeOptions: [10, 20],
               }}
-              scroll={{ x: "max-content" }}
+              scroll={{ x: "max-content", y: 450 }}
               size="middle"
+              rowClassName={(record) =>
+                editingCategory?.id === record.id ? "active-row" : ""
+              }
             />
           </TableContainer>
         )}
@@ -164,6 +167,15 @@ const SearchInput = styled(Input)`
 const TableContainer = styled.div`
   width: 100%;
   overflow: hidden;
+
+  .active-row {
+    background-color: #e6f7ff;
+    border-left: 3px solid #1890ff;
+
+    td {
+      background-color: #e6f7ff !important; /* Force the background on all cells */
+    }
+  }
 `;
 
 const WrapperIcons = styled.div`

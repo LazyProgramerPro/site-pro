@@ -4,6 +4,7 @@ import {
   EditOutlined,
   EyeOutlined,
   PlusOutlined,
+  SearchOutlined,
 } from "@ant-design/icons";
 import { Button, Card, Input, Popconfirm, Space, Table } from "antd";
 import { Fragment, useEffect, useState } from "react";
@@ -72,69 +73,69 @@ export default function Project() {
   const columns = [
     {
       title: "Mã dự án",
-      dataIndex: "name",
-      key: "name",
+      dataIndex: "projectCode",
+      key: "projectCode",
       width: "10%",
       fixed: "left",
     },
     {
       title: "Tên dự án",
-      dataIndex: "name",
-      key: "name",
+      dataIndex: "projectName",
+      key: "projectName",
       width: "10%",
     },
     {
       title: "Mô tả",
-      dataIndex: "name",
-      key: "name",
-      width: "10%",
-    },
-    {
-      title: "Ngay bắt đầu",
       dataIndex: "description",
       key: "description",
       width: "10%",
     },
     {
+      title: "Ngày bắt đầu",
+      dataIndex: "startDate",
+      key: "startDate",
+      width: "10%",
+    },
+    {
       title: "Ngày kết thúc",
-      dataIndex: "price",
-      key: "price",
+      dataIndex: "endDate",
+      key: "endDate",
       width: "10%",
     },
     {
       title: "Nhà thầu thi công",
-      dataIndex: "category",
-      key: "category",
+      dataIndex: "contractor",
+      key: "contractor",
       width: "10%",
     },
     {
       title: "Tư vấn giám sát",
-      dataIndex: "subCategory",
-      key: "subCategory",
+      dataIndex: "supervisor",
+      key: "supervisor",
       width: "10%",
     },
     {
       title: "Tư vấn thiết kế",
-      dataIndex: "quantity",
-      key: "quantity",
+      dataIndex: "designer",
+      key: "designer",
       width: "10%",
     },
     {
-      title: "Action",
+      title: "Hành động",
       key: "action",
       width: "10%",
       fixed: "right",
       render: (record) => (
         <Space size="middle">
-          <WrapperIcons onClick={() => handleViewProject(record?.id)}>
+          <WrapperIcons title="Xem chi tiết dự án" onClick={() => handleViewProject(record?.id)}>
             <EyeOutlined />
           </WrapperIcons>
 
-          <WrapperIcons onClick={() => handleEditProject(record?.id)}>
+          <WrapperIcons title="Sửa dự án" onClick={() => handleEditProject(record?.id)}>
             <EditOutlined />
           </WrapperIcons>
 
-          <WrapperIcons>
+          <WrapperIcons title="Xóa dự án">
             <Popconfirm
               cancelText="Hủy bỏ"
               okText="Xóa"
@@ -156,7 +157,7 @@ export default function Project() {
         title={
           <>
             <SearchInput placeholder="Search..." />
-            <Button type="primary" onClick={() => {}}>
+            <Button type="primary" icon={<SearchOutlined />} onClick={() => {}}>
               Tìm kiếm
             </Button>
           </>
@@ -167,7 +168,7 @@ export default function Project() {
             onClick={() => showDrawer(null)}
             icon={<PlusOutlined />}
           >
-            Thêm
+            Thêm dự án
           </Button>
         }
       >
@@ -188,8 +189,11 @@ export default function Project() {
                 showSizeChanger: true,
                 pageSizeOptions: [10, 20],
               }}
-              scroll={{ x: "max-content" }}
+              scroll={{ x: "max-content", y: 450 }}
               size="middle"
+              rowClassName={(record) =>
+                editingProject?.id === record.id ? "active-row" : ""
+              }
             />
           </TableContainer>
         )}
@@ -216,6 +220,14 @@ const SearchInput = styled(Input)`
 const TableContainer = styled.div`
   width: 100%;
   overflow: hidden;
+  .active-row {
+    background-color: #e6f7ff;
+    border-left: 3px solid #1890ff;
+
+    td {
+      background-color: #e6f7ff !important; /* Force the background on all cells */
+    }
+  }
 `;
 
 const WrapperIcons = styled.div`

@@ -8,50 +8,91 @@ const initialState = {
   currentRequestId: undefined,
 };
 
+// Sample contract data for testing
 const fakeContractList = [
-  // Keep your example data
   {
-    id: "1",
-    name: "John Brown",
-    description: "New York No. 1 Lake Park",
-    price: 32,
-    category: "New York No. 1 Lake Park",
-    subCategory: "New York No. 1 Lake Park",
-    quantity: 32,
+    id: 1,
+    contractCode: "CTR-2023-001",
+    contractName: "Hợp đồng thi công phần móng",
+    projectName: "Khu đô thị Phú Mỹ Hưng",
+    construction: "Phần móng và tầng hầm",
+    partyB: "Công ty TNHH Xây dựng ABC",
   },
   {
-    id: "2",
-    name: "Jim Green",
-    description: "London No. 1 Lake Park",
-    price: 42,
-    category: "London No. 1 Lake Park",
-    subCategory: "London No. 1 Lake Park",
-    quantity: 42,
+    id: 2,
+    contractCode: "CTR-2023-002",
+    contractName: "Hợp đồng cung cấp và lắp đặt thiết bị điện",
+    projectName: "Cầu Nhật Tân",
+    construction: "Hệ thống điện chiếu sáng",
+    partyB: "Công ty Điện lực MHT",
   },
-
   {
-    id: "3",
-    name: "Joe Black",
-    description: "Sydney No. 1 Lake Park",
-    price: 32,
-    category: "Sydney No. 1 Lake Park",
-    subCategory: "Sydney No. 1 Lake Park",
-    quantity: 32,
+    id: 3,
+    contractCode: "CTR-2023-003",
+    contractName: "Hợp đồng tư vấn thiết kế kiến trúc",
+    projectName: "Tòa nhà Landmark 81",
+    construction: "Thiết kế kiến trúc",
+    partyB: "Công ty Tư vấn Kiến trúc Sao Việt",
   },
-
   {
-    id: "4",
-    name: "Joe Black",
-    description: "Sydney No. 1 Lake Park",
-    price: 32,
-    category: "Sydney No. 1 Lake Park",
-    subCategory: "Sydney No. 1 Lake Park",
-    quantity: 32,
+    id: 4,
+    contractCode: "CTR-2023-004",
+    contractName: "Hợp đồng thi công hạ tầng kỹ thuật",
+    projectName: "Đường cao tốc Bắc Nam",
+    construction: "Hệ thống thoát nước và cấp nước",
+    partyB: "Tổng công ty Xây dựng Công trình Giao thông",
   },
-
-  // ... (rest of the data remains unchanged)
+  {
+    id: 5,
+    contractCode: "CTR-2023-005",
+    contractName: "Hợp đồng cung cấp vật liệu xây dựng",
+    projectName: "Khu công nghiệp Vân Trung",
+    construction: "Vật liệu xây dựng",
+    partyB: "Công ty TNHH Vật liệu Xây dựng Hòa Phát",
+  },
+  {
+    id: 6,
+    contractCode: "CTR-2023-006",
+    contractName: "Hợp đồng thi công phần thô",
+    projectName: "Nhà máy nhiệt điện Vũng Áng",
+    construction: "Thi công phần thô",
+    partyB: "Công ty Cổ phần Xây lắp Điện 1",
+  },
+  {
+    id: 7,
+    contractCode: "CTR-2023-007",
+    contractName: "Hợp đồng lắp đặt hệ thống PCCC",
+    projectName: "Metro Bến Thành - Suối Tiên",
+    construction: "Hệ thống PCCC",
+    partyB: "Công ty TNHH PCCC An Toàn",
+  },
+  {
+    id: 8,
+    contractCode: "CTR-2023-008",
+    contractName: "Hợp đồng tư vấn giám sát",
+    projectName: "Đập Thủy điện Sơn La",
+    construction: "Giám sát thi công",
+    partyB: "Công ty Cổ phần Tư vấn Xây dựng Điện 2",
+  },
+  {
+    id: 9,
+    contractCode: "CTR-2024-001",
+    contractName: "Hợp đồng thi công hoàn thiện",
+    projectName: "Khu đô thị Phú Mỹ Hưng",
+    construction: "Hoàn thiện nội thất",
+    partyB: "Công ty Cổ phần Nội thất Toàn Cầu",
+  },
+  {
+    id: 10,
+    contractCode: "CTR-2024-002",
+    contractName: "Hợp đồng lắp đặt hệ thống điều hòa",
+    projectName: "Tòa nhà Landmark 81",
+    construction: "Hệ thống điều hòa trung tâm",
+    partyB: "Công ty TNHH Kỹ thuật Lạnh",
+  }
 ];
 
+// You can use this data in your Redux store or for testing purposes
 export const getContractList = createAsyncThunk(
   "contract/getContractList",
   async (searchTerm, thunkAPI) => {

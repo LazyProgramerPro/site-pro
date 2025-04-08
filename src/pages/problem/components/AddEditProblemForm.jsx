@@ -25,15 +25,7 @@ import {
 } from "@ant-design/icons";
 
 const initialState = {
-  userName: "",
-  fullName: "",
-  password: "",
-  confirmPassword: "",
-  email: "",
-  phoneNumber: "",
-  role: "",
-  company: "",
-  position: "",
+
 };
 
 // Thêm code để xử lý việc upload
@@ -99,7 +91,7 @@ export default function AddEditProblemForm(props) {
       title={
         isEmpty(selectedProblem)
           ? "Thêm mới vấn đề"
-          : `Sửa vấn đề ${initialValues && initialValues?.name}`
+          : `Sửa vấn đề ${initialValues && initialValues?.code}`
       }
       placement="right"
       onClose={onClose}
@@ -121,15 +113,15 @@ export default function AddEditProblemForm(props) {
             <Col span={12}>
               <Form.Item
                 label="Dự án"
-                name="role"
+                name="project"
                 rules={[
                   {
                     required: true,
-                    message: "Bạn phải nhập nhà thầu thi công!",
+                    message: "Vui lòng chọn dự án!",
                   },
                 ]}
               >
-                <Select showSearch allowClear placeholder="Select an item role">
+                <Select showSearch allowClear placeholder="Chọn dự án">
                   {["Apple", "Samsung", "Microsoft", "Lenovo", "ASUS"].map(
                     (b, index) => {
                       return (
@@ -145,18 +137,18 @@ export default function AddEditProblemForm(props) {
             <Col span={12}>
               <Form.Item
                 label="Phụ lục hợp đồng"
-                name="company"
+                name="contractAppendix"
                 rules={[
                   {
                     required: true,
-                    message: "Bạn phải nhập tư vấn giám sát!",
+                    message: "Vui lòng chọn phụ lục hợp đồng!",
                   },
                 ]}
               >
                 <Select
                   showSearch
                   allowClear
-                  placeholder="Select an item company"
+                  placeholder="Chọn phụ lục hợp đồng"
                 >
                   {["Apple", "Samsung", "Microsoft", "Lenovo", "ASUS"].map(
                     (b, index) => {
@@ -176,8 +168,8 @@ export default function AddEditProblemForm(props) {
             <Col span={12}>
               <Form.Item
                 label="Mã vấn đề"
-                name="password"
-                rules={[{ required: true, message: "Bạn phải nhập địa chỉ" }]}
+                name="problemCode"
+                rules={[{ required: true, message: "Vui lòng nhập mã vấn đề!" }]}
               >
                 <Input />
               </Form.Item>
@@ -185,8 +177,8 @@ export default function AddEditProblemForm(props) {
             <Col span={12}>
               <Form.Item
                 label="Tên vấn đề"
-                name="confirmPassword"
-                rules={[{ required: true, message: "Bạn phải nhập mô tả!" }]}
+                name="problemName"
+                rules={[{ required: true, message: "Vui lòng nhập tên vấn đề!" }]}
               >
                 <Input />
               </Form.Item>
@@ -197,11 +189,11 @@ export default function AddEditProblemForm(props) {
             <Col span={12}>
               <Form.Item
                 label="Mô tả vấn đề"
-                name="startDate"
+                name="problemDescription"
                 rules={[
                   {
                     required: true,
-                    message: "Bạn phải nhập ngày bắt đầu!",
+                    message: "Vui lòng nhập mô tả vấn đề!",
                   },
                 ]}
               >
@@ -211,15 +203,13 @@ export default function AddEditProblemForm(props) {
             <Col span={12}>
               <Form.Item
                 label="Tổng hợp"
-                name="phoneNumber"
+                name="summary"
                 rules={[
                   {
                     required: true,
-                    message: "Bạn phải nhập ngày kết thúc!",
+                    message: "Vui lòng nhập tổng hợp!",
                   },
                 ]}
-                dependencies={["startDate"]}
-                hasFeedback
               >
                 <TextArea />
               </Form.Item>
@@ -230,11 +220,11 @@ export default function AddEditProblemForm(props) {
             <Col span={12}>
               <Form.Item
                 label="Địa điểm"
-                name="startDate"
+                name="location"
                 rules={[
                   {
                     required: true,
-                    message: "Bạn phải nhập ngày bắt đầu!",
+                    message: "Vui lòng nhập địa điểm!",
                   },
                 ]}
               >
@@ -244,15 +234,13 @@ export default function AddEditProblemForm(props) {
             <Col span={12}>
               <Form.Item
                 label="Tỉnh"
-                name="phoneNumber"
+                name="province"
                 rules={[
                   {
                     required: true,
-                    message: "Bạn phải nhập ngày kết thúc!",
+                    message: "Vui lòng nhập tỉnh!",
                   },
                 ]}
-                dependencies={["startDate"]}
-                hasFeedback
               >
                 <TextArea />
               </Form.Item>
@@ -263,15 +251,15 @@ export default function AddEditProblemForm(props) {
             <Col span={24}>
               <Form.Item
                 label="Người được chỉ định"
-                name="role"
+                name="assignedPerson"
                 rules={[
                   {
                     required: true,
-                    message: "Bạn phải nhập nhà thầu thi công!",
+                    message: "Vui lòng chọn người được chỉ định!",
                   },
                 ]}
               >
-                <Select showSearch allowClear placeholder="Select an item role">
+                <Select showSearch allowClear placeholder="Chọn người được chỉ định">
                   {["Apple", "Samsung", "Microsoft", "Lenovo", "ASUS"].map(
                     (b, index) => {
                       return (

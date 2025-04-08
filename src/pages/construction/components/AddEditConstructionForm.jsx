@@ -16,15 +16,7 @@ import { useAppDispatch } from "../../../redux/store";
 import { useSelector } from "react-redux";
 
 const initialState = {
-  userName: "",
-  fullName: "",
-  password: "",
-  confirmPassword: "",
-  email: "",
-  phoneNumber: "",
-  role: "",
-  company: "",
-  position: "",
+
 };
 
 export default function AddEditConstructionForm(props) {
@@ -84,7 +76,7 @@ export default function AddEditConstructionForm(props) {
       title={
         isEmpty(selectedConstruction)
           ? "Thêm mới công trình"
-          : `Sửa công trình ${initialValues && initialValues?.name}`
+          : `Sửa công trình ${initialValues && initialValues?.code}`
       }
       placement="right"
       onClose={onClose}
@@ -106,7 +98,7 @@ export default function AddEditConstructionForm(props) {
             <Col span={24}>
               <Form.Item
                 label="Mã công trình"
-                name="userName"
+                name="code"
                 rules={[
                   {
                     required: true,
@@ -120,10 +112,9 @@ export default function AddEditConstructionForm(props) {
           </Row>
           <Row gutter={16}>
             <Col span={24}>
-              {" "}
               <Form.Item
-                label=" Tên công trình"
-                name="fullName"
+                label="Tên công trình"
+                name="name"
                 rules={[
                   {
                     required: true,
@@ -140,8 +131,8 @@ export default function AddEditConstructionForm(props) {
             <Col span={24}>
               {" "}
               <Form.Item
-                label="Dự án"
-                name="fullName"
+                label="Tên dự án"
+                name="projectName"
                 rules={[
                   {
                     required: true,
@@ -156,7 +147,7 @@ export default function AddEditConstructionForm(props) {
 
           <Form.Item>
             <Button type="primary" htmlType="submit" disabled={loading}>
-              {isEmpty(selectedConstruction) ? "Thêm" : "Cập nhật"}
+              {isEmpty(selectedConstruction) ? "Thêm công trình" : "Cập nhật"}
             </Button>
           </Form.Item>
         </Form>

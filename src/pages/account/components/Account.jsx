@@ -36,6 +36,10 @@ export default function Account() {
   const accountList = useSelector((state) => state.account.accountList);
   const loading = useSelector((state) => state.account.loading);
 
+  const editingAccount = useSelector(
+    (state) => state.account.editingAccount
+  );
+
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -226,8 +230,11 @@ export default function Account() {
                 showSizeChanger: true,
                 pageSizeOptions: [10, 20],
               }}
-              scroll={{ x: "max-content", y: 400 }}
+              scroll={{ x: "max-content", y: 450 }}
               size="middle"
+              rowClassName={(record) =>
+                editingAccount?.id === record.id ? "active-row" : ""
+              }
             />
           </TableContainer>
         )}
@@ -251,6 +258,15 @@ const SearchInput = styled(Input)`
 const TableContainer = styled.div`
   width: 100%;
   overflow: hidden;
+
+  .active-row {
+    background-color: #e6f7ff;
+    border-left: 3px solid #1890ff;
+
+    td {
+      background-color: #e6f7ff !important; /* Force the background on all cells */
+    }
+  }
 `;
 
 const WrapperIcons = styled.div`

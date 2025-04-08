@@ -26,13 +26,13 @@ export default function AppraisalProblem() {
       >
         <Row gutter={16}>
           <Col span={24}>
-            <Form.Item
+          <Form.Item
               label="Ghi chú"
-              name="userName"
+              name="note"
               rules={[
                 {
                   required: true,
-                  message: "Bạn phải nhập mã dự án!",
+                  message: "Vui lòng nhập ghi chú!",
                 },
               ]}
             >
@@ -44,7 +44,7 @@ export default function AppraisalProblem() {
           <Button type="primary" htmlType="submit" style={{ marginRight: 8 }}>
             Đã giải quyết
           </Button>
-          <Button type="dashed">Từ chối</Button>
+          <Button type="dashed" htmlType="submit">Từ chối</Button>
         </Form.Item>
       </Form>
     </div>

@@ -9,24 +9,10 @@ import OverviewProblem from "./OverviewProblem";
 import CancelProblem from "./CancelProblem";
 
 const initialState = {
-  userName: "",
-  fullName: "",
-  password: "",
-  confirmPassword: "",
-  email: "",
-  phoneNumber: "",
-  role: "",
-  company: "",
-  position: "",
+
 };
 
-// Thêm code để xử lý việc upload
-const normFile = (e) => {
-  if (Array.isArray(e)) {
-    return e;
-  }
-  return e?.fileList;
-};
+
 
 export default function ViewProblem(props) {
   const navigate = useNavigate();
@@ -86,7 +72,7 @@ export default function ViewProblem(props) {
   return (
     <Drawer
       width={1000}
-      title={`Chi tiết vấn đề ${initialValues && initialValues?.name}`}
+      title={`Chi tiết vấn đề ${initialValues && initialValues?.code}`}
       placement="right"
       onClose={onClose}
       open={open}

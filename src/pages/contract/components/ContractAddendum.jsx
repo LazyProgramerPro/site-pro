@@ -4,6 +4,7 @@ import {
   EditOutlined,
   EyeOutlined,
   PlusOutlined,
+  SearchOutlined,
 } from "@ant-design/icons";
 import { Button, Card, Input, Popconfirm, Space, Table } from "antd";
 import { Fragment, useEffect, useState } from "react";
@@ -89,8 +90,8 @@ export default function ContractAddendum() {
   const columns = [
     {
       title: "Mã phụ lục",
-      dataIndex: "name",
-      key: "name",
+      dataIndex: "code",
+      key: "code",
       width: "10%",
       fixed: "left",
     },
@@ -102,56 +103,56 @@ export default function ContractAddendum() {
     },
     {
       title: "Dự án",
-      dataIndex: "name",
-      key: "name",
+      dataIndex: "project",
+      key: "project",
       width: "10%",
     },
     {
       title: "Hạng mục",
-      dataIndex: "description",
-      key: "description",
-      width: "10%",
-    },
-    {
-      title: "Hợp đồng",
-      dataIndex: "price",
-      key: "price",
-      width: "10%",
-    },
-    {
-      title: "Nhà thầu thi công",
       dataIndex: "category",
       key: "category",
       width: "10%",
     },
     {
+      title: "Hợp đồng",
+      dataIndex: "contract",
+      key: "contract",
+      width: "10%",
+    },
+    {
+      title: "Nhà thầu thi công",
+      dataIndex: "contractor",
+      key: "contractor",
+      width: "10%",
+    },
+    {
       title: "Tư vấn giám sát",
-      dataIndex: "subCategory",
-      key: "subCategory",
+      dataIndex: "supervisor",
+      key: "supervisor",
       width: "10%",
     },
     {
       title: "Tư vấn thiết kế",
-      dataIndex: "quantity",
-      key: "quantity",
+      dataIndex: "designer",
+      key: "designer",
       width: "10%",
     },
     {
-      title: "Action",
+      title: "Hành động",
       key: "action",
       width: "10%",
       fixed: "right",
       render: (record) => (
         <Space size="middle">
-          <WrapperIcons onClick={() => handleViewContractAddendum(record?.id)}>
+          <WrapperIcons title="Xem chi tiết phụ lục" onClick={() => handleViewContractAddendum(record?.id)}>
             <EyeOutlined />
           </WrapperIcons>
 
-          <WrapperIcons onClick={() => handleEditContractAddendum(record?.id)}>
+          <WrapperIcons title="Sửa phụ lục" onClick={() => handleEditContractAddendum(record?.id)}>
             <EditOutlined />
           </WrapperIcons>
 
-          <WrapperIcons>
+          <WrapperIcons title ="Xóa phụ lục">
             <Popconfirm
               cancelText="Hủy bỏ"
               okText="Xóa"
@@ -172,7 +173,7 @@ export default function ContractAddendum() {
         title={
           <>
             <SearchInput placeholder="Search..." />
-            <Button type="primary" onClick={() => {}}>
+            <Button type="primary" icon={<SearchOutlined />} onClick={() => {}}>
               Tìm kiếm
             </Button>
           </>
@@ -181,7 +182,7 @@ export default function ContractAddendum() {
           <>
             <Button
               style={{ marginRight: 10 }}
-              type="primary"
+              type="dashed"
               onClick={() => handleOpenImportExcel(null)}
               icon={<PlusOutlined />}
             >
@@ -193,7 +194,7 @@ export default function ContractAddendum() {
               onClick={() => showDrawer(null)}
               icon={<PlusOutlined />}
             >
-              Thêm
+              Thêm phụ lục
             </Button>
           </>
         }
@@ -215,8 +216,11 @@ export default function ContractAddendum() {
                 showSizeChanger: true,
                 pageSizeOptions: [10, 20],
               }}
-              scroll={{ x: "max-content" }}
+              scroll={{ x: "max-content", y: 800 }}
               size="middle"
+              rowClassName={(record) =>
+                editingContractAddendum?.id === record.id ? "active-row" : ""
+              }
             />
           </TableContainer>
         )}
@@ -246,6 +250,15 @@ const SearchInput = styled(Input)`
 const TableContainer = styled.div`
   width: 100%;
   overflow: hidden;
+
+  .active-row {
+    background-color: #e6f7ff;
+    border-left: 3px solid #1890ff;
+
+    td {
+      background-color: #e6f7ff !important; /* Force the background on all cells */
+    }
+  }
 `;
 
 const WrapperIcons = styled.div`

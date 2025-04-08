@@ -25,24 +25,10 @@ import {
 } from "@ant-design/icons";
 
 const initialState = {
-  userName: "",
-  fullName: "",
-  password: "",
-  confirmPassword: "",
-  email: "",
-  phoneNumber: "",
-  role: "",
-  company: "",
-  position: "",
+
 };
 
-// Thêm code để xử lý việc upload
-const normFile = (e) => {
-  if (Array.isArray(e)) {
-    return e;
-  }
-  return e?.fileList;
-};
+
 
 export default function AddEditContractAddendumForm(props) {
   const navigate = useNavigate();
@@ -101,7 +87,7 @@ export default function AddEditContractAddendumForm(props) {
       title={
         isEmpty(selectedContractAddendum)
           ? "Thêm mới phụ lục hợp đồng"
-          : `Sửa phụ lục hợp đồng ${initialValues && initialValues?.name}`
+          : `Sửa phụ lục hợp đồng ${initialValues && initialValues?.code}`
       }
       placement="right"
       onClose={onClose}
@@ -123,7 +109,7 @@ export default function AddEditContractAddendumForm(props) {
             <Col span={12}>
               <Form.Item
                 label="Mã phụ lục hợp đồng"
-                name="userName"
+                name="code"
                 rules={[
                   {
                     required: true,
@@ -135,10 +121,9 @@ export default function AddEditContractAddendumForm(props) {
               </Form.Item>
             </Col>
             <Col span={12}>
-              {" "}
               <Form.Item
                 label="Tên phụ lục hợp đồng"
-                name="fullName"
+                name="name"
                 rules={[
                   {
                     required: true,
@@ -155,16 +140,16 @@ export default function AddEditContractAddendumForm(props) {
             <Col span={12}>
               <Form.Item
                 label="Tên dự án"
-                name="role"
+                name="projectName"
                 rules={[
                   {
                     required: true,
-                    message: "Bạn phải nhập nhà thầu thi công!",
+                    message: "Bạn phải chọn tên dự án!",
                   },
                 ]}
               >
-                <Select showSearch allowClear placeholder="Select an item role">
-                  {["Apple", "Samsung", "Microsoft", "Lenovo", "ASUS"].map(
+                <Select showSearch allowClear placeholder="Chọn dự án">
+                  {["Dự án A", "Dự án B", "Dự án C", "Dự án D", "Dự án E"].map(
                     (b, index) => {
                       return (
                         <Select.Option value={b} key={index}>
@@ -179,20 +164,20 @@ export default function AddEditContractAddendumForm(props) {
             <Col span={12}>
               <Form.Item
                 label="Tên công trình"
-                name="company"
+                name="constructionName"
                 rules={[
                   {
                     required: true,
-                    message: "Bạn phải nhập tư vấn giám sát!",
+                    message: "Bạn phải chọn tên công trình!",
                   },
                 ]}
               >
                 <Select
                   showSearch
                   allowClear
-                  placeholder="Select an item company"
+                  placeholder="Chọn công trình"
                 >
-                  {["Apple", "Samsung", "Microsoft", "Lenovo", "ASUS"].map(
+                  {["Công trình 1", "Công trình 2", "Công trình 3", "Công trình 4", "Công trình 5"].map(
                     (b, index) => {
                       return (
                         <Select.Option value={b} key={index}>
@@ -210,16 +195,16 @@ export default function AddEditContractAddendumForm(props) {
             <Col span={12}>
               <Form.Item
                 label="Tên hợp đồng"
-                name="role"
+                name="contractName"
                 rules={[
                   {
                     required: true,
-                    message: "Bạn phải nhập nhà thầu thi công!",
+                    message: "Bạn phải chọn tên hợp đồng!",
                   },
                 ]}
               >
-                <Select showSearch allowClear placeholder="Select an item role">
-                  {["Apple", "Samsung", "Microsoft", "Lenovo", "ASUS"].map(
+                <Select showSearch allowClear placeholder="Chọn hợp đồng">
+                  {["Hợp đồng A-001", "Hợp đồng B-002", "Hợp đồng C-003", "Hợp đồng D-004", "Hợp đồng E-005"].map(
                     (b, index) => {
                       return (
                         <Select.Option value={b} key={index}>
@@ -234,20 +219,20 @@ export default function AddEditContractAddendumForm(props) {
             <Col span={12}>
               <Form.Item
                 label="Hạng mục"
-                name="company"
+                name="category"
                 rules={[
                   {
                     required: true,
-                    message: "Bạn phải nhập tư vấn giám sát!",
+                    message: "Bạn phải chọn hạng mục!",
                   },
                 ]}
               >
                 <Select
                   showSearch
                   allowClear
-                  placeholder="Select an item company"
+                  placeholder="Chọn hạng mục"
                 >
-                  {["Apple", "Samsung", "Microsoft", "Lenovo", "ASUS"].map(
+                  {["Hạng mục 1", "Hạng mục 2", "Hạng mục 3", "Hạng mục 4", "Hạng mục 5"].map(
                     (b, index) => {
                       return (
                         <Select.Option value={b} key={index}>
@@ -265,16 +250,16 @@ export default function AddEditContractAddendumForm(props) {
             <Col span={12}>
               <Form.Item
                 label="Nhóm"
-                name="role"
+                name="group"
                 rules={[
                   {
                     required: true,
-                    message: "Bạn phải nhập nhà thầu thi công!",
+                    message: "Bạn phải chọn nhóm!",
                   },
                 ]}
               >
-                <Select showSearch allowClear placeholder="Select an item role">
-                  {["Apple", "Samsung", "Microsoft", "Lenovo", "ASUS"].map(
+                <Select showSearch allowClear placeholder="Chọn nhóm">
+                  {["Nhóm A", "Nhóm B", "Nhóm C", "Nhóm D", "Nhóm E"].map(
                     (b, index) => {
                       return (
                         <Select.Option value={b} key={index}>
@@ -289,11 +274,11 @@ export default function AddEditContractAddendumForm(props) {
             <Col span={12}>
               <Form.Item
                 label="Đơn vị"
-                name="company"
+                name="unit"
                 rules={[
                   {
                     required: true,
-                    message: "Bạn phải nhập tư vấn giám sát!",
+                    message: "Bạn phải nhập đơn vị!",
                   },
                 ]}
               >
@@ -306,11 +291,11 @@ export default function AddEditContractAddendumForm(props) {
             <Col span={8}>
               <Form.Item
                 label="Khối lượng"
-                name="userName"
+                name="quantity"
                 rules={[
                   {
                     required: true,
-                    message: "Bạn phải nhập mã phụ lục hợp đồng!",
+                    message: "Bạn phải nhập khối lượng!",
                   },
                 ]}
               >
@@ -321,11 +306,11 @@ export default function AddEditContractAddendumForm(props) {
             <Col span={8}>
               <Form.Item
                 label="Đơn giá"
-                name="userName"
+                name="unitPrice"
                 rules={[
                   {
                     required: true,
-                    message: "Bạn phải nhập mã phụ lục hợp đồng!",
+                    message: "Bạn phải nhập đơn giá!",
                   },
                 ]}
               >
@@ -336,11 +321,11 @@ export default function AddEditContractAddendumForm(props) {
             <Col span={8}>
               <Form.Item
                 label="Thành tiền"
-                name="userName"
+                name="totalAmount"
                 rules={[
                   {
                     required: true,
-                    message: "Bạn phải nhập mã phụ lục hợp đồng!",
+                    message: "Bạn phải nhập thành tiền!",
                   },
                 ]}
               >
@@ -353,16 +338,16 @@ export default function AddEditContractAddendumForm(props) {
             <Col span={12}>
               <Form.Item
                 label="Nhà thầu thi công"
-                name="role"
+                name="contractor"
                 rules={[
                   {
                     required: true,
-                    message: "Bạn phải nhập nhà thầu thi công!",
+                    message: "Bạn phải chọn nhà thầu thi công!",
                   },
                 ]}
               >
-                <Select showSearch allowClear placeholder="Select an item role">
-                  {["Apple", "Samsung", "Microsoft", "Lenovo", "ASUS"].map(
+                <Select showSearch allowClear placeholder="Chọn nhà thầu thi công">
+                  {["Công ty xây dựng A", "Công ty xây dựng B", "Công ty xây dựng C", "Công ty xây dựng D", "Công ty xây dựng E"].map(
                     (b, index) => {
                       return (
                         <Select.Option value={b} key={index}>
@@ -377,20 +362,20 @@ export default function AddEditContractAddendumForm(props) {
             <Col span={12}>
               <Form.Item
                 label="Tư vấn giám sát"
-                name="company"
+                name="supervisionConsultant"
                 rules={[
                   {
                     required: true,
-                    message: "Bạn phải nhập tư vấn giám sát!",
+                    message: "Bạn phải chọn tư vấn giám sát!",
                   },
                 ]}
               >
                 <Select
                   showSearch
                   allowClear
-                  placeholder="Select an item company"
+                  placeholder="Chọn tư vấn giám sát"
                 >
-                  {["Apple", "Samsung", "Microsoft", "Lenovo", "ASUS"].map(
+                  {["Tư vấn giám sát A", "Tư vấn giám sát B", "Tư vấn giám sát C", "Tư vấn giám sát D", "Tư vấn giám sát E"].map(
                     (b, index) => {
                       return (
                         <Select.Option value={b} key={index}>
@@ -408,20 +393,20 @@ export default function AddEditContractAddendumForm(props) {
             <Col span={12}>
               <Form.Item
                 label="Tư vấn thiết kế"
-                name="position"
+                name="designConsultant"
                 rules={[
                   {
                     required: true,
-                    message: "Bạn phải nhập tư vấn thiết kế!",
+                    message: "Bạn phải chọn tư vấn thiết kế!",
                   },
                 ]}
               >
                 <Select
                   showSearch
                   allowClear
-                  placeholder="Select an item position"
+                  placeholder="Chọn tư vấn thiết kế"
                 >
-                  {["Apple", "Samsung", "Microsoft", "Lenovo", "ASUS"].map(
+                  {["Tư vấn thiết kế A", "Tư vấn thiết kế B", "Tư vấn thiết kế C", "Tư vấn thiết kế D", "Tư vấn thiết kế E"].map(
                     (b, index) => {
                       return (
                         <Select.Option value={b} key={index}>
@@ -437,7 +422,7 @@ export default function AddEditContractAddendumForm(props) {
 
           <Form.Item>
             <Button type="primary" htmlType="submit" disabled={loading}>
-              {isEmpty(selectedContractAddendum) ? "Thêm" : "Cập nhật"}
+              {isEmpty(selectedContractAddendum) ? "Thêm phụ lục" : "Cập nhật"}
             </Button>
           </Form.Item>
         </Form>

@@ -28,11 +28,11 @@ export default function CancelProblem() {
           <Col span={24}>
             <Form.Item
               label="Ghi chú"
-              name="userName"
+              name="note"
               rules={[
                 {
                   required: true,
-                  message: "Bạn phải nhập mã dự án!",
+                  message: "Vui lòng nhập ghi chú!",
                 },
               ]}
             >
@@ -41,7 +41,7 @@ export default function CancelProblem() {
           </Col>
         </Row>
         <Form.Item>
-          <Button type="dashed">Hủy bỏ</Button>
+          <Button type="dashed" htmlType="submit">Hủy bỏ</Button>
         </Form.Item>
       </Form>
     </div>

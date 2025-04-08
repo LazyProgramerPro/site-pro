@@ -1,6 +1,6 @@
 import { useStyle } from "@/hooks/useStyle";
-import { DeleteOutlined, EyeOutlined } from "@ant-design/icons";
-import { Button, Card, Input, Popconfirm, Space, Table } from "antd";
+import { EyeOutlined, SearchOutlined } from "@ant-design/icons";
+import { Button, Card, Input, Space, Table, Tag } from "antd";
 import { Fragment, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
@@ -8,9 +8,8 @@ import { SkeletonTable } from "../../../components/table/SkeletonTable";
 import { useAppDispatch } from "../../../redux/store";
 import {
   cancelEditingAcceptanceRequest,
-  deleteAcceptanceRequest,
   getAcceptanceRequestList,
-  startEditingAcceptanceRequest,
+  startEditingAcceptanceRequest
 } from "../redux/acceptanceRequest.slice";
 import ViewAcceptanceRequest from "./ViewAcceptanceRequest";
 
@@ -51,8 +50,8 @@ export default function AcceptanceRequest() {
   const columns = [
     {
       title: "Mã yêu cầu",
-      dataIndex: "name",
-      key: "name",
+      dataIndex: "code",
+      key: "code",
       width: "10%",
       fixed: "left",
     },
@@ -64,27 +63,38 @@ export default function AcceptanceRequest() {
     },
     {
       title: "Dự án",
-      dataIndex: "name",
-      key: "name",
+      dataIndex: "project",
+      key: "project",
       width: "10%",
     },
     {
       title: "Phụ lục hợp đồng",
-      dataIndex: "description",
-      key: "description",
+      dataIndex: "contractAppendix",
+      key: "contractAppendix",
       width: "10%",
     },
     {
       title: "Ngày tạo",
-      dataIndex: "price",
-      key: "price",
+      dataIndex: "createdAt",
+      key: "createdAt",
       width: "10%",
     },
     {
       title: "Trạng thái",
-      dataIndex: "category",
-      key: "category",
+      dataIndex: "status",
+      key: "status",
       width: "10%",
+
+      //render tag status
+      render: (status) => {
+        let color = "green";
+        if (status === "Đã duyệt") {
+          color = "orange";
+        } else if (status === "Đang xem xét") {
+          color = "red";
+        }
+        return <Tag color={color}>{status}</Tag>;
+      },
     },
 
     {
@@ -94,7 +104,7 @@ export default function AcceptanceRequest() {
       fixed: "right",
       render: (record) => (
         <Space size="middle">
-          <WrapperIcons onClick={() => handleViewAcceptanceRequest(record?.id)}>
+          <WrapperIcons title="Xem chi tiết yêu cầu nghiệm thu" onClick={() => handleViewAcceptanceRequest(record?.id)}>
             <EyeOutlined />
           </WrapperIcons>
         </Space>
@@ -109,7 +119,7 @@ export default function AcceptanceRequest() {
         title={
           <>
             <SearchInput placeholder="Search..." />
-            <Button type="primary" onClick={() => {}}>
+            <Button type="primary" icon={<SearchOutlined />} onClick={() => {}}>
               Tìm kiếm
             </Button>
           </>
@@ -132,8 +142,11 @@ export default function AcceptanceRequest() {
                 showSizeChanger: true,
                 pageSizeOptions: [10, 20],
               }}
-              scroll={{ x: "max-content" }}
+              scroll={{ x: "max-content", y: 450 }}
               size="middle"
+              rowClassName={(record) =>
+                editingAcceptanceRequest?.id === record.id ? "active-row" : ""
+              }
             />
           </TableContainer>
         )}
@@ -160,6 +173,14 @@ const SearchInput = styled(Input)`
 const TableContainer = styled.div`
   width: 100%;
   overflow: hidden;
+  .active-row {
+    background-color: #e6f7ff;
+    border-left: 3px solid #1890ff;
+
+    td {
+      background-color: #e6f7ff !important; /* Force the background on all cells */
+    }
+  }
 `;
 
 const WrapperIcons = styled.div`
