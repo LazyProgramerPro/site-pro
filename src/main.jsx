@@ -9,18 +9,20 @@ import { ErrorBoundary } from './error-boundry.jsx';
 import { store } from './redux/store.js';
 
 createRoot(document.getElementById('root')).render(
-  <Provider store={store}>
-    <ConfigProvider
-      theme={{
-        token: {
-          colorPrimary: '#1677ff',
-        },
-      }}
-    >
-      <ErrorBoundary fallback={<h1>Error</h1>}>
-        <App />
-        <ToastContainer position="top-center" />
-      </ErrorBoundary>
-    </ConfigProvider>
-  </Provider>,
+  <React.StrictMode>
+    <Provider store={store}>
+      <ConfigProvider
+        theme={{
+          token: {
+            colorPrimary: '#1677ff',
+          },
+        }}
+      >
+        <ErrorBoundary fallback={<h1>Error</h1>}>
+          <App />
+          <ToastContainer position="top-center" />
+        </ErrorBoundary>
+      </ConfigProvider>
+    </Provider>
+  </React.StrictMode>,
 );
