@@ -1,45 +1,35 @@
-import { useStyle } from "@/hooks/useStyle";
-import {
-  DeleteOutlined,
-  EditOutlined,
-  EyeOutlined,
-  PlusOutlined,
-  SearchOutlined,
-} from "@ant-design/icons";
-import { Button, Card, Input, Popconfirm, Space, Table } from "antd";
-import { Fragment, useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import styled from "styled-components";
-import { SkeletonTable } from "../../../components/table/SkeletonTable";
-import { useAppDispatch } from "../../../redux/store";
+import { useStyle } from '@/hooks/useStyle';
+import { DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
+import { Button, Card, Input, Popconfirm, Space, Table } from 'antd';
+import { Fragment, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import styled from 'styled-components';
+import { SkeletonTable } from '../../../components/table/SkeletonTable';
+import { useAppDispatch } from '../../../redux/store';
 
-import AddEditContractAddendumForm from "./AddEditContractAddendumForm";
-import ViewContractAddendum from "./ViewContractAddendum";
+import AddEditContractAddendumForm from './AddEditContractAddendumForm';
+import ViewContractAddendum from './ViewContractAddendum';
 import {
   cancelEditingContractAddendum,
   deleteContractAddendum,
   getContractAddendumList,
   startEditingContractAddendum,
-} from "../redux/contractAddendum.slide";
-import ImportExcel from "./ImportExcel";
+} from '../redux/contractAddendum.slide';
+import ImportExcel from './ImportExcel';
 
 export default function ContractAddendum() {
   const { styles } = useStyle();
   const [open, setOpen] = useState(false);
   const [openDetail, setOpenDetail] = useState(false);
   const [openImportExcel, setOpenImportExcel] = useState(false);
-
-  const contractAddendumList = useSelector(
-    (state) => state.contractAddendum.contractAddendumList
-  );
+  const [searchTerm, setSearchTerm] = useState('');
+  const contractAddendumList = useSelector((state) => state.contractAddendum.contractAddendumList);
   const loading = useSelector((state) => state.contractAddendum.loading);
 
-  const editingContractAddendum = useSelector(
-    (state) => state.contractAddendum.editingContractAddendum
-  );
+  const editingContractAddendum = useSelector((state) => state.contractAddendum.editingContractAddendum);
 
   // TODO: check xem contact nào đang được chọn
-  console.log("editingContractAddendum:", editingContractAddendum);
+  console.log('editingContractAddendum:', editingContractAddendum);
 
   const dispatch = useAppDispatch();
 
@@ -89,59 +79,59 @@ export default function ContractAddendum() {
 
   const columns = [
     {
-      title: "Mã phụ lục",
-      dataIndex: "code",
-      key: "code",
-      width: "10%",
-      fixed: "left",
+      title: 'Mã phụ lục',
+      dataIndex: 'code',
+      key: 'code',
+      width: '10%',
+      fixed: 'left',
     },
     {
-      title: "Tên phụ lục",
-      dataIndex: "name",
-      key: "name",
-      width: "10%",
+      title: 'Tên phụ lục',
+      dataIndex: 'name',
+      key: 'name',
+      width: '10%',
     },
     {
-      title: "Dự án",
-      dataIndex: "project",
-      key: "project",
-      width: "10%",
+      title: 'Dự án',
+      dataIndex: 'project',
+      key: 'project',
+      width: '10%',
     },
     {
-      title: "Hạng mục",
-      dataIndex: "category",
-      key: "category",
-      width: "10%",
+      title: 'Hạng mục',
+      dataIndex: 'category',
+      key: 'category',
+      width: '10%',
     },
     {
-      title: "Hợp đồng",
-      dataIndex: "contract",
-      key: "contract",
-      width: "10%",
+      title: 'Hợp đồng',
+      dataIndex: 'contract',
+      key: 'contract',
+      width: '10%',
     },
     {
-      title: "Nhà thầu thi công",
-      dataIndex: "contractor",
-      key: "contractor",
-      width: "10%",
+      title: 'Nhà thầu thi công',
+      dataIndex: 'contractor',
+      key: 'contractor',
+      width: '10%',
     },
     {
-      title: "Tư vấn giám sát",
-      dataIndex: "supervisor",
-      key: "supervisor",
-      width: "10%",
+      title: 'Tư vấn giám sát',
+      dataIndex: 'supervisor',
+      key: 'supervisor',
+      width: '10%',
     },
     {
-      title: "Tư vấn thiết kế",
-      dataIndex: "designer",
-      key: "designer",
-      width: "10%",
+      title: 'Tư vấn thiết kế',
+      dataIndex: 'designer',
+      key: 'designer',
+      width: '10%',
     },
     {
-      title: "Hành động",
-      key: "action",
-      width: "10%",
-      fixed: "right",
+      title: 'Hành động',
+      key: 'action',
+      width: '10%',
+      fixed: 'right',
       render: (record) => (
         <Space size="middle">
           <WrapperIcons title="Xem chi tiết phụ lục" onClick={() => handleViewContractAddendum(record?.id)}>
@@ -152,7 +142,7 @@ export default function ContractAddendum() {
             <EditOutlined />
           </WrapperIcons>
 
-          <WrapperIcons title ="Xóa phụ lục">
+          <WrapperIcons title="Xóa phụ lục">
             <Popconfirm
               cancelText="Hủy bỏ"
               okText="Xóa"
@@ -172,8 +162,12 @@ export default function ContractAddendum() {
       <Card
         title={
           <>
-            <SearchInput placeholder="Search..." />
-            <Button type="primary" icon={<SearchOutlined />} onClick={() => {}}>
+            <SearchInput placeholder="Search..." onChange={(e) => setSearchTerm(e.target.value)} />
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={() => dispatch(getContractAddendumList(searchTerm))}
+            >
               Tìm kiếm
             </Button>
           </>
@@ -189,11 +183,7 @@ export default function ContractAddendum() {
               Import Excel
             </Button>
 
-            <Button
-              type="primary"
-              onClick={() => showDrawer(null)}
-              icon={<PlusOutlined />}
-            >
+            <Button type="primary" onClick={() => showDrawer(null)} icon={<PlusOutlined />}>
               Thêm phụ lục
             </Button>
           </>
@@ -216,22 +206,16 @@ export default function ContractAddendum() {
                 showSizeChanger: true,
                 pageSizeOptions: [10, 20],
               }}
-              scroll={{ x: "max-content", y: 800 }}
+              scroll={{ x: 'max-content', y: 800 }}
               size="middle"
-              rowClassName={(record) =>
-                editingContractAddendum?.id === record.id ? "active-row" : ""
-              }
+              rowClassName={(record) => (editingContractAddendum?.id === record.id ? 'active-row' : '')}
             />
           </TableContainer>
         )}
       </Card>
       {open && <AddEditContractAddendumForm open={open} onClose={onClose} />}
-      {openDetail && (
-        <ViewContractAddendum open={openDetail} onClose={handleCloseDetail} />
-      )}
-      {openImportExcel && (
-        <ImportExcel open={openImportExcel} onClose={handleCloseImportExcel} />
-      )}
+      {openDetail && <ViewContractAddendum open={openDetail} onClose={handleCloseDetail} />}
+      {openImportExcel && <ImportExcel open={openImportExcel} onClose={handleCloseImportExcel} />}
     </>
   );
 }

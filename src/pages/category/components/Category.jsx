@@ -1,30 +1,23 @@
-import { useStyle } from "@/hooks/useStyle";
-import { DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
-import { Button, Card, Input, Popconfirm, Space, Table } from "antd";
-import { Fragment, useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import styled from "styled-components";
-import { SkeletonTable } from "../../../components/table/SkeletonTable";
-import { useAppDispatch } from "../../../redux/store";
-import {
-  cancelEditingCategory,
-  deleteCategory,
-  getCategoryList,
-  startEditingCategory,
-} from "../redux/category.slice";
-import AddEditCategoryForm from "./AddEditCategoryForm";
+import { useStyle } from '@/hooks/useStyle';
+import { DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
+import { Button, Card, Input, Popconfirm, Space, Table } from 'antd';
+import { Fragment, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import styled from 'styled-components';
+import { SkeletonTable } from '../../../components/table/SkeletonTable';
+import { useAppDispatch } from '../../../redux/store';
+import { cancelEditingCategory, deleteCategory, getCategoryList, startEditingCategory } from '../redux/category.slice';
+import AddEditCategoryForm from './AddEditCategoryForm';
 
 export default function Category() {
   const { styles } = useStyle();
   const [open, setOpen] = useState(false);
-
+  const [searchTerm, setSearchTerm] = useState('');
   const categoryList = useSelector((state) => state.category.categoryList);
   const loading = useSelector((state) => state.category.loading);
 
-  const editingCategory = useSelector(
-    (state) => state.category.editingCategory
-  );
-  console.log("editingCategory1:", editingCategory);
+  const editingCategory = useSelector((state) => state.category.editingCategory);
+  console.log('editingCategory1:', editingCategory);
 
   const dispatch = useAppDispatch();
 
@@ -55,30 +48,30 @@ export default function Category() {
 
   const columns = [
     {
-      title: "Mã hạng mục",
-      dataIndex: "categoryCode",
-      key: "categoryCode",
-      width: "30%",
-      fixed: "left",
+      title: 'Mã hạng mục',
+      dataIndex: 'categoryCode',
+      key: 'categoryCode',
+      width: '30%',
+      fixed: 'left',
     },
     {
-      title: "Tên hạng mục",
-      dataIndex: "categoryName",
-      key: "categoryName",
-      width: "30%",
+      title: 'Tên hạng mục',
+      dataIndex: 'categoryName',
+      key: 'categoryName',
+      width: '30%',
     },
     {
-      title: "Tên công trình",
-      dataIndex: "constructionName",
-      key: "constructionName",
-      width: "30%",
+      title: 'Tên công trình',
+      dataIndex: 'constructionName',
+      key: 'constructionName',
+      width: '30%',
     },
 
     {
-      title: "Hành động",
-      key: "action",
-      width: "10%",
-      fixed: "right",
+      title: 'Hành động',
+      key: 'action',
+      width: '10%',
+      fixed: 'right',
       render: (record) => (
         <Space size="middle">
           <WrapperIcons title="Sửả hạng mục" onClick={() => handleEditCategory(record?.id)}>
@@ -106,18 +99,14 @@ export default function Category() {
       <Card
         title={
           <>
-            <SearchInput placeholder="Search..." />
-            <Button type="primary" icon={<SearchOutlined />} onClick={() => {}}>
+            <SearchInput placeholder="Search..." onChange={(e) => setSearchTerm(e.target.value)} />
+            <Button type="primary" icon={<SearchOutlined />} onClick={() => dispatch(getCategoryList(searchTerm))}>
               Tìm kiếm
             </Button>
           </>
         }
         extra={
-          <Button
-            type="primary"
-            onClick={() => showDrawer(null)}
-            icon={<PlusOutlined />}
-          >
+          <Button type="primary" onClick={() => showDrawer(null)} icon={<PlusOutlined />}>
             Thêm hạng mục
           </Button>
         }
@@ -139,11 +128,9 @@ export default function Category() {
                 showSizeChanger: true,
                 pageSizeOptions: [10, 20],
               }}
-              scroll={{ x: "max-content", y: 450 }}
+              scroll={{ x: 'max-content', y: 450 }}
               size="middle"
-              rowClassName={(record) =>
-                editingCategory?.id === record.id ? "active-row" : ""
-              }
+              rowClassName={(record) => (editingCategory?.id === record.id ? 'active-row' : '')}
             />
           </TableContainer>
         )}

@@ -135,7 +135,7 @@ export const getBusinessList = createAsyncThunk(
   "business/getBusinessList",
   async (searchTerm, thunkAPI) => {
     console.log("getBusinessList with searchTerm:", searchTerm);
-
+    await new Promise((resolve) => setTimeout(resolve, 1500));
     if (!searchTerm) {
       return fakeBusinessList;
     }

@@ -246,6 +246,8 @@ export const getAccountList = createAsyncThunk(
   async (searchTerm, thunkAPI) => {
     console.log("getAccountList with searchTerm:", searchTerm);
 
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
     if (!searchTerm) {
       return fakeAccountList;
     }

@@ -1,35 +1,23 @@
-import { useStyle } from "@/hooks/useStyle";
-import {
-  DeleteOutlined,
-  EditOutlined,
-  PlusOutlined,
-  SearchOutlined,
-} from "@ant-design/icons";
-import { Button, Card, Input, Popconfirm, Space, Table } from "antd";
-import { Fragment, useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import styled from "styled-components";
-import { SkeletonTable } from "../../../components/table/SkeletonTable";
-import { useAppDispatch } from "../../../redux/store";
-import {
-  cancelEditingBusiness,
-  deleteBusiness,
-  getBusinessList,
-  startEditingBusiness,
-} from "../redux/business.slice";
-import AddEditBusinessForm from "./AddEditBusinessForm";
+import { useStyle } from '@/hooks/useStyle';
+import { DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
+import { Button, Card, Input, Popconfirm, Space, Table } from 'antd';
+import { Fragment, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import styled from 'styled-components';
+import { SkeletonTable } from '../../../components/table/SkeletonTable';
+import { useAppDispatch } from '../../../redux/store';
+import { cancelEditingBusiness, deleteBusiness, getBusinessList, startEditingBusiness } from '../redux/business.slice';
+import AddEditBusinessForm from './AddEditBusinessForm';
 
 export default function Business() {
   const { styles } = useStyle();
   const [open, setOpen] = useState(false);
-
+  const [searchTerm, setSearchTerm] = useState('');
   const businessList = useSelector((state) => state.business.businessList);
   const loading = useSelector((state) => state.business.loading);
 
-  const editingBusiness = useSelector(
-    (state) => state.business.editingBusiness
-  );
-  console.log("editingBusiness1:", editingBusiness);
+  const editingBusiness = useSelector((state) => state.business.editingBusiness);
+  console.log('editingBusiness1:', editingBusiness);
 
   const dispatch = useAppDispatch();
 
@@ -60,30 +48,27 @@ export default function Business() {
 
   const columns = [
     {
-      title: "Mã doanh nghiệp",
-      dataIndex: "businessCode",
-      key: "businessCode",
-      width: "45%",
-      fixed: "left",
+      title: 'Mã doanh nghiệp',
+      dataIndex: 'businessCode',
+      key: 'businessCode',
+      width: '45%',
+      fixed: 'left',
     },
 
     {
-      title: "Tên doanh nghiệp",
-      dataIndex: "businessName",
-      key: "businessName",
-      width: "45%",
+      title: 'Tên doanh nghiệp',
+      dataIndex: 'businessName',
+      key: 'businessName',
+      width: '45%',
     },
     {
-      title: "Hành động",
-      key: "action",
-      width: "10%",
-      fixed: "right",
+      title: 'Hành động',
+      key: 'action',
+      width: '10%',
+      fixed: 'right',
       render: (record) => (
         <Space size="middle">
-          <WrapperIcons
-            title="Sửa thông tin doanh nghiệp"
-            onClick={() => handleEditBusiness(record?.id)}
-          >
+          <WrapperIcons title="Sửa thông tin doanh nghiệp" onClick={() => handleEditBusiness(record?.id)}>
             <EditOutlined />
           </WrapperIcons>
 
@@ -108,18 +93,14 @@ export default function Business() {
       <Card
         title={
           <>
-            <SearchInput placeholder="Tìm doanh nghiệp ..." />
-            <Button type="primary" icon={<SearchOutlined />} onClick={() => {}}>
+            <SearchInput placeholder="Tìm doanh nghiệp ..." onChange={(e) => setSearchTerm(e.target.value)} />
+            <Button type="primary" icon={<SearchOutlined />} onClick={() => dispatch(getBusinessList(searchTerm))}>
               Tìm kiếm
             </Button>
           </>
         }
         extra={
-          <Button
-            type="primary"
-            onClick={() => showDrawer(null)}
-            icon={<PlusOutlined />}
-          >
+          <Button type="primary" onClick={() => showDrawer(null)} icon={<PlusOutlined />}>
             Thêm doanh nghiệp
           </Button>
         }
@@ -141,11 +122,9 @@ export default function Business() {
                 showSizeChanger: true,
                 pageSizeOptions: [10, 20],
               }}
-              scroll={{ x: "max-content", y: 450 }}
+              scroll={{ x: 'max-content', y: 450 }}
               size="middle"
-              rowClassName={(record) =>
-                editingBusiness?.id === record.id ? "active-row" : ""
-              }
+              rowClassName={(record) => (editingBusiness?.id === record.id ? 'active-row' : '')}
             />
           </TableContainer>
         )}

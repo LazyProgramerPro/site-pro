@@ -206,7 +206,7 @@ export const getProblemList = createAsyncThunk(
   "problem/getProblemList",
   async (searchTerm, thunkAPI) => {
     console.log("getProblemList with searchTerm:", searchTerm);
-
+    await new Promise((resolve) => setTimeout(resolve, 1500));
     if (!searchTerm) {
       return fakeProblemList;
     }

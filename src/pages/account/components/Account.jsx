@@ -1,44 +1,22 @@
-import { SkeletonTable } from "@/components/table/SkeletonTable";
-import { useStyle } from "@/hooks/useStyle";
-import { useAppDispatch } from "@/redux/store";
-import {
-  DeleteOutlined,
-  EditOutlined,
-  LockOutlined,
-  PlusOutlined,
-  SearchOutlined,
-} from "@ant-design/icons";
-import {
-  Avatar,
-  Button,
-  Card,
-  Input,
-  Popconfirm,
-  Space,
-  Table,
-  Tag,
-} from "antd";
-import { Fragment, useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import styled from "styled-components";
-import {
-  cancelEditingAccount,
-  deleteAccount,
-  getAccountList,
-  startEditingAccount,
-} from "../redux/account.slice";
-import AddEditAccountForm from "./AddEditAccountForm";
+import { SkeletonTable } from '@/components/table/SkeletonTable';
+import { useStyle } from '@/hooks/useStyle';
+import { useAppDispatch } from '@/redux/store';
+import { DeleteOutlined, EditOutlined, LockOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
+import { Avatar, Button, Card, Input, Popconfirm, Space, Table, Tag } from 'antd';
+import { Fragment, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import styled from 'styled-components';
+import { cancelEditingAccount, deleteAccount, getAccountList, startEditingAccount } from '../redux/account.slice';
+import AddEditAccountForm from './AddEditAccountForm';
 
 export default function Account() {
   const { styles } = useStyle();
   const [open, setOpen] = useState(false);
-
+  const [searchTerm, setSearchTerm] = useState('');
   const accountList = useSelector((state) => state.account.accountList);
   const loading = useSelector((state) => state.account.loading);
 
-  const editingAccount = useSelector(
-    (state) => state.account.editingAccount
-  );
+  const editingAccount = useSelector((state) => state.account.editingAccount);
 
   const dispatch = useAppDispatch();
 
@@ -69,99 +47,94 @@ export default function Account() {
 
   const columns = [
     {
-      title: "Avatar",
-      dataIndex: "username",
-      key: "username",
-      width: "5%",
-      fixed: "left",
+      title: 'Avatar',
+      dataIndex: 'username',
+      key: 'username',
+      width: '5%',
+      fixed: 'left',
 
       //render avatar với chữ cái đầu tiên của username
       render: (text) => {
         return (
           <Avatar
             style={{
-              backgroundColor: `#${Math.floor(
-                Math.random() * 16777215
-              ).toString(16)}`,
+              backgroundColor: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
             }}
             size="large"
           >
-            {text?.charAt(0)?.toUpperCase() ?? "T"}
+            {text?.charAt(0)?.toUpperCase() ?? 'T'}
           </Avatar>
         );
       },
     },
     {
-      title: "Tên đăng nhập",
-      dataIndex: "username",
-      key: "username",
-      width: "15%",
-      fixed: "left",
+      title: 'Tên đăng nhập',
+      dataIndex: 'username',
+      key: 'username',
+      width: '15%',
+      fixed: 'left',
     },
     {
-      title: "Họ và tên",
-      dataIndex: "fullName",
-      key: "fullName",
-      width: "15%",
+      title: 'Họ và tên',
+      dataIndex: 'fullName',
+      key: 'fullName',
+      width: '15%',
     },
     {
-      title: "Email",
-      dataIndex: "email",
-      key: "email",
-      width: "15%",
+      title: 'Email',
+      dataIndex: 'email',
+      key: 'email',
+      width: '15%',
     },
     {
-      title: "Doanh nghiệp",
-      dataIndex: "company",
-      key: "company",
-      width: "15%",
+      title: 'Doanh nghiệp',
+      dataIndex: 'company',
+      key: 'company',
+      width: '15%',
     },
     {
-      title: "Chức vụ",
-      dataIndex: "position",
-      key: "position",
-      width: "15%",
+      title: 'Chức vụ',
+      dataIndex: 'position',
+      key: 'position',
+      width: '15%',
     },
     {
-      title: "Role",
-      dataIndex: "role",
-      key: "role",
-      width: "10%",
+      title: 'Role',
+      dataIndex: 'role',
+      key: 'role',
+      width: '10%',
       render: (role) => {
         let color;
         switch (role) {
-          case "Admin":
-            color = "red";
+          case 'Admin':
+            color = 'red';
             break;
-          case "Investor":
-            color = "blue";
+          case 'Investor':
+            color = 'blue';
             break;
-          case "Contractor":
-            color = "green";
+          case 'Contractor':
+            color = 'green';
             break;
-          case "Supervisor":
-            color = "orange";
+          case 'Supervisor':
+            color = 'orange';
             break;
-          case "Designer":
-            color = "purple";
+          case 'Designer':
+            color = 'purple';
             break;
           default:
-            color = "gray";
+            color = 'gray';
         }
         return <Tag color={color}>{role}</Tag>;
       },
     },
     {
-      title: "Hành động",
-      key: "actions",
-      width: "15%",
-      fixed: "right",
+      title: 'Hành động',
+      key: 'actions',
+      width: '15%',
+      fixed: 'right',
       render: (record) => (
         <Space size="middle">
-          <WrapperIcons
-            title="Chỉnh sửa tài khoản"
-            onClick={() => handleEditAccount(record?.id)}
-          >
+          <WrapperIcons title="Chỉnh sửa tài khoản" onClick={() => handleEditAccount(record?.id)}>
             <EditOutlined />
           </WrapperIcons>
 
@@ -197,18 +170,14 @@ export default function Account() {
       <Card
         title={
           <>
-            <SearchInput placeholder="Tìm người dùng ..." />
-            <Button type="primary" icon={<SearchOutlined />} onClick={() => {}}>
+            <SearchInput placeholder="Tìm người dùng ..." onChange={(e) => setSearchTerm(e.target.value)} />
+            <Button type="primary" icon={<SearchOutlined />} onClick={() => dispatch(getAccountList(searchTerm))}>
               Tìm kiếm
             </Button>
           </>
         }
         extra={
-          <Button
-            type="primary"
-            onClick={() => showDrawer(null)}
-            icon={<PlusOutlined />}
-          >
+          <Button type="primary" onClick={() => showDrawer(null)} icon={<PlusOutlined />}>
             Thêm người dùng
           </Button>
         }
@@ -230,11 +199,9 @@ export default function Account() {
                 showSizeChanger: true,
                 pageSizeOptions: [10, 20],
               }}
-              scroll={{ x: "max-content", y: 450 }}
+              scroll={{ x: 'max-content', y: 450 }}
               size="middle"
-              rowClassName={(record) =>
-                editingAccount?.id === record.id ? "active-row" : ""
-              }
+              rowClassName={(record) => (editingAccount?.id === record.id ? 'active-row' : '')}
             />
           </TableContainer>
         )}

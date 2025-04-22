@@ -441,7 +441,7 @@ export const getConstructionDiaryList = createAsyncThunk(
   "construction-diary/getConstructionDiaryList",
   async (searchTerm, thunkAPI) => {
     console.log("getConstructionDiaryList with searchTerm:", searchTerm);
-
+    await new Promise((resolve) => setTimeout(resolve, 1500));
     if (!searchTerm) {
       return fakeConstructionDiaryList;
     }

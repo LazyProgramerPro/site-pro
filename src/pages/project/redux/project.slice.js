@@ -106,7 +106,7 @@ export const getProjectList = createAsyncThunk(
   "project/getProjectList",
   async (searchTerm, thunkAPI) => {
     console.log("getProjectList with searchTerm:", searchTerm);
-
+    await new Promise((resolve) => setTimeout(resolve, 1500));
     if (!searchTerm) {
       return fakeProjectList;
     }

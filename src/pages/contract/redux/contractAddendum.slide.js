@@ -95,7 +95,7 @@ export const getContractAddendumList = createAsyncThunk(
   "contractAddendum/getContractAddendumList",
   async (searchTerm, thunkAPI) => {
     console.log("getContractAddendumList with searchTerm:", searchTerm);
-
+    await new Promise((resolve) => setTimeout(resolve, 1500));
     if (!searchTerm) {
       return fakeContractAddendumList;
     }

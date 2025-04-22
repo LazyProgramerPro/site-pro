@@ -15,7 +15,7 @@ export default function Problem() {
   const [open, setOpen] = useState(false);
 
   const [openDetail, setOpenDetail] = useState(false);
-
+  const [searchTerm, setSearchTerm] = useState('');
   const problemList = useSelector((state) => state.problem.problemList);
   const loading = useSelector((state) => state.problem.loading);
 
@@ -150,8 +150,8 @@ export default function Problem() {
       <Card
         title={
           <>
-            <SearchInput placeholder="Search..." />
-            <Button type="primary" icon={<SearchOutlined />} onClick={() => {}}>
+            <SearchInput placeholder="Search..." onChange={(e) => setSearchTerm(e.target.value)} />
+            <Button type="primary" icon={<SearchOutlined />} onClick={() => dispatch(getProblemList(searchTerm))}>
               Tìm kiếm
             </Button>
           </>

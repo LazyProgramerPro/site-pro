@@ -1,4 +1,4 @@
-import { useStyle } from "@/hooks/useStyle";
+import { useStyle } from '@/hooks/useStyle';
 import {
   DeleteOutlined,
   EditOutlined,
@@ -6,36 +6,29 @@ import {
   PlusOutlined,
   ReconciliationOutlined,
   SearchOutlined,
-} from "@ant-design/icons";
-import { Button, Card, Input, Popconfirm, Select, Space, Table } from "antd";
-import { Fragment, useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import styled from "styled-components";
-import { SkeletonTable } from "../../../components/table/SkeletonTable";
-import { useAppDispatch } from "../../../redux/store";
-import {
-  cancelEditingContract,
-  deleteContract,
-  getContractList,
-  startEditingContract,
-} from "../redux/contract.slice";
-import AddEditContractForm from "./AddEditContractForm";
-import ContractAddendumDrawer from "./ContractAddendumDrawer";
-import ViewContract from "./ViewContract";
+} from '@ant-design/icons';
+import { Button, Card, Input, Popconfirm, Select, Space, Table } from 'antd';
+import { Fragment, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import styled from 'styled-components';
+import { SkeletonTable } from '../../../components/table/SkeletonTable';
+import { useAppDispatch } from '../../../redux/store';
+import { cancelEditingContract, deleteContract, getContractList, startEditingContract } from '../redux/contract.slice';
+import AddEditContractForm from './AddEditContractForm';
+import ContractAddendumDrawer from './ContractAddendumDrawer';
+import ViewContract from './ViewContract';
 
 export default function Contract() {
   const { styles } = useStyle();
   const [open, setOpen] = useState(false);
   const [openDetail, setOpenDetail] = useState(false);
   const [openContractAddendum, setOpenContractAddendum] = useState(false);
-
+  const [searchTerm, setSearchTerm] = useState('');
   const contractList = useSelector((state) => state.contract.contractList);
   const loading = useSelector((state) => state.contract.loading);
 
-  const editingContract = useSelector(
-    (state) => state.contract.editingContract
-  );
-  console.log("editingContract1:", editingContract);
+  const editingContract = useSelector((state) => state.contract.editingContract);
+  console.log('editingContract1:', editingContract);
 
   const dispatch = useAppDispatch();
 
@@ -86,41 +79,41 @@ export default function Contract() {
 
   const columns = [
     {
-      title: "Mã hợp đồng",
-      dataIndex: "contractCode",
-      key: "contractCode",
-      width: "10%",
-      fixed: "left",
+      title: 'Mã hợp đồng',
+      dataIndex: 'contractCode',
+      key: 'contractCode',
+      width: '10%',
+      fixed: 'left',
     },
     {
-      title: "Tên hợp đồng",
-      dataIndex: "contractName",
-      key: "contractName",
-      width: "20%",
+      title: 'Tên hợp đồng',
+      dataIndex: 'contractName',
+      key: 'contractName',
+      width: '20%',
     },
     {
-      title: "Tên dự án",
-      dataIndex: "projectName",
-      key: "projectName",
-      width: "20%",
+      title: 'Tên dự án',
+      dataIndex: 'projectName',
+      key: 'projectName',
+      width: '20%',
     },
     {
-      title: "Công trình",
-      dataIndex: "construction",
-      key: "construction",
-      width: "20%",
+      title: 'Công trình',
+      dataIndex: 'construction',
+      key: 'construction',
+      width: '20%',
     },
     {
-      title: "Bên B",
-      dataIndex: "partyB",
-      key: "partyB",
-      width: "20%",
+      title: 'Bên B',
+      dataIndex: 'partyB',
+      key: 'partyB',
+      width: '20%',
     },
     {
-      title: "Hành động",
-      key: "action",
-      width: "10%",
-      fixed: "right",
+      title: 'Hành động',
+      key: 'action',
+      width: '10%',
+      fixed: 'right',
       render: (record) => (
         <Space size="middle">
           <WrapperIcons title="Xem chi tiết hợp đồng" onClick={() => handleViewContract(record?.id)}>
@@ -154,26 +147,18 @@ export default function Contract() {
       <Card
         title={
           <>
-            <Select
-              style={{ width: 200, marginRight: 10 }}
-              defaultValue="all"
-              placeholder="Tên dự án"
-            >
+            <Select style={{ width: 200, marginRight: 10 }} defaultValue="all" placeholder="Tên dự án">
               <Select.Option value="all">Tất cả</Select.Option>
               <Select.Option value="active">Đang hoạt động</Select.Option>
             </Select>
-            <SearchInput placeholder="Search..." />
-            <Button type="primary" icon={<SearchOutlined />} onClick={() => {}}>
+            <SearchInput placeholder="Search..." onChange={(e) => setSearchTerm(e.target.value)} />
+            <Button type="primary" icon={<SearchOutlined />} onClick={() => dispatch(getContractList(searchTerm))}>
               Tìm kiếm
             </Button>
           </>
         }
         extra={
-          <Button
-            type="primary"
-            onClick={() => showDrawer(null)}
-            icon={<PlusOutlined />}
-          >
+          <Button type="primary" onClick={() => showDrawer(null)} icon={<PlusOutlined />}>
             Thêm hợp đồng
           </Button>
         }
@@ -195,24 +180,17 @@ export default function Contract() {
                 showSizeChanger: true,
                 pageSizeOptions: [10, 20],
               }}
-              scroll={{ x: "max-content", y: 450 }}
+              scroll={{ x: 'max-content', y: 450 }}
               size="middle"
-              rowClassName={(record) =>
-                editingContract?.id === record.id ? "active-row" : ""
-              }
+              rowClassName={(record) => (editingContract?.id === record.id ? 'active-row' : '')}
             />
           </TableContainer>
         )}
       </Card>
       {open && <AddEditContractForm open={open} onClose={onClose} />}
-      {openDetail && (
-        <ViewContract open={openDetail} onClose={handleCloseDetail} />
-      )}
+      {openDetail && <ViewContract open={openDetail} onClose={handleCloseDetail} />}
       {openContractAddendum && (
-        <ContractAddendumDrawer
-          open={openContractAddendum}
-          onClose={handleCloseContractAddendum}
-        />
+        <ContractAddendumDrawer open={openContractAddendum} onClose={handleCloseContractAddendum} />
       )}
     </>
   );

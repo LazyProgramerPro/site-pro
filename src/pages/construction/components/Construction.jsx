@@ -1,32 +1,28 @@
-import { useStyle } from "@/hooks/useStyle";
-import { DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
-import { Button, Card, Input, Popconfirm, Space, Table } from "antd";
-import { Fragment, useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import styled from "styled-components";
-import { SkeletonTable } from "../../../components/table/SkeletonTable";
-import { useAppDispatch } from "../../../redux/store";
+import { useStyle } from '@/hooks/useStyle';
+import { DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
+import { Button, Card, Input, Popconfirm, Space, Table } from 'antd';
+import { Fragment, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import styled from 'styled-components';
+import { SkeletonTable } from '../../../components/table/SkeletonTable';
+import { useAppDispatch } from '../../../redux/store';
 import {
   cancelEditingConstruction,
   deleteConstruction,
   getConstructionList,
   startEditingConstruction,
-} from "../redux/construction.slice";
-import AddEditConstructionForm from "./AddEditConstructionForm";
+} from '../redux/construction.slice';
+import AddEditConstructionForm from './AddEditConstructionForm';
 
 export default function Construction() {
   const { styles } = useStyle();
   const [open, setOpen] = useState(false);
-
-  const constructionList = useSelector(
-    (state) => state.construction.constructionList
-  );
+  const [searchTerm, setSearchTerm] = useState('');
+  const constructionList = useSelector((state) => state.construction.constructionList);
   const loading = useSelector((state) => state.construction.loading);
 
-  const editingConstruction = useSelector(
-    (state) => state.construction.editingConstruction
-  );
-  console.log("editingConstruction1:", editingConstruction);
+  const editingConstruction = useSelector((state) => state.construction.editingConstruction);
+  console.log('editingConstruction1:', editingConstruction);
 
   const dispatch = useAppDispatch();
 
@@ -57,30 +53,30 @@ export default function Construction() {
 
   const columns = [
     {
-      title: "Mã công trình",
-      dataIndex: "code",
-      key: "code",
-      width: "30%",
-      fixed: "left",
+      title: 'Mã công trình',
+      dataIndex: 'code',
+      key: 'code',
+      width: '30%',
+      fixed: 'left',
     },
     {
-      title: "Tên công trình",
-      dataIndex: "name",
-      key: "name",
-      width: "30%",
+      title: 'Tên công trình',
+      dataIndex: 'name',
+      key: 'name',
+      width: '30%',
     },
     {
-      title: "Tên dự án",
-      dataIndex: "projectName",
-      key: "projectName",
-      width: "30%",
+      title: 'Tên dự án',
+      dataIndex: 'projectName',
+      key: 'projectName',
+      width: '30%',
     },
 
     {
-      title: "Hành động",
-      key: "action",
-      width: "10%",
-      fixed: "right",
+      title: 'Hành động',
+      key: 'action',
+      width: '10%',
+      fixed: 'right',
       render: (record) => (
         <Space size="middle">
           <WrapperIcons title="Sửa công trình" onClick={() => handleEditConstruction(record?.id)}>
@@ -108,18 +104,14 @@ export default function Construction() {
       <Card
         title={
           <>
-            <SearchInput placeholder="Search..." />
-            <Button type="primary" icon={<SearchOutlined />} onClick={() => {}}>
+            <SearchInput placeholder="Search..." onChange={(e) => setSearchTerm(e.target.value)} />
+            <Button type="primary" icon={<SearchOutlined />} onClick={() => dispatch(getConstructionList(searchTerm))}>
               Tìm kiếm
             </Button>
           </>
         }
         extra={
-          <Button
-            type="primary"
-            onClick={() => showDrawer(null)}
-            icon={<PlusOutlined />}
-          >
+          <Button type="primary" onClick={() => showDrawer(null)} icon={<PlusOutlined />}>
             Thêm công trình
           </Button>
         }
@@ -141,11 +133,9 @@ export default function Construction() {
                 showSizeChanger: true,
                 pageSizeOptions: [10, 20],
               }}
-              scroll={{ x: "max-content", y: 450 }}
+              scroll={{ x: 'max-content', y: 450 }}
               size="middle"
-              rowClassName={(record) =>
-                editingConstruction?.id === record.id ? "active-row" : ""
-              }
+              rowClassName={(record) => (editingConstruction?.id === record.id ? 'active-row' : '')}
             />
           </TableContainer>
         )}

@@ -136,7 +136,7 @@ export const getAcceptanceRequestList = createAsyncThunk(
   "acceptanceRequest/getAcceptanceRequestList",
   async (searchTerm, thunkAPI) => {
     console.log("getAcceptanceRequestList with searchTerm:", searchTerm);
-
+    await new Promise((resolve) => setTimeout(resolve, 1500));
     if (!searchTerm) {
       return fakeAcceptanceRequestList;
     }

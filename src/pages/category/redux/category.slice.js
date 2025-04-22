@@ -106,7 +106,7 @@ export const getCategoryList = createAsyncThunk(
   "category/getCategoryList",
   async (searchTerm, thunkAPI) => {
     console.log("getCategoryList with searchTerm:", searchTerm);
-
+    await new Promise((resolve) => setTimeout(resolve, 1500));
     if (!searchTerm) {
       return fakeCategoryList;
     }

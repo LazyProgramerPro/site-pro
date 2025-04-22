@@ -125,7 +125,7 @@ export const getGroupList = createAsyncThunk(
   "group/getGroupList",
   async (searchTerm, thunkAPI) => {
     console.log("getGroupList with searchTerm:", searchTerm);
-
+    await new Promise((resolve) => setTimeout(resolve, 1500));
     if (!searchTerm) {
       return fakeGroupList;
     }

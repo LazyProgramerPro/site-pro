@@ -19,7 +19,7 @@ export default function ConstructionDiary() {
   const { styles } = useStyle();
   const [open, setOpen] = useState(false);
   const [openDetail, setOpenDetail] = useState(false);
-
+  const [searchTerm, setSearchTerm] = useState('');
   const constructionDiaryList = useSelector((state) => state.constructionDiary.constructionDiaryList);
   const loading = useSelector((state) => state.constructionDiary.loading);
 
@@ -156,8 +156,12 @@ export default function ConstructionDiary() {
               <Select.Option value="all">Tất cả</Select.Option>
               <Select.Option value="active">Đang hoạt động</Select.Option>
             </Select>
-            <SearchInput placeholder="Search..." />
-            <Button type="primary" icon={<SearchOutlined />} onClick={() => {}}>
+            <SearchInput placeholder="Search..." onChange={(e) => setSearchTerm(e.target.value)} />
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={() => dispatch(getConstructionDiaryList(searchTerm))}
+            >
               Tìm kiếm
             </Button>
           </>

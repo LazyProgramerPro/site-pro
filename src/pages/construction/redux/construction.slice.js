@@ -87,7 +87,7 @@ export const getConstructionList = createAsyncThunk(
   "construction/getConstructionList",
   async (searchTerm, thunkAPI) => {
     console.log("getConstructionList with searchTerm:", searchTerm);
-
+    await new Promise((resolve) => setTimeout(resolve, 1500));
     if (!searchTerm) {
       return fakeConstructionList;
     }
