@@ -3,11 +3,39 @@ import axios from "axios";
 const axiosParams = {
   // Set different base URL based on the environment
   baseURL:
-    process.env.NODE_ENV === "development" ? "http://localhost:3000" : "/",
+    process.env.NODE_ENV === "development" ? "http://10.7.0.4:8808" : "/",
 };
 
 // Create axios instance with default params
 const axiosInstance = axios.create(axiosParams);
+
+// Add request interceptor
+axiosInstance.interceptors.request.use(
+  (config) => {
+    // Modify request config before sending it
+    console.log("Request Interceptor:", config);
+    return config;
+  },
+  (error) => {
+    // Handle request error
+    console.error("Request Error:", error);
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptor
+axiosInstance.interceptors.response.use(
+  (response) => {
+    // Handle response data
+    console.log("Response Interceptor:", response);
+    return response.data;
+  },
+  (error) => {
+    // Handle response error
+    console.error("Response Error:", error);
+    return Promise.reject(error);
+  }
+);
 
 export const didAbort = (error) => axios.isCancel(error) && { aborted: true };
 

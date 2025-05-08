@@ -1,5 +1,6 @@
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
 import Error from './components/error/Error';
+import ProtectedRoute from './components/routes/ProtectedRoute';
 import { AcceptanceRequest } from './pages/acceptance-request';
 import Account from './pages/account/components/Account';
 import { AdminLayout } from './pages/admin';
@@ -39,7 +40,12 @@ const router = createBrowserRouter([
       },
       {
         path: 'dashboard',
-        element: <AdminLayout />,
+
+        element: (
+          <ProtectedRoute>
+            <AdminLayout />
+          </ProtectedRoute>
+        ),
         children: [
           {
             index: true,

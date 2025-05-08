@@ -1,16 +1,51 @@
-import { Button, Card, Form, Input } from "antd";
-import { useState } from "react";
-import styled from "styled-components";
-import Wrapper from "../../../assets/wrappers/Login";
-import Logo from "./../../../components/logo/Logo";
+import { useAppDispatch } from '@/redux/store';
+import http from '@/utils/http';
+import { Button, Card, Form, Input } from 'antd';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import styled from 'styled-components';
+import Wrapper from '../../../assets/wrappers/Login';
+import { loggedInUser } from '../redux/user.slice';
+import Logo from './../../../components/logo/Logo';
 
 export default function Login() {
   const [form] = Form.useForm();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate(); // Use useNavigate hook
 
-  const onFinish = () => {};
-  const onFinishFailed = () => {};
+  const onFinish = async (values) => {
+    try {
+      const { rc, auth } = await http.post('/login', values);
+
+      if (rc?.code !== 0) {
+        toast.error(rc?.desc || 'Đăng nhập thất bại!');
+        return;
+      } else {
+        const { access_token } = auth;
+
+        await dispatch(
+          loggedInUser({
+            token: access_token,
+          }),
+        );
+
+        // save token to local storage
+        localStorage.setItem('user', JSON.stringify({ token: access_token }));
+
+        toast.success('Đăng nhập thành công!');
+        navigate('/dashboard'); // Navigate to dashboard
+      }
+    } catch (error) {
+      console.log('error:', error);
+    }
+  };
+
+  const onFinishFailed = (errorInfo) => {
+    toast.error('Đăng nhập thất bại!');
+  };
 
   return (
     <Wrapper>
@@ -25,39 +60,32 @@ export default function Login() {
         <Form
           form={form}
           name="form-login"
-          initialValues={{
-            email: localStorage.getItem("emailForRegistration"),
-          }}
+          // initialValues={{
+          //   username: 'sitepro-admin',
+          //   password: 'abc@123',
+          // }}
           onFinish={onFinish}
           onFinishFailed={onFinishFailed}
           autoComplete="off"
           layout="vertical"
         >
           <Form.Item
-            label="Email"
-            name="email"
-            rules={[
-              { required: true, message: "Vui lòng nhập email của bạn!" },
-            ]}
+            label="Tên tài khoản"
+            name="username"
+            rules={[{ required: true, message: 'Vui lòng nhập tên tài khoản của bạn!' }]}
           >
-            <Input type="email" onChange={(e) => setEmail(e.target.value)} />
+            <Input onChange={(e) => setUsername(e.target.value)} />
           </Form.Item>
           <Form.Item
             label="Mật khẩu"
             name="password"
-            rules={[
-              { required: true, message: "Vui lòng nhập mật khẩu của bạn!" },
-            ]}
+            rules={[{ required: true, message: 'Vui lòng nhập mật khẩu của bạn!' }]}
           >
             <Input.Password onChange={(e) => setPassword(e.target.value)} />
           </Form.Item>
           <WrapperButton>
             <Form.Item>
-              <Button
-                type="primary"
-                htmlType="submit"
-                disabled={!email || !password}
-              >
+              <Button type="primary" htmlType="submit" disabled={!username || !password}>
                 Đăng nhập
               </Button>
             </Form.Item>
