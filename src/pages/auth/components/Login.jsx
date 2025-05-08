@@ -1,9 +1,8 @@
 import { useAppDispatch } from '@/redux/store';
 import http from '@/utils/http';
-import { Button, Card, Form, Input } from 'antd';
+import { Button, Card, Form, Input, message } from 'antd';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'react-toastify';
 import styled from 'styled-components';
 import Wrapper from '../../../assets/wrappers/Login';
 import { loggedInUser } from '../redux/user.slice';
@@ -21,10 +20,23 @@ export default function Login() {
       const { rc, auth } = await http.post('/login', values);
 
       if (rc?.code !== 0) {
-        toast.error(rc?.desc || 'Đăng nhập thất bại!');
+        message.error(rc?.desc || 'Đăng nhập thất bại!');
         return;
       } else {
         const { access_token } = auth;
+
+        // TODO: call api get permission
+        // const { rc, data } = await http.get('/user/permission', {
+        //   headers: {
+        //     Authorization: `Bearer ${access_token}`,
+        //   },
+        // });
+        // if (rc?.code !== 0) {  
+        //   message.error(rc?.desc || 'Lỗi không xác định!');
+        //   return;
+        // }
+        // const { permission } = data;
+        // console.log('permission:', permission);
 
         await dispatch(
           loggedInUser({
@@ -35,7 +47,7 @@ export default function Login() {
         // save token to local storage
         localStorage.setItem('user', JSON.stringify({ token: access_token }));
 
-        toast.success('Đăng nhập thành công!');
+        message.success('Đăng nhập thành công!');
         navigate('/dashboard'); // Navigate to dashboard
       }
     } catch (error) {
@@ -43,8 +55,8 @@ export default function Login() {
     }
   };
 
-  const onFinishFailed = (errorInfo) => {
-    toast.error('Đăng nhập thất bại!');
+  const onFinishFailed = () => {
+    message.error('Đăng nhập thất bại!');
   };
 
   return (

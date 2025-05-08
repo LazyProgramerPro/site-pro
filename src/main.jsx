@@ -1,10 +1,10 @@
+import '@ant-design/v5-patch-for-react-19';
 import { ConfigProvider } from 'antd';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
-import { ToastContainer } from 'react-toastify';
-import './assets/css/index.css'; // Fixed import path
 import App from './App.jsx';
+import './assets/css/index.css'; // Fixed import path
 import { ErrorBoundary } from './error-boundry.jsx';
 import { store } from './redux/store.js';
 
@@ -20,7 +20,6 @@ createRoot(document.getElementById('root')).render(
       >
         <ErrorBoundary fallback={<h1>Error</h1>}>
           <App />
-          <ToastContainer position="top-center" />
         </ErrorBoundary>
       </ConfigProvider>
     </Provider>

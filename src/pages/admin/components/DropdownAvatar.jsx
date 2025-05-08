@@ -1,14 +1,12 @@
 import { logOut } from '@/pages/auth/redux/user.slice';
-import { useDispatch } from 'react-redux';
-import { toast } from 'react-toastify';
-
+import { useAppDispatch } from '@/redux/store';
 import { FileOutlined, LogoutOutlined, ProfileOutlined, UserOutlined } from '@ant-design/icons';
-import { Avatar, Dropdown, Space } from 'antd';
+import { Avatar, Dropdown, message, Space } from 'antd';
 import styled from 'styled-components';
 import ResetPasswordModal from './ResetPasswordModal';
 
 const DropdownAvatar = () => {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   const items = [
     {
@@ -49,7 +47,7 @@ const DropdownAvatar = () => {
             dispatch(logOut()); // Dispatch the logout action
             console.log('Logging out...');
             localStorage.removeItem('user'); // Remove user from local storage
-            toast.success('Đăng xuất thành công!');
+            message.success('Đăng xuất thành công!');
           }}
         >
           Đăng xuất

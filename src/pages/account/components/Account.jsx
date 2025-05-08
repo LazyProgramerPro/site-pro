@@ -105,25 +105,14 @@ export default function Account() {
       width: '10%',
       render: (role) => {
         let color;
-        switch (role) {
-          case 'Admin':
-            color = 'red';
-            break;
-          case 'Investor':
-            color = 'blue';
-            break;
-          case 'Contractor':
-            color = 'green';
-            break;
-          case 'Supervisor':
-            color = 'orange';
-            break;
-          case 'Designer':
-            color = 'purple';
-            break;
-          default:
-            color = 'gray';
-        }
+        const roleColors = {
+          Admin: 'red',
+          Investor: 'blue',
+          Contractor: 'green',
+          Supervisor: 'orange',
+          Designer: 'purple',
+        };
+        color = roleColors[role] || 'gray';
         return <Tag color={color}>{role}</Tag>;
       },
     },
