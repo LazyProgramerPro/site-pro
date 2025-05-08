@@ -14,18 +14,29 @@ export default function Account() {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const accountList = useSelector((state) => state.account.accountList);
+  const totalCount = useSelector((state) => state.account.totalCount);
   const loading = useSelector((state) => state.account.loading);
 
   const editingAccount = useSelector((state) => state.account.editingAccount);
 
+  // pagination
+  const [page, setPage] = useState(0);
+  const [size, setSize] = useState(1);
+
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    const promise = dispatch(getAccountList());
+    const filters = {
+      pageNo: page - 1,
+      pageSize: size,
+      searchText: searchTerm,
+    };
+
+    const promise = dispatch(getAccountList(filters));
     return () => {
       promise.abort();
     };
-  }, [dispatch]);
+  }, [dispatch, page, size]);
 
   const showDrawer = (accountId) => {
     setOpen(true);
@@ -43,6 +54,11 @@ export default function Account() {
 
   const handleEditAccount = (accountId) => {
     showDrawer(accountId);
+  };
+
+  const onShowSizeChange = (current, pageSize) => {
+    setPage(current);
+    setSize(pageSize);
   };
 
   const columns = [
@@ -76,8 +92,8 @@ export default function Account() {
     },
     {
       title: 'Họ và tên',
-      dataIndex: 'fullName',
-      key: 'fullName',
+      dataIndex: 'full_name',
+      key: 'full_name',
       width: '15%',
     },
     {
@@ -160,7 +176,11 @@ export default function Account() {
         title={
           <>
             <SearchInput placeholder="Tìm người dùng ..." onChange={(e) => setSearchTerm(e.target.value)} />
-            <Button type="primary" icon={<SearchOutlined />} onClick={() => dispatch(getAccountList(searchTerm))}>
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={() => dispatch(getAccountList({ searchText: searchTerm, pageNo: page, pageSize: size }))}
+            >
               Tìm kiếm
             </Button>
           </>
@@ -184,9 +204,18 @@ export default function Account() {
               columns={columns}
               dataSource={accountList}
               pagination={{
-                pageSize: 10,
                 showSizeChanger: true,
-                pageSizeOptions: [10, 20],
+                onShowSizeChange: (current, size) => {
+                  onShowSizeChange(current, size);
+                },
+
+                hideOnSinglePage: false,
+                current: page,
+                total: totalCount,
+                pageSize: size,
+                onChange: (value) => {
+                  setPage(value);
+                },
               }}
               scroll={{ x: 'max-content', y: 450 }}
               size="middle"

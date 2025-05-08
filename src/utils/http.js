@@ -12,8 +12,14 @@ const axiosInstance = axios.create(axiosParams);
 // Add request interceptor
 axiosInstance.interceptors.request.use(
   (config) => {
-    // Modify request config before sending it
-    console.log("Request Interceptor:", config);
+    // Add Bearer token to Authorization header if available
+    const user = JSON.parse(localStorage.getItem("user") || null); // Add fallback to prevent errors
+    if (user?.token) {
+      config.headers.Authorization = `Bearer ${user?.token}`;
+    }
+    // Add CORS headers if needed
+    config.headers["X-Requested-With"] = "XMLHttpRequest";
+
     return config;
   },
   (error) => {
