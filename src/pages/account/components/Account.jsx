@@ -1,4 +1,5 @@
 import { SkeletonTable } from '@/components/table/SkeletonTable';
+import getColor from '@/helpers/getColor';
 import { useStyle } from '@/hooks/useStyle';
 import { useAppDispatch } from '@/redux/store';
 import { DeleteOutlined, EditOutlined, LockOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
@@ -20,8 +21,8 @@ export default function Account() {
   const editingAccount = useSelector((state) => state.account.editingAccount);
 
   // pagination
-  const [page, setPage] = useState(0);
-  const [size, setSize] = useState(1);
+  const [page, setPage] = useState(1);
+  const [size, setSize] = useState(10);
 
   const dispatch = useAppDispatch();
 
@@ -74,7 +75,8 @@ export default function Account() {
         return (
           <Avatar
             style={{
-              backgroundColor: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
+              backgroundColor: getColor(text?.charAt(0)),
+              verticalAlign: 'middle',
             }}
             size="large"
           >
@@ -103,16 +105,24 @@ export default function Account() {
       width: '15%',
     },
     {
-      title: 'Doanh nghiệp',
+      title: 'Doanh nghiệp & vị trí trong doanh nghiệp',
       dataIndex: 'company',
       key: 'company',
-      width: '15%',
-    },
-    {
-      title: 'Chức vụ',
-      dataIndex: 'position',
-      key: 'position',
-      width: '15%',
+      width: '30%',
+      // render mảng tên doanh nghiệp
+      render: (company) => {
+        return (
+          <div>
+            {company?.map((item, index) => {
+              return (
+                <Tag key={index} color="blue" style={{ margin: '5px' }}>
+                  {item?.name} - {item?.position}
+                </Tag>
+              );
+            })}
+          </div>
+        );
+      },
     },
     {
       title: 'Role',
@@ -120,16 +130,25 @@ export default function Account() {
       key: 'role',
       width: '10%',
       render: (role) => {
-        let color;
         const roleColors = {
-          Admin: 'red',
-          Investor: 'blue',
-          Contractor: 'green',
-          Supervisor: 'orange',
-          Designer: 'purple',
+          admin: 'red',
+          cdt: 'blue',
+          tvgs: 'green',
+          nttc: 'orange',
+          tvtk: 'purple',
         };
-        color = roleColors[role] || 'gray';
-        return <Tag color={color}>{role}</Tag>;
+
+        return (
+          <div>
+            {role?.map((item, index) => {
+              return (
+                <Tag key={index} color={roleColors[item?.code]} style={{ margin: '5px' }}>
+                  {item?.code}
+                </Tag>
+              );
+            })}
+          </div>
+        );
       },
     },
     {
@@ -179,7 +198,7 @@ export default function Account() {
             <Button
               type="primary"
               icon={<SearchOutlined />}
-              onClick={() => dispatch(getAccountList({ searchText: searchTerm, pageNo: page, pageSize: size }))}
+              onClick={() => dispatch(getAccountList({ searchText: searchTerm, pageNo: page - 1, pageSize: size }))}
             >
               Tìm kiếm
             </Button>

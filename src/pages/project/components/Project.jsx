@@ -1,46 +1,45 @@
-import { useStyle } from "@/hooks/useStyle";
-import {
-  DeleteOutlined,
-  EditOutlined,
-  EyeOutlined,
-  PlusOutlined,
-  SearchOutlined,
-} from "@ant-design/icons";
-import { Button, Card, Input, Popconfirm, Space, Table } from "antd";
-import { Fragment, useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import styled from "styled-components";
-import { SkeletonTable } from "../../../components/table/SkeletonTable";
-import { useAppDispatch } from "../../../redux/store";
-import {
-  cancelEditingProject,
-  deleteProject,
-  getProjectList,
-  startEditingProject,
-} from "../redux/project.slice";
-import AddEditProjectForm from "./AddEditProjectForm";
-import ViewProject from "./ViewProject";
+import { useStyle } from '@/hooks/useStyle';
+import { DeleteOutlined, EditOutlined, EyeOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
+import { Button, Card, Input, Popconfirm, Space, Table } from 'antd';
+import { Fragment, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import styled from 'styled-components';
+import { SkeletonTable } from '../../../components/table/SkeletonTable';
+import { useAppDispatch } from '../../../redux/store';
+import { cancelEditingProject, deleteProject, getProjectList, startEditingProject } from '../redux/project.slice';
+import AddEditProjectForm from './AddEditProjectForm';
+import ViewProject from './ViewProject';
 
 export default function Project() {
   const { styles } = useStyle();
   const [open, setOpen] = useState(false);
-
+  const [searchTerm, setSearchTerm] = useState('');
   const [openDetail, setOpenDetail] = useState(false);
 
   const projectList = useSelector((state) => state.project.projectList);
+  const totalCount = useSelector((state) => state.project.totalCount);
   const loading = useSelector((state) => state.project.loading);
 
   const editingProject = useSelector((state) => state.project.editingProject);
-  console.log("editingProject1:", editingProject);
+  console.log('editingProject1:', editingProject);
 
   const dispatch = useAppDispatch();
 
+  // pagination
+  const [page, setPage] = useState(1);
+  const [size, setSize] = useState(10);
+
   useEffect(() => {
-    const promise = dispatch(getProjectList());
+    const filters = {
+      pageNo: page - 1,
+      pageSize: size,
+      searchText: searchTerm,
+    };
+    const promise = dispatch(getProjectList(filters));
     return () => {
       promise.abort();
     };
-  }, [dispatch]);
+  }, [dispatch, page, size]);
 
   const showDrawer = (projectId) => {
     setOpen(true);
@@ -72,59 +71,59 @@ export default function Project() {
 
   const columns = [
     {
-      title: "Mã dự án",
-      dataIndex: "projectCode",
-      key: "projectCode",
-      width: "10%",
-      fixed: "left",
+      title: 'Mã dự án',
+      dataIndex: 'code',
+      key: 'code',
+      width: '10%',
+      fixed: 'left',
     },
     {
-      title: "Tên dự án",
-      dataIndex: "projectName",
-      key: "projectName",
-      width: "10%",
+      title: 'Tên dự án',
+      dataIndex: 'name',
+      key: 'name',
+      width: '10%',
     },
     {
-      title: "Mô tả",
-      dataIndex: "description",
-      key: "description",
-      width: "10%",
+      title: 'Mô tả',
+      dataIndex: 'description',
+      key: 'description',
+      width: '10%',
     },
     {
-      title: "Ngày bắt đầu",
-      dataIndex: "startDate",
-      key: "startDate",
-      width: "10%",
+      title: 'Ngày bắt đầu',
+      dataIndex: 'start_at',
+      key: 'start_at',
+      width: '10%',
     },
     {
-      title: "Ngày kết thúc",
-      dataIndex: "endDate",
-      key: "endDate",
-      width: "10%",
+      title: 'Ngày kết thúc',
+      dataIndex: 'endDate',
+      key: 'endDate',
+      width: '10%',
     },
     {
-      title: "Nhà thầu thi công",
-      dataIndex: "contractor",
-      key: "contractor",
-      width: "10%",
+      title: 'Nhà thầu thi công',
+      dataIndex: 'nttc_name',
+      key: 'nttc_name',
+      width: '10%',
     },
     {
-      title: "Tư vấn giám sát",
-      dataIndex: "supervisor",
-      key: "supervisor",
-      width: "10%",
+      title: 'Tư vấn giám sát',
+      dataIndex: 'tvgs_name',
+      key: 'tvgs_name',
+      width: '10%',
     },
     {
-      title: "Tư vấn thiết kế",
-      dataIndex: "designer",
-      key: "designer",
-      width: "10%",
+      title: 'Tư vấn thiết kế',
+      dataIndex: 'tvtk_name',
+      key: 'tvtk_name',
+      width: '10%',
     },
     {
-      title: "Hành động",
-      key: "action",
-      width: "10%",
-      fixed: "right",
+      title: 'Hành động',
+      key: 'action',
+      width: '10%',
+      fixed: 'right',
       render: (record) => (
         <Space size="middle">
           <WrapperIcons title="Xem chi tiết dự án" onClick={() => handleViewProject(record?.id)}>
@@ -156,18 +155,18 @@ export default function Project() {
       <Card
         title={
           <>
-            <SearchInput placeholder="Search..." />
-            <Button type="primary" icon={<SearchOutlined />} onClick={() => {}}>
+            <SearchInput placeholder="Tìm kiếm dự án..." onChange={(e) => setSearchTerm(e.target.value)} />
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={() => dispatch(getProjectList({ searchText: searchTerm, pageNo: page - 1, pageSize: size }))}
+            >
               Tìm kiếm
             </Button>
           </>
         }
         extra={
-          <Button
-            type="primary"
-            onClick={() => showDrawer(null)}
-            icon={<PlusOutlined />}
-          >
+          <Button type="primary" onClick={() => showDrawer(null)} icon={<PlusOutlined />}>
             Thêm dự án
           </Button>
         }
@@ -185,23 +184,28 @@ export default function Project() {
               columns={columns}
               dataSource={projectList}
               pagination={{
-                pageSize: 10,
                 showSizeChanger: true,
-                pageSizeOptions: [10, 20],
+                onShowSizeChange: (current, size) => {
+                  onShowSizeChange(current, size);
+                },
+
+                hideOnSinglePage: false,
+                current: page,
+                total: totalCount,
+                pageSize: size,
+                onChange: (value) => {
+                  setPage(value);
+                },
               }}
-              scroll={{ x: "max-content", y: 450 }}
+              scroll={{ x: 'max-content', y: 450 }}
               size="middle"
-              rowClassName={(record) =>
-                editingProject?.id === record.id ? "active-row" : ""
-              }
+              rowClassName={(record) => (editingProject?.id === record.id ? 'active-row' : '')}
             />
           </TableContainer>
         )}
       </Card>
       {open && <AddEditProjectForm open={open} onClose={onClose} />}
-      {openDetail && (
-        <ViewProject open={openDetail} onClose={handleCloseDetail} />
-      )}
+      {openDetail && <ViewProject open={openDetail} onClose={handleCloseDetail} />}
     </>
   );
 }

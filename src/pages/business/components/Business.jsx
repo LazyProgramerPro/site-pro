@@ -14,19 +14,29 @@ export default function Business() {
   const [open, setOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const businessList = useSelector((state) => state.business.businessList);
+  const totalCount = useSelector((state) => state.business.totalCount);
   const loading = useSelector((state) => state.business.loading);
 
   const editingBusiness = useSelector((state) => state.business.editingBusiness);
-  console.log('editingBusiness1:', editingBusiness);
+
+  // pagination
+  const [page, setPage] = useState(1);
+  const [size, setSize] = useState(10);
 
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    const promise = dispatch(getBusinessList());
+    const filters = {
+      pageNo: page - 1,
+      pageSize: size,
+      searchText: searchTerm,
+    };
+
+    const promise = dispatch(getBusinessList(filters));
     return () => {
       promise.abort();
     };
-  }, [dispatch]);
+  }, [dispatch, page, size]);
 
   const showDrawer = (businessId) => {
     setOpen(true);
@@ -46,20 +56,32 @@ export default function Business() {
     showDrawer(businessId);
   };
 
+  const onShowSizeChange = (current, pageSize) => {
+    setPage(current);
+    setSize(pageSize);
+  };
+
   const columns = [
     {
       title: 'Mã doanh nghiệp',
-      dataIndex: 'businessCode',
-      key: 'businessCode',
-      width: '45%',
+      dataIndex: 'code',
+      key: 'code',
+      width: '30%',
       fixed: 'left',
     },
 
     {
       title: 'Tên doanh nghiệp',
-      dataIndex: 'businessName',
-      key: 'businessName',
-      width: '45%',
+      dataIndex: 'name',
+      key: 'name',
+      width: '30%',
+    },
+
+    {
+      title: 'Lãnh đạo của doanh nghiệp',
+      dataIndex: 'leader_name',
+      key: 'leader_name',
+      width: '30%',
     },
     {
       title: 'Hành động',
@@ -94,7 +116,11 @@ export default function Business() {
         title={
           <>
             <SearchInput placeholder="Tìm doanh nghiệp ..." onChange={(e) => setSearchTerm(e.target.value)} />
-            <Button type="primary" icon={<SearchOutlined />} onClick={() => dispatch(getBusinessList(searchTerm))}>
+            <Button
+              type="primary"
+              icon={<SearchOutlined />}
+              onClick={() => dispatch(getBusinessList({ searchText: searchTerm, pageNo: page - 1, pageSize: size }))}
+            >
               Tìm kiếm
             </Button>
           </>
@@ -118,9 +144,18 @@ export default function Business() {
               columns={columns}
               dataSource={businessList}
               pagination={{
-                pageSize: 10,
                 showSizeChanger: true,
-                pageSizeOptions: [10, 20],
+                onShowSizeChange: (current, size) => {
+                  onShowSizeChange(current, size);
+                },
+
+                hideOnSinglePage: false,
+                current: page,
+                total: totalCount,
+                pageSize: size,
+                onChange: (value) => {
+                  setPage(value);
+                },
               }}
               scroll={{ x: 'max-content', y: 450 }}
               size="middle"
