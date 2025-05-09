@@ -23,10 +23,12 @@ export const getAccountList = createAsyncThunk('account/getAccountList', async (
 
 export const addAccount = createAsyncThunk('account/addAccount', async (body, thunkAPI) => {
   try {
-    const response = await http.post('accounts', body, {
+    const {data} = await http.post('/auth/user/add', body, {
       signal: thunkAPI.signal,
     });
-    return response.data;
+
+    console.log("data:", data)
+    return data;
   } catch (error) {
     if (error.name === 'AxiosError' && error.response.status === 422) {
       return thunkAPI.rejectWithValue(error.response.data);

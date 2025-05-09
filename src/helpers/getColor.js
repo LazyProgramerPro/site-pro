@@ -27,7 +27,7 @@ const getColor = (letter) => {
     Y: '#FF33A1',
     Z: '#FF8C33',
   };
-  return colors[letter.toUpperCase()] || '#000000'; // default color if letter not found
+  return colors[letter?.toUpperCase()] || '#000000'; // default color if letter not found
 };
 
 export default getColor;

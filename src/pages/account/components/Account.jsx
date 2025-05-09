@@ -238,7 +238,7 @@ export default function Account() {
               }}
               scroll={{ x: 'max-content', y: 450 }}
               size="middle"
-              rowClassName={(record) => (editingAccount?.id === record.id ? 'active-row' : '')}
+              rowClassName={(record) => (editingAccount?.id === record?.id ? 'active-row' : '')}
             />
           </TableContainer>
         )}
