@@ -59,11 +59,76 @@ export default function AddEditAccountForm(props) {
   }, []);
 
   useEffect(() => {
-    setInitialValues(selectedAccount || initialState);
+    if (selectedAccount) {
+      // Add debug logs to inspect the data structure
+      console.log('Selected Account Data:', selectedAccount);
+
+      // Process data for form initialization in edit mode
+      let formData = { ...selectedAccount };
+
+      // Format role data if available
+      if (selectedAccount.group_id_list && Array.isArray(selectedAccount.group_id_list)) {
+        console.log('Using existing group_id_list:', selectedAccount.group_id_list);
+      } else if (selectedAccount.groups && Array.isArray(selectedAccount.groups)) {
+        // Extract group IDs from the groups array
+        formData.group_id_list = selectedAccount.groups.map((group) => group.id);
+        console.log('Created group_id_list from groups:', formData.group_id_list);
+      } else if (selectedAccount.role && Array.isArray(selectedAccount.role)) {
+        // Extract IDs from role array
+        formData.group_id_list = selectedAccount.role.map((role) => role.id);
+        console.log('Created group_id_list from role:', formData.group_id_list);
+      } else {
+        console.log('No role data found in selectedAccount');
+      }
+
+      // Format business data if available
+      if (formData.doanh_nghiep_list && Array.isArray(formData.doanh_nghiep_list)) {
+        console.log('Using existing doanh_nghiep_list:', formData.doanh_nghiep_list);
+      } else if (selectedAccount.businesses && Array.isArray(selectedAccount.businesses)) {
+        // Transform businesses array to expected form format
+        formData.doanh_nghiep_list = selectedAccount.businesses.map((business) => ({
+          doanh_nghiep_id: business.id,
+          position: business.position || '',
+        }));
+        console.log('Created doanh_nghiep_list from businesses:', formData.doanh_nghiep_list);
+      } else if (selectedAccount.doanhNghieps && Array.isArray(selectedAccount.doanhNghieps)) {
+        // Alternative field name that might contain business data
+        formData.doanh_nghiep_list = selectedAccount.doanhNghieps.map((business) => ({
+          doanh_nghiep_id: business.id,
+          position: business.position || business.chucVu || '',
+        }));
+        console.log('Created doanh_nghiep_list from doanhNghieps:', formData.doanh_nghiep_list);
+      } else if (selectedAccount.company && Array.isArray(selectedAccount.company)) {
+        // Transform company array to expected form format
+        formData.doanh_nghiep_list = selectedAccount.company.map((company) => ({
+          doanh_nghiep_id: company.id || company.doanh_nghiep_id,
+          position: company.position || company.chucVu || '',
+        }));
+        console.log('Created doanh_nghiep_list from company:', formData.doanh_nghiep_list);
+      } else {
+        // Provide at least one empty entry
+        formData.doanh_nghiep_list = [{}];
+        console.log('No business data found, using empty entry');
+      }
+
+      // Log the final formData being set
+      console.log('Final formData being set:', formData);
+      setInitialValues(formData);
+    } else {
+      setInitialValues(initialState);
+    }
+
     if (open) {
       form.resetFields();
     }
   }, [selectedAccount, open, form]);
+
+  // After form is reset, set values for edit mode
+  useEffect(() => {
+    if (open && !isEmpty(initialValues)) {
+      form.setFieldsValue(initialValues);
+    }
+  }, [initialValues, open, form]);
 
   const onFinish = async (values) => {
     console.log('values:', values);
