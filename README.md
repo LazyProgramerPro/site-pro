@@ -64,3 +64,26 @@ If you are developing a production application, we recommend using TypeScript an
   // 1 user có thể có nhiều vai trò khác nhau trong HỆ THỐNG, hệ thống bao gồm 5 ROLE : Admin, CHủ đầu tư, Nhà thầu thi công, TVGS, TVTK
 }
 ```
+
+{
+    "username": "thuongtt",
+    "full_name": "Trần Tiến Thường",
+    "email": "<husthunter97@gmail.com>",
+    "phone_number": "0973839432",
+    "password": "12345",
+    "confirmPassword": "12345",
+    "roles": [
+        "ADMIN",
+        "CHỦ ĐẦU TƯ"
+    ],
+    "positions": [
+        {
+            "companyId": "companyId1",
+            "positionName": "tester"
+        },
+        {
+            "companyId": "companyId3",
+            "positionName": "dev"
+        }
+    ]
+}
