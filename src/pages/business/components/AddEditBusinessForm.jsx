@@ -1,12 +1,35 @@
 import { useAppDispatch } from '@/redux/store';
-import { CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
-import { Button, Col, Drawer, Form, Input, notification, Row, Select, Spin } from 'antd';
+import {
+  BankOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  CodeOutlined,
+  SaveOutlined,
+  TeamOutlined,
+} from '@ant-design/icons';
+import {
+  Avatar,
+  Button,
+  Card,
+  Col,
+  Drawer,
+  Form,
+  Input,
+  notification,
+  Row,
+  Select,
+  Space,
+  Spin,
+  Typography,
+} from 'antd';
 import { isEmpty } from 'lodash';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { getUserList } from '../redux/business-user.slice';
 import { addBusiness, getBusinessList, updateBusiness } from '../redux/business.slice';
+
+const { Title } = Typography;
 
 const initialState = {};
 
@@ -123,18 +146,43 @@ export default function AddEditBusinessForm(props) {
       icon: <CloseCircleOutlined style={{ color: '#ff4d4f' }} />,
     });
   };
+  const formTitle = isEmpty(selectedBusiness)
+    ? 'Thêm mới doanh nghiệp'
+    : `Sửa doanh nghiệp ${initialValues?.name || ''}`;
+
   return (
     <Drawer
-      width={500}
+      width={window.innerWidth > 768 ? 720 : '100%'}
       title={
-        isEmpty(selectedBusiness)
-          ? 'Thêm mới doanh nghiệp'
-          : `Sửa doanh nghiệp ${(initialValues && initialValues?.name) || initialValues?.name}`
+        <Space align="center">
+          <Avatar
+            icon={<BankOutlined />}
+            style={{ backgroundColor: isEmpty(selectedBusiness) ? '#1890ff' : '#52c41a' }}
+          />
+          <span>{formTitle}</span>
+        </Space>
       }
       placement="right"
       onClose={onClose}
       open={open}
       destroyOnClose
+      extra={
+        <Space>
+          <Button onClick={onClose} icon={<CloseCircleOutlined />}>
+            Hủy
+          </Button>
+          <Button
+            type="primary"
+            onClick={() => form.submit()}
+            loading={loading}
+            disabled={loading}
+            icon={<SaveOutlined />}
+          >
+            {isEmpty(selectedBusiness) ? 'Tạo doanh nghiệp' : 'Cập nhật'}
+          </Button>
+        </Space>
+      }
+      bodyStyle={{ paddingBottom: 24 }}
     >
       {!isEmpty(selectedBusiness) && isEmpty(initialValues) ? (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
@@ -149,73 +197,72 @@ export default function AddEditBusinessForm(props) {
           onFinishFailed={onFinishFailed}
           autoComplete="off"
           layout="vertical"
+          requiredMark={false}
         >
-          <Row gutter={12}>
-            <Col span={24}>
-              <Form.Item
-                label="Mã doanh nghiệp"
-                name="code"
-                rules={[
-                  {
-                    required: true,
-                    message: 'Vui lòng nhập mã doanh nghiệp!',
-                  },
-                ]}
-              >
-                <Input />
-              </Form.Item>
-            </Col>
-          </Row>
-          <Row gutter={12}>
-            <Col span={24}>
-              <Form.Item
-                label="Tên doanh nghiệp"
-                name="name"
-                rules={[
-                  {
-                    required: true,
-                    message: 'Vui lòng nhập tên doanh nghiệp!',
-                  },
-                ]}
-              >
-                <Input />
-              </Form.Item>
-            </Col>
-          </Row>{' '}
-          {/* Only show the leader selection field when editing */}
-          {!isEmpty(selectedBusiness) && (
-            <Row gutter={12}>
-              <Col span={24}>
+          <Card title="Thông tin doanh nghiệp" bordered={false} style={{ marginBottom: 16 }}>
+            <Row gutter={16}>
+              <Col xs={24} sm={12}>
                 <Form.Item
-                  label="Người phụ trách"
-                  name="leader_id"
+                  label="Mã doanh nghiệp"
+                  name="code"
                   rules={[
                     {
-                      required: false,
-                      message: 'Vui lòng chọn người phụ trách!',
+                      required: true,
+                      message: 'Vui lòng nhập mã doanh nghiệp!',
+                    },
+                  ]}
+                  tooltip="Mã doanh nghiệp phải là duy nhất"
+                >
+                  <Input autoFocus placeholder="Nhập mã doanh nghiệp" prefix={<CodeOutlined />} />
+                </Form.Item>
+              </Col>
+              <Col xs={24} sm={12}>
+                <Form.Item
+                  label="Tên doanh nghiệp"
+                  name="name"
+                  rules={[
+                    {
+                      required: true,
+                      message: 'Vui lòng nhập tên doanh nghiệp!',
                     },
                   ]}
                 >
-                  <Select
-                    mode="multiple"
-                    allowClear
-                    placeholder="Chọn người phụ trách"
-                    loading={userLoading}
-                    filterOption={(input, option) => option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0}
-                    options={userList.map((user) => ({
-                      value: user.id,
-                      label: user.fullname || user.username,
-                    }))}
-                  />
+                  <Input placeholder="Nhập tên doanh nghiệp" prefix={<BankOutlined />} />
                 </Form.Item>
               </Col>
             </Row>
-          )}
-          <Form.Item>
-            <Button type="primary" htmlType="submit" loading={loading} disabled={loading} style={{ marginTop: '16px' }}>
-              {isEmpty(selectedBusiness) ? 'Thêm doanh nghiệp' : 'Cập nhật doanh nghiệp'}
-            </Button>
-          </Form.Item>
+
+            {/* Only show the leader selection field when editing */}
+            {!isEmpty(selectedBusiness) && (
+              <Row gutter={16}>
+                <Col span={24}>
+                  <Form.Item
+                    label="Người phụ trách"
+                    name="leader_id"
+                    rules={[
+                      {
+                        required: false,
+                        message: 'Vui lòng chọn người phụ trách!',
+                      },
+                    ]}
+                  >
+                    <Select
+                      mode="multiple"
+                      allowClear
+                      placeholder="Chọn người phụ trách"
+                      loading={userLoading}
+                      prefix={<TeamOutlined />}
+                      filterOption={(input, option) => option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0}
+                      options={userList.map((user) => ({
+                        value: user.id,
+                        label: user.fullname || user.username,
+                      }))}
+                    />
+                  </Form.Item>
+                </Col>
+              </Row>
+            )}
+          </Card>
         </Form>
       )}
       {loading && (
