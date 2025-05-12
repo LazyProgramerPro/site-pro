@@ -2,6 +2,7 @@ import acceptanceRequestReducer from '@/pages/acceptance-request/redux/acceptanc
 import accountReducer from '@/pages/account/redux/account.slice';
 import userReducer from '@/pages/auth/redux/user.slice';
 import businessReducer from '@/pages/business/redux/business.slice';
+import businessUserReducer from '@/pages/business/redux/business-user.slice';
 import categoryReducer from '@/pages/category/redux/category.slice';
 import constructionDiaryReducer from '@/pages/construction-diary/redux/constructionDiary.slice';
 import constructionReducer from '@/pages/construction/redux/construction.slice';
@@ -20,6 +21,7 @@ export const store = configureStore({
     account: accountReducer,
     role: groupReducer,
     business: businessReducer,
+    businessUser: businessUserReducer,
     construction: constructionReducer,
     category: categoryReducer,
     group: groupReducer,

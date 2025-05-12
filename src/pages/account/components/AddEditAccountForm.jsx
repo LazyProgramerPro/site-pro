@@ -47,17 +47,6 @@ export default function AddEditAccountForm(props) {
   const groupList = useSelector((state) => state.group.groupList);
   const businessList = useSelector((state) => state.business.businessList);
 
-  console.log('groupList:', groupList, businessList);
-
-  useEffect(() => {
-    const promiseForGetGroup = dispatch(getGroupList());
-    const promiseForGetBusiness = dispatch(getBusinessList());
-    return () => {
-      promiseForGetGroup.abort();
-      promiseForGetBusiness.abort();
-    };
-  }, []);
-
   useEffect(() => {
     if (selectedAccount) {
       let formData = { ...selectedAccount };
@@ -79,6 +68,8 @@ export default function AddEditAccountForm(props) {
         formData.doanh_nghiep_list = [{}];
       }
 
+      dispatch(getGroupList());
+      dispatch(getBusinessList());
       setInitialValues(formData);
     } else {
       setInitialValues(initialState);
@@ -87,7 +78,7 @@ export default function AddEditAccountForm(props) {
     if (open) {
       form.resetFields();
     }
-  }, [selectedAccount, open, form]);
+  }, [selectedAccount, open, form, dispatch]);
 
   // After form is reset, set values for edit mode
   useEffect(() => {

@@ -1,11 +1,12 @@
-import { Button, Col, Drawer, Form, Input, Row, Spin, notification } from 'antd';
+import { useAppDispatch } from '@/redux/store';
+import { CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
+import { Button, Col, Drawer, Form, Input, notification, Row, Select, Spin } from 'antd';
 import { isEmpty } from 'lodash';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { useAppDispatch } from '@/redux/store';
+import { getUserList } from '../redux/business-user.slice';
 import { addBusiness, getBusinessList, updateBusiness } from '../redux/business.slice';
-import { CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
 
 const initialState = {};
 
@@ -17,6 +18,8 @@ export default function AddEditBusinessForm(props) {
   const dispatch = useAppDispatch();
 
   const loading = useSelector((state) => state.business.loading);
+  const userLoading = useSelector((state) => state.businessUser.loading);
+  const userList = useSelector((state) => state.businessUser.userList);
 
   const selectedBusiness = useSelector((state) => state.business.editingBusiness);
   useEffect(() => {
@@ -25,8 +28,17 @@ export default function AddEditBusinessForm(props) {
       const formData = {
         code: selectedBusiness.code,
         name: selectedBusiness.name,
+        leader_id: selectedBusiness.leader_id || [],
       };
       setInitialValues(formData);
+
+      // Load user list for leader selection when editing
+      const filters = {
+        pageNo: 0,
+        pageSize: 100,
+        searchText: '',
+      };
+      dispatch(getUserList(filters));
     } else {
       setInitialValues(initialState);
     }
@@ -34,7 +46,7 @@ export default function AddEditBusinessForm(props) {
     if (open) {
       form.resetFields();
     }
-  }, [selectedBusiness, open, form]);
+  }, [selectedBusiness, open, form, dispatch]);
 
   // After form is reset, set values for edit mode
   useEffect(() => {
@@ -72,6 +84,7 @@ export default function AddEditBusinessForm(props) {
           id: selectedBusiness.id,
           name: values.name,
           code: values.code,
+          leader_id: values.leader_id,
         };
 
         await dispatch(updateBusiness(payload));
@@ -169,6 +182,35 @@ export default function AddEditBusinessForm(props) {
               </Form.Item>
             </Col>
           </Row>{' '}
+          {/* Only show the leader selection field when editing */}
+          {!isEmpty(selectedBusiness) && (
+            <Row gutter={12}>
+              <Col span={24}>
+                <Form.Item
+                  label="Người phụ trách"
+                  name="leader_id"
+                  rules={[
+                    {
+                      required: false,
+                      message: 'Vui lòng chọn người phụ trách!',
+                    },
+                  ]}
+                >
+                  <Select
+                    mode="multiple"
+                    allowClear
+                    placeholder="Chọn người phụ trách"
+                    loading={userLoading}
+                    filterOption={(input, option) => option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0}
+                    options={userList.map((user) => ({
+                      value: user.id,
+                      label: user.fullname || user.username,
+                    }))}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+          )}
           <Form.Item>
             <Button type="primary" htmlType="submit" loading={loading} disabled={loading} style={{ marginTop: '16px' }}>
               {isEmpty(selectedBusiness) ? 'Thêm doanh nghiệp' : 'Cập nhật doanh nghiệp'}
