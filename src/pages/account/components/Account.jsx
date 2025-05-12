@@ -9,6 +9,7 @@ import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { cancelEditingAccount, deleteAccount, getAccountList, startEditingAccount } from '../redux/account.slice';
 import AddEditAccountForm from './AddEditAccountForm';
+import http from '@/utils/http';
 
 export default function Account() {
   const { styles } = useStyle();
@@ -70,6 +71,30 @@ export default function Account() {
     setSize(pageSize);
   };
 
+  const handleLockAccount = async (accountId) => {
+    await http.post('/auth/user/lock', { id: accountId });
+    const filters = {
+      pageNo: page - 1,
+      pageSize: size,
+      searchText: searchTerm,
+    };
+
+    await dispatch(getAccountList(filters));
+  };
+
+  const handleUnlockAccount = async (accountId) => {
+    await http.post('/auth/user/unlock', { id: accountId });
+
+    const filters = {
+      pageNo: page - 1,
+      pageSize: size,
+      searchText: searchTerm,
+    };
+
+    await dispatch(getAccountList(filters));
+  };
+  // Define columns for the table
+
   const columns = [
     {
       title: 'Avatar',
@@ -77,7 +102,6 @@ export default function Account() {
       key: 'username',
       width: '5%',
       fixed: 'left',
-
       //render avatar với chữ cái đầu tiên của username
       render: (text) => {
         return (
@@ -170,14 +194,28 @@ export default function Account() {
             <EditOutlined />
           </WrapperIcons>
 
-          <WrapperIcons title="Khóa tài khoản">
+          <WrapperIcons title={record?.is_active ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}>
             <Popconfirm
               cancelText="Hủy bỏ"
-              okText="Xóa"
-              title="Bạn có chắc chắn muốn khóa tài khoản này?"
-              onConfirm={() => {}}
+              okText={record?.is_active ? 'Khóa' : 'Mở khóa'}
+              title={
+                record?.is_active
+                  ? 'Bạn có chắc chắn muốn khóa tài khoản này?'
+                  : 'Bạn có chắc chắn muốn mở khóa tài khoản này?'
+              }
+              onConfirm={() => {
+                if (record?.is_active) {
+                  handleLockAccount(record?.id);
+                } else {
+                  handleUnlockAccount(record?.id);
+                }
+              }}
             >
-              <LockOutlined />
+              {record?.is_active ? (
+                <LockOutlined style={{ color: '#1890ff' }} />
+              ) : (
+                <LockOutlined style={{ color: '#ff4d4f', opacity: 0.5, transform: 'rotate(45deg)' }} />
+              )}
             </Popconfirm>
           </WrapperIcons>
 

@@ -51,8 +51,14 @@ export default function Project() {
     dispatch(cancelEditingProject());
   };
 
-  const handleDeleteProject = (projectId) => {
-    dispatch(deleteProject(projectId));
+  const handleDeleteProject = async (projectId) => {
+    await dispatch(deleteProject(projectId));
+    const filters = {
+      pageNo: page - 1,
+      pageSize: size,
+      searchText: searchTerm,
+    };
+    await dispatch(getProjectList(filters));
   };
 
   const handleEditProject = (projectId) => {
@@ -97,26 +103,26 @@ export default function Project() {
     },
     {
       title: 'Ngày kết thúc',
-      dataIndex: 'endDate',
-      key: 'endDate',
+      dataIndex: 'finish_at',
+      key: 'finish_at',
       width: '10%',
     },
     {
       title: 'Nhà thầu thi công',
-      dataIndex: 'nttc_name',
-      key: 'nttc_name',
+      dataIndex: 'nha_thau_thi_cong_name',
+      key: 'nha_thau_thi_cong_name',
       width: '10%',
     },
     {
       title: 'Tư vấn giám sát',
-      dataIndex: 'tvgs_name',
-      key: 'tvgs_name',
+      dataIndex: 'tu_van_giam_sat_name',
+      key: 'tu_van_giam_sat_name',
       width: '10%',
     },
     {
       title: 'Tư vấn thiết kế',
-      dataIndex: 'tvtk_name',
-      key: 'tvtk_name',
+      dataIndex: 'tu_van_thiet_ke_name',
+      key: 'tu_van_thiet_ke_name',
       width: '10%',
     },
     {
@@ -199,7 +205,7 @@ export default function Project() {
               }}
               scroll={{ x: 'max-content', y: 450 }}
               size="middle"
-              rowClassName={(record) => (editingProject?.id === record.id ? 'active-row' : '')}
+              rowClassName={(record) => (editingProject?.id === record?.id ? 'active-row' : '')}
             />
           </TableContainer>
         )}

@@ -8,15 +8,22 @@ const initialState = {
   currentRequestId: undefined,
 };
 
-export const getUserList = createAsyncThunk('business/getUserList', async (filters, thunkAPI) => {
-  const { rc, data, totalCount } = await http.post('/auth/user/list', { ...filters });
+export const getUserList = createAsyncThunk('business/getUserList', async (body, thunkAPI) => {
+  try {
+    const { rc, data, totalCount } = await http.post('/auth/user/list-by-doanh-nghiep-id', body);
 
-  if (rc?.code !== 0) {
-    message.error(rc?.desc || 'Lỗi không xác định!');
-    return thunkAPI.rejectWithValue(rc?.desc || 'Lỗi không xác định!');
+    if (rc?.code !== 0) {
+      message.error(rc?.desc || 'Unknown error!');
+      // Return empty data array and totalCount 0 on error
+      return { data: [], totalCount: 0 };
+    }
+
+    return { data, totalCount };
+  } catch (error) {
+    message.error('An error occurred while fetching the user list!');
+    // Return empty data array and totalCount 0 on error
+    return { data: [], totalCount: 0 };
   }
-
-  return { data, totalCount };
 });
 
 const userSlice = createSlice({

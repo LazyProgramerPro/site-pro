@@ -1,11 +1,28 @@
-import { InboxOutlined } from '@ant-design/icons';
-import { Button, Col, DatePicker, Drawer, Form, Input, notification, Row, Select, Spin, Upload } from 'antd';
+import { useAppDispatch } from '@/redux/store';
+import { CloseCircleOutlined, InboxOutlined, ProjectOutlined, SaveOutlined } from '@ant-design/icons';
+import {
+  Avatar,
+  Button,
+  Col,
+  DatePicker,
+  Drawer,
+  Form,
+  Input,
+  notification,
+  Row,
+  Select,
+  Space,
+  Spin,
+  Upload,
+} from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import { isEmpty } from 'lodash';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { getBusinessList } from '../../business/redux/business.slice';
+import { addProject, getProjectList, updateProject } from '../redux/project.slice';
 
 const initialState = {};
 
@@ -22,19 +39,43 @@ export default function AddEditProjectForm(props) {
   const { onClose, open } = props;
   const [form] = Form.useForm();
   const [initialValues, setInitialValues] = useState(initialState);
+  const [companies, setCompanies] = useState([]);
+  const dispatch = useAppDispatch();
 
   const loading = useSelector((state) => state.project.loading);
 
+  // Fetch companies for dropdowns when component mounts
+  useEffect(() => {
+    const fetchCompanies = async () => {
+      try {
+        const result = await dispatch(getBusinessList({ pageNo: 0, pageSize: 100 })).unwrap();
+        if (result?.data) {
+          setCompanies(result.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch companies:', error);
+        notification.error({
+          message: 'Lỗi',
+          description: 'Không thể tải danh sách công ty',
+        });
+      }
+    };
+
+    fetchCompanies();
+  }, [dispatch]);
+
   const selectedProject = useSelector((state) => state.project.editingProject);
   console.log('editingProject:', selectedProject);
-
   useEffect(() => {
     // Transform dates from string to moment objects with explicit format
     if (selectedProject) {
       const formattedProject = {
         ...selectedProject,
-        startDate: selectedProject.startDate ? moment(selectedProject.startDate, "DD/MM/YYYY") : null,
-        endDate: selectedProject.endDate ? moment(selectedProject.endDate, "DD/MM/YYYY") : null,
+        start_at: selectedProject.start_at ? moment(selectedProject.start_at) : null,
+        finish_at: selectedProject.finish_at ? moment(selectedProject.finish_at) : null,
+        nha_thau_thi_cong_id: selectedProject.nha_thau_thi_cong_id || '',
+        tu_van_giam_sat_id: selectedProject.tu_van_giam_sat_id || '',
+        tu_van_thiet_ke_id: selectedProject.tu_van_thiet_ke_id || '',
       };
       setInitialValues(formattedProject);
     } else {
@@ -42,32 +83,74 @@ export default function AddEditProjectForm(props) {
     }
   }, [selectedProject]);
 
-
-  console.log("selectedProject1111:", selectedProject);
-
+  console.log('selectedProject1111:', selectedProject);
   const onFinish = async (values) => {
     try {
       if (!selectedProject) {
-        // dispatch(createProject(values));
+        // Format dates for API
+        const payload = {
+          code: values.code,
+          name: values.name,
+          description: values.description,
+          start_at: values.start_at ? values.start_at.toISOString() : null,
+          finish_at: values.finish_at ? values.finish_at.toISOString() : null,
+          nha_thau_thi_cong_id: values.nha_thau_thi_cong_id,
+          tu_van_giam_sat_id: values.tu_van_giam_sat_id,
+          tu_van_thiet_ke_id: values.tu_van_thiet_ke_id,
+        };
+        await dispatch(addProject(payload));
 
         notification.success({
-          message: 'Success',
-          description: 'Add project successfully',
+          message: 'Thành công',
+          description: 'Thêm dự án thành công',
         });
+
+        // get new account list
+        const filters = {
+          pageNo: 0,
+          pageSize: 10,
+          searchText: '',
+        };
+        await dispatch(getProjectList(filters));
+        onClose();
+        navigate('/dashboard/project');
       } else {
-        // dispatch(updateProject({ ...values, id: selectedProject }));
+        // Format dates for API
+        const payload = {
+          id: selectedProject.id,
+          code: values.code,
+          name: values.name,
+          description: values.description,
+          start_at: values.start_at ? values.start_at.toISOString() : null,
+          finish_at: values.finish_at ? values.finish_at.toISOString() : null,
+          nha_thau_thi_cong_id: values.nha_thau_thi_cong_id,
+          tu_van_giam_sat_id: values.tu_van_giam_sat_id,
+          tu_van_thiet_ke_id: values.tu_van_thiet_ke_id,
+        };
+
+        await dispatch(updateProject(payload));
 
         notification.success({
-          message: 'Success',
-          description: 'Update project successfully',
+          message: 'Thành công',
+          description: 'Cập nhật dự án thành công',
         });
       }
 
+      // get new account list
+      const filters = {
+        pageNo: 0,
+        pageSize: 10,
+        searchText: '',
+      };
+      await dispatch(getProjectList(filters));
       onClose();
-
-      navigate('/dashboard/administration/project');
+      navigate('/dashboard/project');
     } catch (error) {
       console.log('error:', error);
+      notification.error({
+        message: 'Lỗi',
+        description: 'Đã xảy ra lỗi khi xử lý yêu cầu',
+      });
     }
   };
 
@@ -80,14 +163,43 @@ export default function AddEditProjectForm(props) {
   };
   return (
     <Drawer
-      width={720}
-      title={isEmpty(selectedProject) ? 'Thêm mới dự án' : `Sửa dự án ${initialValues && initialValues?.projectCode}`}
+      width={window.innerWidth > 768 ? 720 : '100%'}
+      title={
+        <Space align="center">
+          <Avatar
+            icon={<ProjectOutlined />}
+            style={{ backgroundColor: isEmpty(selectedProject) ? '#1890ff' : '#52c41a' }}
+          />
+          <span>{isEmpty(selectedProject) ? 'Thêm mới dự án' : `Sửa dự án ${initialValues?.code || ''}`}</span>
+        </Space>
+      }
       placement="right"
       onClose={onClose}
       open={open}
+      destroyOnClose
+      extra={
+        <Space>
+          <Button onClick={onClose} icon={<CloseCircleOutlined />}>
+            Hủy
+          </Button>
+          <Button
+            type="primary"
+            onClick={() => form.submit()}
+            loading={loading}
+            disabled={loading}
+            icon={<SaveOutlined />}
+          >
+            {isEmpty(selectedProject) ? 'Tạo dự án' : 'Cập nhật'}
+          </Button>
+        </Space>
+      }
+      bodyStyle={{ paddingBottom: 24 }}
     >
+      {' '}
       {!isEmpty(selectedProject) && isEmpty(initialValues) ? (
-        <Spin></Spin>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+          <Spin size="large" tip="Đang tải thông tin dự án..." />
+        </div>
       ) : (
         <Form
           name="form-add-edit-project"
@@ -97,169 +209,164 @@ export default function AddEditProjectForm(props) {
           onFinishFailed={onFinishFailed}
           autoComplete="off"
           layout="vertical"
+          requiredMark={false}
         >
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
                 label="Mã dự án"
-                name="projectCode"
+                name="code"
                 rules={[
                   {
                     required: true,
-                    message: 'Bạn phải nhập mã dự án!',
+                    message: 'Vui lòng nhập mã dự án!',
+                  },
+                ]}
+                tooltip="Mã dự án phải là duy nhất"
+              >
+                <Input autoFocus placeholder="Nhập mã dự án" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                label="Tên dự án"
+                name="name"
+                rules={[
+                  {
+                    required: true,
+                    message: 'Vui lòng nhập tên dự án!',
                   },
                 ]}
               >
-                <Input />
+                <Input placeholder="Nhập tên dự án" />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item
+                label="Mô tả"
+                name="description"
+                rules={[{ required: true, message: 'Vui lòng nhập mô tả dự án!' }]}
+              >
+                <TextArea rows={4} placeholder="Nhập mô tả chi tiết về dự án" />
+              </Form.Item>
+            </Col>
+          </Row>
+          <Row gutter={16}>
+            <Col span={12}>
+              <Form.Item
+                label="Ngày bắt đầu"
+                name="start_at"
+                rules={[
+                  {
+                    required: true,
+                    message: 'Vui lòng chọn ngày bắt đầu!',
+                  },
+                ]}
+              >
+                <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" placeholder="Chọn ngày bắt đầu" />
               </Form.Item>
             </Col>
             <Col span={12}>
               {' '}
               <Form.Item
-                label="Tên dự án"
-                name="projectName"
-                rules={[
-                  {
-                    required: true,
-                    message: 'Bạn phải nhập tên dự án!',
-                  },
-                ]}
-              >
-                <Input />
-              </Form.Item>
-            </Col>
-          </Row>
-
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item label="Đia chỉ" name="address" rules={[{ required: true, message: 'Bạn phải nhập địa chỉ' }]}>
-                <TextArea />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                label="Mô tả"
-                name="description"
-                rules={[{ required: true, message: 'Bạn phải nhập mô tả!' }]}
-              >
-                <TextArea />
-              </Form.Item>
-            </Col>
-          </Row>
-
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                label="Ngày bắt đầu"
-                name="startDate"
-                rules={[
-                  {
-                    required: true,
-                    message: 'Bạn phải nhập ngày bắt đầu!',
-                  },
-                ]}
-              >
-                <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
                 label="Ngày kết thúc"
-                name="endDate"
+                name="finish_at"
                 rules={[
                   {
                     required: true,
-                    message: 'Bạn phải nhập ngày kết thúc!',
+                    message: 'Vui lòng chọn ngày kết thúc!',
                   },
                   ({ getFieldValue }) => ({
                     validator(_, value) {
-                      if (!value || !getFieldValue('startDate')) {
+                      if (!value || !getFieldValue('start_at')) {
                         return Promise.resolve();
                       }
-                      if (value.isSameOrAfter(getFieldValue('startDate'))) {
+                      // Use moment to compare dates properly
+                      const startDate = getFieldValue('start_at');
+                      if (value.isAfter(startDate, 'day') || value.isSame(startDate, 'day')) {
                         return Promise.resolve();
                       }
-                      return Promise.reject(new Error('Ngày kết thúc phải sau ngày bắt đầu!'));
+                      return Promise.reject(new Error('Ngày kết thúc phải sau hoặc bằng ngày bắt đầu!'));
                     },
                   }),
                 ]}
               >
-                <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" />
+                <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" placeholder="Chọn ngày kết thúc" />
               </Form.Item>
             </Col>
           </Row>
-
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
                 label="Nhà thầu thi công"
-                name="contractor"
+                name="nha_thau_thi_cong_id"
                 rules={[
                   {
                     required: true,
-                    message: 'Bạn phải nhập nhà thầu thi công!',
+                    message: 'Vui lòng chọn nhà thầu thi công!',
                   },
                 ]}
               >
-                <Select showSearch allowClear placeholder="Chọn nhà thầu thi công">
-                  {['Apple', 'Samsung', 'Microsoft', 'Lenovo', 'ASUS'].map((b, index) => {
-                    return (
-                      <Select.Option value={b} key={index}>
-                        {b}
-                      </Select.Option>
-                    );
-                  })}
-                </Select>
+                <Select
+                  placeholder="Chọn nhà thầu thi công"
+                  options={companies.map((company) => ({
+                    label: company.name,
+                    value: company.id,
+                  }))}
+                  showSearch
+                  filterOption={(input, option) => option.label.toLowerCase().includes(input.toLowerCase())}
+                />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
                 label="Tư vấn giám sát"
-                name="supervisor"
+                name="tu_van_giam_sat_id"
                 rules={[
                   {
                     required: true,
-                    message: 'Bạn phải nhập tư vấn giám sát!',
+                    message: 'Vui lòng chọn tư vấn giám sát!',
                   },
                 ]}
               >
-                <Select showSearch allowClear placeholder="Chọn tư vấn giám sát">
-                  {['Apple', 'Samsung', 'Microsoft', 'Lenovo', 'ASUS'].map((b, index) => {
-                    return (
-                      <Select.Option value={b} key={index}>
-                        {b}
-                      </Select.Option>
-                    );
-                  })}
-                </Select>
+                <Select
+                  placeholder="Chọn tư vấn giám sát"
+                  options={companies.map((company) => ({
+                    label: company.name,
+                    value: company.id,
+                  }))}
+                  showSearch
+                  filterOption={(input, option) => option.label.toLowerCase().includes(input.toLowerCase())}
+                />
               </Form.Item>
             </Col>
           </Row>
-
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
                 label="Tư vấn thiết kế"
-                name="designer"
+                name="tu_van_thiet_ke_id"
                 rules={[
                   {
                     required: true,
-                    message: 'Bạn phải nhập tư vấn thiết kế!',
+                    message: 'Vui lòng chọn tư vấn thiết kế!',
                   },
                 ]}
               >
-                <Select showSearch allowClear placeholder="Chọn tư vấn thiết kế">
-                  {['Apple', 'Samsung', 'Microsoft', 'Lenovo', 'ASUS'].map((b, index) => {
-                    return (
-                      <Select.Option value={b} key={index}>
-                        {b}
-                      </Select.Option>
-                    );
-                  })}
-                </Select>
+                <Select
+                  placeholder="Chọn tư vấn thiết kế"
+                  options={companies.map((company) => ({
+                    label: company.name,
+                    value: company.id,
+                  }))}
+                  showSearch
+                  filterOption={(input, option) => option.label.toLowerCase().includes(input.toLowerCase())}
+                />
               </Form.Item>
             </Col>
-          </Row>
+          </Row>{' '}
           {/* Trường upload ảnh */}
           <Row gutter={16}>
             <Col span={24}>
@@ -325,13 +432,26 @@ export default function AddEditProjectForm(props) {
               </Form.Item>
             </Col>
           </Row>
-
-          <Form.Item>
-            <Button type="primary" htmlType="submit" disabled={loading}>
-              {isEmpty(selectedProject) ? 'Thêm dự án' : 'Cập nhật'}
-            </Button>
-          </Form.Item>
         </Form>
+      )}
+      {loading && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            padding: '10px 24px',
+            background: 'rgba(255, 255, 255, 0.8)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderTop: '1px solid #f0f0f0',
+            backdropFilter: 'blur(4px)',
+          }}
+        >
+          <Spin tip="Đang xử lý..." />
+        </div>
       )}
     </Drawer>
   );

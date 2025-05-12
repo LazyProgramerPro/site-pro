@@ -51,7 +51,7 @@ export default function AddEditBusinessForm(props) {
       const formData = {
         code: selectedBusiness.code,
         name: selectedBusiness.name,
-        leader_id: selectedBusiness.leader_id || [],
+        leader_id: selectedBusiness?.leaders?.map((leader) => leader?.id) || [],
       };
       setInitialValues(formData);
 
@@ -60,6 +60,7 @@ export default function AddEditBusinessForm(props) {
         pageNo: 0,
         pageSize: 100,
         searchText: '',
+        doanh_nghiep_id: selectedBusiness.id,
       };
       dispatch(getUserList(filters));
     } else {
@@ -233,7 +234,7 @@ export default function AddEditBusinessForm(props) {
             </Row>
 
             {/* Only show the leader selection field when editing */}
-            {!isEmpty(selectedBusiness) && (
+            {!isEmpty(selectedBusiness) && !isEmpty(userList) && (
               <Row gutter={16}>
                 <Col span={24}>
                   <Form.Item

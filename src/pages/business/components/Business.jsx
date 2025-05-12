@@ -1,6 +1,6 @@
 import { useStyle } from '@/hooks/useStyle';
 import { DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
-import { Button, Card, Input, Popconfirm, Space, Table } from 'antd';
+import { Button, Card, Input, Popconfirm, Space, Table, Tag } from 'antd';
 import { Fragment, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -88,7 +88,17 @@ export default function Business() {
       dataIndex: 'leader_name',
       key: 'leader_name',
       width: '30%',
-      render: (text) => (Array.isArray(text) ? text.join(', ') : text),
+      render: (text, record) => {
+        return (
+          <div>
+            {record?.leaders?.map((item, index) => (
+              <Tag key={index} color="blue" style={{ margin: '2px' }}>
+                {item?.full_name}
+              </Tag>
+            ))}
+          </div>
+        );
+      },
     },
     {
       title: 'Hành động',
