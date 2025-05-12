@@ -48,8 +48,14 @@ export default function Business() {
     dispatch(cancelEditingBusiness());
   };
 
-  const handleDeleteBusiness = (businessId) => {
-    dispatch(deleteBusiness(businessId));
+  const handleDeleteBusiness = async (businessId) => {
+    await dispatch(deleteBusiness(businessId));
+    const filters = {
+      pageNo: page - 1,
+      pageSize: size,
+      searchText: searchTerm,
+    };
+    await dispatch(getBusinessList(filters));
   };
 
   const handleEditBusiness = (businessId) => {
@@ -82,6 +88,7 @@ export default function Business() {
       dataIndex: 'leader_name',
       key: 'leader_name',
       width: '30%',
+      render: (text) => (Array.isArray(text) ? text.join(', ') : text),
     },
     {
       title: 'Hành động',

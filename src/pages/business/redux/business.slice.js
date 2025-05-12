@@ -1,5 +1,6 @@
 import http from "@/utils/http";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { message } from "antd";
 
 const initialState = {
   businessList: [],
@@ -29,10 +30,16 @@ export const addBusiness = createAsyncThunk(
   "business/addBusiness",
   async (body, thunkAPI) => {
     try {
-      const response = await http.post("businesses", body, {
+      const { rc, item } = await http.post("/auth/company/add", body, {
         signal: thunkAPI.signal,
       });
-      return response.data;
+      
+      if (rc?.code !== 0) {
+        message.error(rc?.desc || 'Lỗi không xác định!');
+        return thunkAPI.rejectWithValue(rc?.desc || 'Lỗi không xác định!');
+      }
+
+      return item;
     } catch (error) {
       if (error.name === "AxiosError" && error.response.status === 422) {
         return thunkAPI.rejectWithValue(error.response.data);
@@ -44,12 +51,18 @@ export const addBusiness = createAsyncThunk(
 
 export const updateBusiness = createAsyncThunk(
   "business/updateBusiness",
-  async ({ businessId, body }, thunkAPI) => {
+  async (body, thunkAPI) => {
     try {
-      const response = await http.put(`businesses/${businessId}`, body, {
+      const { rc, item } = await http.put("/auth/company/update", body, {
         signal: thunkAPI.signal,
       });
-      return response.data;
+      
+      if (rc?.code !== 0) {
+        message.error(rc?.desc || 'Lỗi không xác định!');
+        return thunkAPI.rejectWithValue(rc?.desc || 'Lỗi không xác định!');
+      }
+
+      return item;
     } catch (error) {
       if (error.name === "AxiosError" && error.response.status === 422) {
         return thunkAPI.rejectWithValue(error.response.data);
@@ -62,7 +75,10 @@ export const updateBusiness = createAsyncThunk(
 export const deleteBusiness = createAsyncThunk(
   "business/deleteBusiness",
   async (businessId, thunkAPI) => {
-    const response = await http.delete(`businesses/${businessId}`, {
+    const response = await http.delete(`/auth/company`, {
+      data: { 
+        id: businessId,
+      },
       signal: thunkAPI.signal,
     });
     return response.data;

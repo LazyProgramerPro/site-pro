@@ -56,9 +56,11 @@ export const updateAccount = createAsyncThunk('account/updateAccount', async (bo
   }
 });
 
-export const deleteAccount = createAsyncThunk('account/deleteAccount', async (body, thunkAPI) => {
+export const deleteAccount = createAsyncThunk('account/deleteAccount', async (accountId, thunkAPI) => {
   try {
-    const { rc } = await http.delete(`/auth/user`,body, {
+    const { rc } = await http.delete(`/auth/user`, { data: {
+       id: accountId,
+    }}, {
       signal: thunkAPI.signal,
     });
 
