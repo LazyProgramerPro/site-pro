@@ -49,8 +49,16 @@ export default function Account() {
     dispatch(cancelEditingAccount());
   };
 
-  const handleDeleteAccount = (accountId) => {
-    dispatch(deleteAccount(accountId));
+  const handleDeleteAccount = async (accountId) => {
+    await dispatch(deleteAccount({ id: accountId }));
+
+    const filters = {
+      pageNo: page - 1,
+      pageSize: size,
+      searchText: searchTerm,
+    };
+
+    await dispatch(getAccountList(filters));
   };
 
   const handleEditAccount = (accountId) => {

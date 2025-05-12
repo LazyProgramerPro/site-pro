@@ -23,12 +23,11 @@ export const getAccountList = createAsyncThunk('account/getAccountList', async (
 
 export const addAccount = createAsyncThunk('account/addAccount', async (body, thunkAPI) => {
   try {
-    const {data} = await http.post('/auth/user/add', body, {
+    const { item } = await http.post('/auth/user/add', body, {
       signal: thunkAPI.signal,
     });
 
-    console.log("data:", data)
-    return data;
+    return item;
   } catch (error) {
     if (error.name === 'AxiosError' && error.response.status === 422) {
       return thunkAPI.rejectWithValue(error.response.data);
@@ -37,12 +36,18 @@ export const addAccount = createAsyncThunk('account/addAccount', async (body, th
   }
 });
 
-export const updateAccount = createAsyncThunk('account/updateAccount', async ({ accountId, body }, thunkAPI) => {
+export const updateAccount = createAsyncThunk('account/updateAccount', async (body, thunkAPI) => {
   try {
-    const response = await http.put(`accounts/${accountId}`, body, {
+    const { rc, item } = await http.put('/auth/user/update', body, {
       signal: thunkAPI.signal,
     });
-    return response.data;
+
+    if (rc?.code !== 0) {
+      message.error(rc?.desc || 'Lỗi không xác định!');
+      return thunkAPI.rejectWithValue(rc?.desc || 'Lỗi không xác định!');
+    }
+
+    return item;
   } catch (error) {
     if (error.name === 'AxiosError' && error.response.status === 422) {
       return thunkAPI.rejectWithValue(error.response.data);
@@ -51,11 +56,22 @@ export const updateAccount = createAsyncThunk('account/updateAccount', async ({ 
   }
 });
 
-export const deleteAccount = createAsyncThunk('account/deleteAccount', async (accountId, thunkAPI) => {
-  const response = await http.delete(`accounts/${accountId}`, {
-    signal: thunkAPI.signal,
-  });
-  return response.data;
+export const deleteAccount = createAsyncThunk('account/deleteAccount', async (body, thunkAPI) => {
+  try {
+    const { rc } = await http.delete(`/auth/user`,body, {
+      signal: thunkAPI.signal,
+    });
+
+    if (rc?.code !== 0) {
+      message.error(rc?.desc || 'Lỗi không xác định!');
+      return thunkAPI.rejectWithValue(rc?.desc || 'Lỗi không xác định!');
+    }
+
+    return id;
+  } catch (error) {
+    message.error('Xóa tài khoản thất bại!');
+    throw error;
+  }
 });
 
 const accountSlice = createSlice({
