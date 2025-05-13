@@ -102,23 +102,32 @@ export default function AddEditAccountForm(props) {
 
     try {
       if (!selectedAccount) {
-        // Call API to create new account
-        await dispatch(addAccount(values));
-        notification.success({
-          message: 'Thành công',
-          description: 'Thêm tài khoản thành công',
-          icon: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
-        });
+        // Gọi API tạo tài khoản mới và xử lý lỗi nếu có
+        try {
+          await dispatch(addAccount(values)).unwrap();
 
-        // get new account list
-        const filters = {
-          pageNo: 0,
-          pageSize: 10,
-          searchText: '',
-        };
-        await dispatch(getAccountList(filters));
-        onClose();
-        navigate('/dashboard/administration/account');
+          notification.success({
+            message: 'Thành công',
+            description: 'Thêm tài khoản thành công',
+            icon: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
+          });
+
+          // Lấy lại danh sách tài khoản mới nhất
+          const filters = {
+            pageNo: 0,
+            pageSize: 10,
+            searchText: '',
+          };
+          await dispatch(getAccountList(filters)).unwrap();
+          onClose();
+          navigate('/dashboard/administration/account');
+        } catch (error) {
+          notification.error({
+            message: 'Lỗi',
+            description: error?.message || 'Thêm tài khoản thất bại',
+            icon: <CloseCircleOutlined style={{ color: '#ff4d4f' }} />,
+          });
+        }
       } else {
         // Call API to update existing account
         const updatePayload = {
