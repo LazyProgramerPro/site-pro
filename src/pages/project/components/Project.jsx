@@ -1,4 +1,5 @@
 import { SkeletonTable } from '@/components/table/SkeletonTable';
+import { formatDate } from '@/helpers/formatDate';
 import { useStyle } from '@/hooks/useStyle';
 import { useAppDispatch } from '@/redux/store';
 import {
@@ -139,7 +140,9 @@ export default function Project() {
       key: 'start_at',
       width: '10%',
       render: (text) => (
-        <Typography.Text>{text || <span className="text-secondary">Chưa cập nhật</span>}</Typography.Text>
+        <Typography.Text>
+          {text ? formatDate(text) : <span className="text-secondary">Chưa cập nhật</span>}
+        </Typography.Text>
       ),
     },
     {
@@ -148,7 +151,9 @@ export default function Project() {
       key: 'finish_at',
       width: '10%',
       render: (text) => (
-        <Typography.Text>{text || <span className="text-secondary">Chưa cập nhật</span>}</Typography.Text>
+        <Typography.Text>
+          {text ? formatDate(text) : <span className="text-secondary">Chưa cập nhật</span>}
+        </Typography.Text>
       ),
     },
     {
