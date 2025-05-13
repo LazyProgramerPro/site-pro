@@ -74,7 +74,7 @@ export default function Account() {
   };
   const handleDeleteAccount = async (accountId) => {
     try {
-      await dispatch(deleteAccount(accountId));
+      await dispatch(deleteAccount(accountId)).unwrap();
 
       const filters = {
         pageNo: page - 1,

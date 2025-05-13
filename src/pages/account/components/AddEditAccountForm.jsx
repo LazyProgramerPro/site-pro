@@ -139,21 +139,30 @@ export default function AddEditAccountForm(props) {
           group_id_list: values.group_id_list,
         };
 
-        await dispatch(updateAccount(updatePayload));
+        try {
+          await dispatch(updateAccount(updatePayload)).unwrap();
 
-        notification.success({
-          message: 'Thành công',
-          description: 'Cập nhật tài khoản thành công',
-          icon: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
-        });
+          notification.success({
+            message: 'Thành công',
+            description: 'Cập nhật tài khoản thành công',
+            icon: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
+          });
 
-        // Refresh account list after update
-        const filters = {
-          pageNo: 0,
-          pageSize: 10,
-          searchText: '',
-        };
-        await dispatch(getAccountList(filters));
+          // Refresh account list after update
+          const filters = {
+            pageNo: 0,
+            pageSize: 10,
+            searchText: '',
+          };
+          await dispatch(getAccountList(filters)).unwrap();
+        } catch (error) {
+          notification.error({
+            message: 'Lỗi',
+            description: error?.message || 'Cập nhật tài khoản thất bại',
+            icon: <CloseCircleOutlined style={{ color: '#ff4d4f' }} />,
+          });
+          return;
+        }
       }
       onClose();
       navigate('/dashboard/administration/account');

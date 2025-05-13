@@ -1,13 +1,15 @@
+import { SkeletonTable } from '@/components/table/SkeletonTable';
 import { useStyle } from '@/hooks/useStyle';
-import { DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
-import { Button, Card, Input, Popconfirm, Space, Table, Tag } from 'antd';
+import { useAppDispatch } from '@/redux/store';
+import { BankOutlined, DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
+import { Button, Card, Col, Input, Popconfirm, Row, Space, Table, Tag, Typography, message } from 'antd';
 import { Fragment, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { SkeletonTable } from '../../../components/table/SkeletonTable';
-import { useAppDispatch } from '../../../redux/store';
 import { cancelEditingBusiness, deleteBusiness, getBusinessList, startEditingBusiness } from '../redux/business.slice';
 import AddEditBusinessForm from './AddEditBusinessForm';
+
+const { Title } = Typography;
 
 export default function Business() {
   const { styles } = useStyle();
@@ -47,33 +49,47 @@ export default function Business() {
     setOpen(false);
     dispatch(cancelEditingBusiness());
   };
-
+  // Hàm xóa doanh nghiệp, nên dùng .unwrap() để bắt lỗi chuẩn Redux Toolkit
   const handleDeleteBusiness = async (businessId) => {
-    await dispatch(deleteBusiness(businessId));
-    const filters = {
-      pageNo: page - 1,
-      pageSize: size,
-      searchText: searchTerm,
-    };
-    await dispatch(getBusinessList(filters));
+    try {
+      await dispatch(deleteBusiness(businessId)).unwrap();
+
+      const filters = {
+        pageNo: page - 1,
+        pageSize: size,
+        searchText: searchTerm,
+      };
+
+      await dispatch(getBusinessList(filters));
+      message.success('Xóa doanh nghiệp thành công');
+    } catch (error) {
+      console.error('Lỗi khi xóa doanh nghiệp:', error);
+      message.error('Xóa doanh nghiệp thất bại. Vui lòng thử lại!');
+    }
   };
 
   const handleEditBusiness = (businessId) => {
     showDrawer(businessId);
+  };
+  // Xử lý search khi nhấn Enter
+  const handleSearchKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      dispatch(getBusinessList({ searchText: searchTerm, pageNo: page - 1, pageSize: size }));
+    }
   };
 
   const onShowSizeChange = (current, pageSize) => {
     setPage(current);
     setSize(pageSize);
   };
-
   const columns = [
     {
       title: 'Mã doanh nghiệp',
       dataIndex: 'code',
       key: 'code',
-      width: '30%',
+      width: '20%',
       fixed: 'left',
+      render: (text) => <Typography.Text strong>{text}</Typography.Text>,
     },
 
     {
@@ -81,6 +97,12 @@ export default function Business() {
       dataIndex: 'name',
       key: 'name',
       width: '30%',
+      render: (text, record) => (
+        <Space>
+          <BankOutlined style={{ color: '#1890ff' }} />
+          <Typography.Text>{text}</Typography.Text>
+        </Space>
+      ),
     },
 
     {
@@ -89,14 +111,15 @@ export default function Business() {
       key: 'leader_name',
       width: '30%',
       render: (text, record) => {
+        if (!record?.leaders?.length) return <Typography.Text type="secondary">Chưa có thông tin</Typography.Text>;
         return (
-          <div>
+          <TagsContainer>
             {record?.leaders?.map((item, index) => (
-              <Tag key={index} color="blue" style={{ margin: '2px' }}>
+              <Tag key={index} color="blue" className="leader-tag">
                 {item?.full_name}
               </Tag>
             ))}
-          </div>
+          </TagsContainer>
         );
       },
     },
@@ -107,47 +130,56 @@ export default function Business() {
       fixed: 'right',
       render: (record) => (
         <Space size="middle">
-          <WrapperIcons title="Sửa thông tin doanh nghiệp" onClick={() => handleEditBusiness(record?.id)}>
-            <EditOutlined />
-          </WrapperIcons>
+          <ActionButton title="Sửa thông tin doanh nghiệp" onClick={() => handleEditBusiness(record?.id)}>
+            <EditOutlined className="action-icon" />
+          </ActionButton>
 
-          <WrapperIcons title="Xóa doanh nghiệp">
+          <ActionButton title="Xóa doanh nghiệp">
             <Popconfirm
               cancelText="Hủy bỏ"
               okText="Xóa"
               title="Bạn có chắc chắn muốn xóa doanh nghiệp này?"
               onConfirm={() => handleDeleteBusiness(record?.id)}
             >
-              <DeleteOutlined />
+              <DeleteOutlined className="action-icon delete-icon" />
             </Popconfirm>
-          </WrapperIcons>
+          </ActionButton>
         </Space>
       ),
     },
   ];
-
   return (
     <>
-      <PageTitle>Doanh nghiệp</PageTitle>
-      <Card
-        title={
-          <>
-            <SearchInput placeholder="Tìm doanh nghiệp ..." onChange={(e) => setSearchTerm(e.target.value)} />
+      <PageHeader>
+        <Title level={2}>Danh sách doanh nghiệp</Title>
+        <Typography.Text type="secondary">Quản lý thông tin doanh nghiệp trong hệ thống</Typography.Text>
+      </PageHeader>
+
+      <Card>
+        <SearchContainer>
+          <Col span={18}>
+            <SearchInput
+              prefix={<SearchOutlined style={{ color: '#bfbfbf' }} />}
+              placeholder="Tìm kiếm doanh nghiệp theo mã hoặc tên..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyPress={handleSearchKeyPress}
+              allowClear
+            />
             <Button
               type="primary"
-              icon={<SearchOutlined />}
               onClick={() => dispatch(getBusinessList({ searchText: searchTerm, pageNo: page - 1, pageSize: size }))}
             >
               Tìm kiếm
             </Button>
-          </>
-        }
-        extra={
-          <Button type="primary" onClick={() => showDrawer(null)} icon={<PlusOutlined />}>
-            Thêm doanh nghiệp
-          </Button>
-        }
-      >
+          </Col>
+          <Col span={6} style={{ textAlign: 'right' }}>
+            <Button type="primary" onClick={() => showDrawer(null)} icon={<PlusOutlined />}>
+              Thêm doanh nghiệp
+            </Button>
+          </Col>
+        </SearchContainer>
+
         {loading && (
           <Fragment>
             <SkeletonTable />
@@ -165,7 +197,6 @@ export default function Business() {
                 onShowSizeChange: (current, size) => {
                   onShowSizeChange(current, size);
                 },
-
                 hideOnSinglePage: false,
                 current: page,
                 total: totalCount,
@@ -173,10 +204,12 @@ export default function Business() {
                 onChange: (value) => {
                   setPage(value);
                 },
+                showTotal: (total) => `Tổng số ${total} doanh nghiệp`,
               }}
               scroll={{ x: 'max-content', y: 450 }}
               size="middle"
               rowClassName={(record) => (editingBusiness?.id === record.id ? 'active-row' : '')}
+              rowKey="id"
             />
           </TableContainer>
         )}
@@ -187,19 +220,31 @@ export default function Business() {
 }
 
 // Styled components for layout elements
-const PageTitle = styled.div`
-  font-size: 32px;
-  margin-bottom: 20px;
+const PageHeader = styled.div`
+  margin-bottom: 24px;
+`;
+
+const SearchContainer = styled(Row)`
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
 `;
 
 const SearchInput = styled(Input)`
-  width: 300px;
-  margin-right: 10px;
+  width: 400px;
+  margin-right: 12px;
+  border-radius: 4px;
+
+  &.ant-input-affix-wrapper:focus,
+  &.ant-input-affix-wrapper-focused {
+    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+  }
 `;
 
 const TableContainer = styled.div`
   width: 100%;
   overflow: hidden;
+
   .active-row {
     background-color: #e6f7ff;
     border-left: 3px solid #1890ff;
@@ -208,8 +253,58 @@ const TableContainer = styled.div`
       background-color: #e6f7ff !important; /* Force the background on all cells */
     }
   }
+
+  .ant-table-thead > tr > th {
+    background-color: #f5f5f5;
+    font-weight: 600;
+  }
+
+  .ant-pagination {
+    margin-top: 16px;
+  }
 `;
 
-const WrapperIcons = styled.div`
+const TagsContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+
+  .leader-tag {
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+  }
+`;
+
+const ActionButton = styled.div`
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background-color: #f5f5f5;
+  }
+
+  .action-icon {
+    color: #1890ff;
+    font-size: 16px;
+    transition: all 0.3s;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+
+  .delete-icon {
+    color: #ff4d4f;
+
+    &:hover {
+      color: #ff7875;
+    }
+  }
 `;

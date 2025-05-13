@@ -81,29 +81,38 @@ export default function AddEditBusinessForm(props) {
   const onFinish = async (values) => {
     try {
       if (!selectedBusiness) {
-        // Create new business
+        // Tạo mới doanh nghiệp
         const payload = {
           name: values.name,
           code: values.code,
         };
 
-        await dispatch(addBusiness(payload));
+        try {
+          await dispatch(addBusiness(payload)).unwrap();
 
-        notification.success({
-          message: 'Thành công',
-          description: 'Thêm doanh nghiệp thành công',
-          icon: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
-        });
+          notification.success({
+            message: 'Thành công',
+            description: 'Thêm doanh nghiệp thành công',
+            icon: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
+          });
 
-        // Refresh business list
-        const filters = {
-          pageNo: 0,
-          pageSize: 10,
-          searchText: '',
-        };
-        await dispatch(getBusinessList(filters));
+          // Làm mới danh sách doanh nghiệp
+          const filters = {
+            pageNo: 0,
+            pageSize: 10,
+            searchText: '',
+          };
+          await dispatch(getBusinessList(filters)).unwrap();
+        } catch (error) {
+          notification.error({
+            message: 'Lỗi',
+            description: error?.message || 'Thêm doanh nghiệp thất bại',
+            icon: <CloseCircleOutlined style={{ color: '#ff4d4f' }} />,
+          });
+          return;
+        }
       } else {
-        // Update existing business
+        // Cập nhật doanh nghiệp hiện tại
         const payload = {
           id: selectedBusiness.id,
           name: values.name,
@@ -111,25 +120,33 @@ export default function AddEditBusinessForm(props) {
           leader_id: values.leader_id,
         };
 
-        await dispatch(updateBusiness(payload));
+        try {
+          await dispatch(updateBusiness(payload)).unwrap();
 
-        notification.success({
-          message: 'Thành công',
-          description: 'Cập nhật doanh nghiệp thành công',
-          icon: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
-        });
+          notification.success({
+            message: 'Thành công',
+            description: 'Cập nhật doanh nghiệp thành công',
+            icon: <CheckCircleOutlined style={{ color: '#52c41a' }} />,
+          });
 
-        // Refresh business list
-        const filters = {
-          pageNo: 0,
-          pageSize: 10,
-          searchText: '',
-        };
-        await dispatch(getBusinessList(filters));
+          // Làm mới danh sách doanh nghiệp
+          const filters = {
+            pageNo: 0,
+            pageSize: 10,
+            searchText: '',
+          };
+          await dispatch(getBusinessList(filters)).unwrap();
+
+          onClose();
+          navigate('/dashboard/administration/business');
+        } catch (error) {
+          notification.error({
+            message: 'Lỗi',
+            description: error?.message || 'Cập nhật doanh nghiệp thất bại',
+            icon: <CloseCircleOutlined style={{ color: '#ff4d4f' }} />,
+          });
+        }
       }
-
-      onClose();
-      navigate('/dashboard/administration/business');
     } catch (error) {
       console.log('error:', error);
       notification.error({
