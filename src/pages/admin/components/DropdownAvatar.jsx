@@ -1,76 +1,98 @@
+import { FileOutlined, LogoutOutlined, ProfileOutlined } from '@ant-design/icons';
+import { Avatar, Dropdown, message, Space } from 'antd';
+import { useEffect, useMemo, useState } from 'react';
+import styled from 'styled-components';
+
+import getColor from '@/helpers/getColor';
 import { logOut } from '@/pages/auth/redux/user.slice';
 import { useAppDispatch } from '@/redux/store';
-import { FileOutlined, LogoutOutlined, ProfileOutlined, UserOutlined } from '@ant-design/icons';
-import { Avatar, Dropdown, message, Space } from 'antd';
-import styled from 'styled-components';
 import ResetPasswordModal from './ResetPasswordModal';
 
 const DropdownAvatar = () => {
   const dispatch = useAppDispatch();
+  const [userProfile, setUserProfile] = useState({
+    displayName: 'Thuong Dev',
+    initial: 'T',
+  });
 
-  const items = [
-    {
-      key: '1',
-      icon: <ProfileOutlined />,
-      label: (
-        <a target="_blank" rel="noopener noreferrer" href="https://www.antgroup.com">
-          Hồ sơ
-        </a>
-      ),
-    },
+  // Lấy thông tin người dùng từ localStorage khi component được mount
+  useEffect(() => {
+    const getUserFromStorage = () => {
+      const userStr = localStorage.getItem('user');
+      if (!userStr) return;
 
-    {
-      key: '2',
-      icon: <FileOutlined />,
-      label: (
-        <a target="_blank" rel="noopener noreferrer" href="https://www.antgroup.com">
-          Tài liệu của tôi
-        </a>
-      ),
-    },
+      try {
+        const userData = JSON.parse(userStr);
+        const displayName = userData.fullName || userData.full_name || userData.name || userData.username || 'User';
+        const initial = (userData.username || displayName)?.charAt(0) || 'T';
 
-    {
-      key: '3',
-      label: (
-        <>
-          <ResetPasswordModal />
-        </>
-      ),
-    },
+        setUserProfile({ displayName, initial });
+      } catch (error) {
+        console.error('Lỗi khi parse thông tin người dùng từ localStorage:', error);
+      }
+    };
 
-    {
-      key: '4',
-      icon: <LogoutOutlined />,
-      label: (
-        <a
-          onClick={() => {
-            dispatch(logOut()); // Dispatch the logout action
-            console.log('Logging out...');
-            localStorage.removeItem('user'); // Remove user from local storage
-            message.success('Đăng xuất thành công!');
-          }}
-        >
-          Đăng xuất
-        </a>
-      ),
-    },
-  ];
+    getUserFromStorage();
+  }, []);
+  // Tạo items menu cho dropdown với useMemo để tránh tính toán lại không cần thiết
+  const items = useMemo(
+    () => [
+      {
+        key: 'profile',
+        icon: <ProfileOutlined />,
+        label: <a href="/profile">Hồ sơ</a>,
+      },
+      {
+        key: 'documents',
+        icon: <FileOutlined />,
+        label: <a href="/documents">Tài liệu của tôi</a>,
+      },
+      {
+        key: 'reset-password',
+        label: <ResetPasswordModal />,
+      },
+      {
+        key: 'logout',
+        icon: <LogoutOutlined />,
+        label: (
+          <a
+            onClick={() => {
+              dispatch(logOut());
+              localStorage.removeItem('user');
+              message.success('Đăng xuất thành công!');
+            }}
+          >
+            Đăng xuất
+          </a>
+        ),
+      },
+    ],
+    [dispatch],
+  );
+  // Handler cho việc prevent default click
+  const handleDropdownClick = (e) => e.preventDefault();
 
   return (
     <AvatarContainer>
-      <GreetingText>Hi, Thuong Dev</GreetingText>
+      <GreetingText>Hi, {userProfile.displayName}</GreetingText>
       <Dropdown menu={{ items }}>
-        <a onClick={(e) => e.preventDefault()}>
+        <a onClick={handleDropdownClick}>
           <Space>
-            <Avatar size="default" icon={<UserOutlined />} />
+            <Avatar
+              style={{
+                backgroundColor: getColor(userProfile.initial),
+                verticalAlign: 'middle',
+              }}
+              size="default"
+            >
+              {userProfile.initial?.toUpperCase()}
+            </Avatar>
           </Space>
         </a>
       </Dropdown>
     </AvatarContainer>
   );
 };
-
-export default DropdownAvatar;
 
 // Styled Components
 const AvatarContainer = styled.div`
@@ -82,4 +104,7 @@ const GreetingText = styled.div`
   margin-right: 10px;
   font-size: 16px;
   color: #333;
+  font-weight: 500;
 `;
+
+export default DropdownAvatar;
