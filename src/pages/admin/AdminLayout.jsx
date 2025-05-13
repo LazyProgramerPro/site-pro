@@ -1,88 +1,83 @@
 import {
-  SettingOutlined,
-  ProjectOutlined,
-  FileTextOutlined,
-  CheckSquareOutlined,
-  BugOutlined,
-  ScheduleOutlined,
-  UserOutlined,
-  ShopOutlined,
-  BuildOutlined,
   AppstoreOutlined,
+  BugOutlined,
+  BuildOutlined,
+  CheckSquareOutlined,
+  FileTextOutlined,
+  ProjectOutlined,
+  ScheduleOutlined,
+  SettingOutlined,
+  ShopOutlined,
   TeamOutlined,
-} from "@ant-design/icons";
-import { Layout, Menu, theme } from "antd";
-import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import styled from "styled-components";
-import Logo from "../../components/logo/Logo";
-import DropdownAvatar from "./components/DropdownAvatar";
-import PageContent from "./components/PageContent";
+  UserOutlined,
+} from '@ant-design/icons';
+import { Layout, Menu, theme } from 'antd';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
+import Logo from '../../components/logo/Logo';
+import DropdownAvatar from './components/DropdownAvatar';
+import PageContent from './components/PageContent';
 
-const {
-  Header: AntHeader,
-  Content: AntContent,
-  Footer: AntFooter,
-  Sider,
-} = Layout;
+const { Header: AntHeader, Content: AntContent, Footer: AntFooter, Sider } = Layout;
 
 const items = [
   {
-    key: "/dashboard/administration",
-    label: "Quản trị",
-    icon: <SettingOutlined style={{ fontSize: "16px" }} />,
+    key: '/dashboard/administration',
+    label: 'Quản trị',
+    icon: <SettingOutlined style={{ fontSize: '16px' }} />,
     children: [
       {
-        key: "/dashboard/administration/account",
-        label: "Tài khoản",
-        icon: <UserOutlined style={{ fontSize: "14px" }} />,
+        key: '/dashboard/administration/account',
+        label: 'Tài khoản',
+        icon: <UserOutlined style={{ fontSize: '14px' }} />,
       },
       {
-        key: "/dashboard/administration/business",
-        label: "Doanh nghiệp",
-        icon: <ShopOutlined style={{ fontSize: "14px" }} />,
+        key: '/dashboard/administration/business',
+        label: 'Doanh nghiệp',
+        icon: <ShopOutlined style={{ fontSize: '14px' }} />,
       },
       {
-        key: "/dashboard/administration/construction",
-        label: "Công trình",
-        icon: <BuildOutlined style={{ fontSize: "14px" }} />,
+        key: '/dashboard/administration/construction',
+        label: 'Công trình',
+        icon: <BuildOutlined style={{ fontSize: '14px' }} />,
       },
       {
-        key: "/dashboard/administration/category",
-        label: "Hạng mục",
-        icon: <AppstoreOutlined style={{ fontSize: "14px" }} />,
+        key: '/dashboard/administration/category',
+        label: 'Hạng mục',
+        icon: <AppstoreOutlined style={{ fontSize: '14px' }} />,
       },
       {
-        key: "/dashboard/administration/group",
-        label: "Nhóm",
-        icon: <TeamOutlined style={{ fontSize: "14px" }} />,
+        key: '/dashboard/administration/group',
+        label: 'Nhóm',
+        icon: <TeamOutlined style={{ fontSize: '14px' }} />,
       },
     ],
   },
   {
-    key: "/dashboard/project",
-    icon: <ProjectOutlined style={{ fontSize: "16px" }} />,
-    label: "Dự án",
+    key: '/dashboard/project',
+    icon: <ProjectOutlined style={{ fontSize: '16px' }} />,
+    label: 'Dự án',
   },
   {
-    key: "/dashboard/contract",
-    icon: <FileTextOutlined style={{ fontSize: "16px" }} />,
-    label: "Hợp đồng",
+    key: '/dashboard/contract',
+    icon: <FileTextOutlined style={{ fontSize: '16px' }} />,
+    label: 'Hợp đồng',
   },
   {
-    key: "/dashboard/acceptance-request",
-    icon: <CheckSquareOutlined style={{ fontSize: "16px" }} />,
-    label: "Yêu cầu nghiệm thu",
+    key: '/dashboard/acceptance-request',
+    icon: <CheckSquareOutlined style={{ fontSize: '16px' }} />,
+    label: 'Yêu cầu nghiệm thu',
   },
   {
-    key: "/dashboard/problem",
-    icon: <BugOutlined style={{ fontSize: "16px" }} />,
-    label: "Vấn đề",
+    key: '/dashboard/problem',
+    icon: <BugOutlined style={{ fontSize: '16px' }} />,
+    label: 'Vấn đề',
   },
   {
-    key: "/dashboard/construction-diary",
-    icon: <ScheduleOutlined style={{ fontSize: "16px" }} />,
-    label: "Nhật ký thi công",
+    key: '/dashboard/construction-diary',
+    icon: <ScheduleOutlined style={{ fontSize: '16px' }} />,
+    label: 'Nhật ký thi công',
   },
 ];
 export default function AdminLayout() {
@@ -91,7 +86,7 @@ export default function AdminLayout() {
   } = theme.useToken();
 
   const location = useLocation();
-  const [selectedKeys, setSelectedKeys] = useState("/dashboard");
+  const [selectedKeys, setSelectedKeys] = useState('/dashboard');
 
   useEffect(() => {
     const pathName = location.pathname;
@@ -112,8 +107,9 @@ export default function AdminLayout() {
           console.log(collapsed, type);
         }}
       >
+        {' '}
         <LogoContainer>
-          <Logo />
+          <Logo style={{ width: 'auto', height: 'auto', maxWidth: '140px', maxHeight: '40px', objectFit: 'contain' }} />
         </LogoContainer>
         <Menu
           theme="dark"
@@ -130,16 +126,11 @@ export default function AdminLayout() {
           <DropdownAvatar />
         </StyledHeader>
         <StyledContent>
-          <ContentWrapper
-            background={colorBgContainer}
-            borderRadius={borderRadiusLG}
-          >
+          <ContentWrapper background={colorBgContainer} borderRadius={borderRadiusLG}>
             <PageContent />
           </ContentWrapper>
         </StyledContent>
-        <StyledFooter>
-          Site Pro ©{new Date().getFullYear()} Created by ThuongDev
-        </StyledFooter>
+        <StyledFooter>Site Pro ©{new Date().getFullYear()} Created by ThuongDev</StyledFooter>
       </Layout>
     </StyledLayout>
   );
@@ -151,8 +142,10 @@ const StyledLayout = styled(Layout)`
 `;
 
 const LogoContainer = styled.div`
-  height: 32px;
-  margin: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
 `;
 
 const StyledHeader = styled(AntHeader)`
