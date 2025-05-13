@@ -1,16 +1,18 @@
 import { useAppDispatch } from '@/redux/store';
 import http from '@/utils/http';
-import { Button, Card, Form, Input, message } from 'antd';
+import { Button, Card, Form, Input, message, Typography } from 'antd';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import Wrapper from '../../../assets/wrappers/Login';
 import { loggedInUser } from '../redux/user.slice';
 import Logo from './../../../components/logo/Logo';
+import ForgotPasswordModal from './ForgotPasswordModal';
 
 export default function Login() {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] = useState(false);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
@@ -86,14 +88,21 @@ export default function Login() {
             ]}
           >
             <Input />
-          </Form.Item>
-
+          </Form.Item>{' '}
           <Form.Item
             label="Mật khẩu"
             name="password"
             rules={[{ required: true, message: 'Vui lòng nhập mật khẩu của bạn!' }]}
           >
             <Input.Password />
+          </Form.Item>
+          <Form.Item style={{ marginBottom: 8 }}>
+            <Typography.Link
+              onClick={() => setIsForgotPasswordModalOpen(true)}
+              style={{ float: 'right', fontSize: '14px' }}
+            >
+              Quên mật khẩu?
+            </Typography.Link>
           </Form.Item>
           <WrapperButton>
             <Form.Item>
@@ -105,10 +114,13 @@ export default function Login() {
               >
                 Đăng nhập
               </Button>
-            </Form.Item>
+            </Form.Item>{' '}
           </WrapperButton>
         </Form>
       </StyledCard>
+
+      {/* Modal Quên mật khẩu */}
+      <ForgotPasswordModal isOpen={isForgotPasswordModalOpen} onClose={() => setIsForgotPasswordModalOpen(false)} />
     </Wrapper>
   );
 }
