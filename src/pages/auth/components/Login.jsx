@@ -10,53 +10,53 @@ import Logo from './../../../components/logo/Logo';
 
 export default function Login() {
   const [form] = Form.useForm();
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   const dispatch = useAppDispatch();
-  const navigate = useNavigate(); // Use useNavigate hook
+  const navigate = useNavigate();
 
   const onFinish = async (values) => {
+    setLoading(true);
     try {
-      const { rc, auth } = await http.post('/login', values);
+      const { rc, auth, info } = await http.post('/login', values);
 
       if (rc?.code !== 0) {
         message.error(rc?.desc || 'Đăng nhập thất bại!');
         return;
-      } else {
-        const { access_token } = auth;
-
-        // TODO: call api get permission
-        // const { rc, data } = await http.get('/user/permission', {
-        //   headers: {
-        //     Authorization: `Bearer ${access_token}`,
-        //   },
-        // });
-        // if (rc?.code !== 0) {  
-        //   message.error(rc?.desc || 'Lỗi không xác định!');
-        //   return;
-        // }
-        // const { permission } = data;
-        // console.log('permission:', permission);
-
-        await dispatch(
-          loggedInUser({
-            token: access_token,
-          }),
-        );
-
-        // save token to local storage
-        localStorage.setItem('user', JSON.stringify({ token: access_token }));
-
-        message.success('Đăng nhập thành công!');
-        navigate('/dashboard'); // Navigate to dashboard
       }
+
+      const { access_token } = auth;
+      const { username, is_active } = info;
+
+      if (!is_active) {
+        message.error('Tài khoản của bạn đã bị khóa!');
+        localStorage.removeItem('user');
+        return;
+      }
+
+      await dispatch(
+        loggedInUser({
+          token: access_token,
+          username,
+          is_active,
+        }),
+      );
+
+      // save token to local storage
+      localStorage.setItem('user', JSON.stringify({ token: access_token, username, is_active }));
+
+      message.success('Đăng nhập thành công!');
+      navigate('/dashboard');
     } catch (error) {
-      console.log('error:', error);
+      console.error('Lỗi đăng nhập:', error);
+      message.error('Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại sau!');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const onFinishFailed = () => {
-    message.error('Đăng nhập thất bại!');
+  const onFinishFailed = (errorInfo) => {
+    console.log('Form validation failed:', errorInfo);
+    message.error('Vui lòng kiểm tra lại thông tin đăng nhập!');
   };
 
   return (
@@ -72,10 +72,6 @@ export default function Login() {
         <Form
           form={form}
           name="form-login"
-          // initialValues={{
-          //   username: 'sitepro-admin',
-          //   password: 'abc@123',
-          // }}
           onFinish={onFinish}
           onFinishFailed={onFinishFailed}
           autoComplete="off"
@@ -84,20 +80,29 @@ export default function Login() {
           <Form.Item
             label="Tên tài khoản"
             name="username"
-            rules={[{ required: true, message: 'Vui lòng nhập tên tài khoản của bạn!' }]}
+            rules={[
+              { required: true, message: 'Vui lòng nhập tên tài khoản của bạn!' },
+              { whitespace: true, message: 'Tên tài khoản không được chứa khoảng trắng!' },
+            ]}
           >
-            <Input onChange={(e) => setUsername(e.target.value)} />
+            <Input />
           </Form.Item>
+
           <Form.Item
             label="Mật khẩu"
             name="password"
             rules={[{ required: true, message: 'Vui lòng nhập mật khẩu của bạn!' }]}
           >
-            <Input.Password onChange={(e) => setPassword(e.target.value)} />
+            <Input.Password />
           </Form.Item>
           <WrapperButton>
             <Form.Item>
-              <Button type="primary" htmlType="submit" disabled={!username || !password}>
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={loading}
+                disabled={!form.isFieldsTouched(true) || form.getFieldsError().some(({ errors }) => errors.length)}
+              >
                 Đăng nhập
               </Button>
             </Form.Item>
@@ -110,11 +115,72 @@ export default function Login() {
 
 // Styled Components
 const StyledCard = styled(Card)`
-  border-radius: 0.6rem;
+  border-radius: 1rem;
   width: 100%;
-  max-width: 30rem;
   margin: 0 auto;
-  padding: 1rem;
+  padding: 1.5rem 1rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  border: none;
+  background-color: #ffffff;
+
+  @media (max-width: 576px) {
+    padding: 1rem 0.5rem;
+    border-radius: 0.75rem;
+  }
+
+  .ant-card-head {
+    border-bottom: none;
+    padding: 0;
+  }
+
+  .ant-card-body {
+    padding: 1.5rem 1rem;
+
+    @media (max-width: 576px) {
+      padding: 1rem 0.5rem;
+    }
+  }
+  .ant-form-item-label > label {
+    font-weight: 500;
+    color: #333;
+  }
+  .ant-input,
+  .ant-input-password {
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid #d9d9d9;
+
+    &:hover {
+      border-color: #1677ff;
+    }
+
+    &:focus {
+      border-color: #1677ff;
+      box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+      outline: none;
+    }
+  }
+
+  .ant-input-affix-wrapper:focus,
+  .ant-input-affix-wrapper-focused {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+  }
+
+  @media (max-width: 576px) {
+    .ant-form-item {
+      margin-bottom: 16px;
+    }
+
+    .ant-form-item-label > label {
+      font-size: 14px;
+    }
+
+    .ant-input,
+    .ant-input-password {
+      padding: 0.4rem 0.6rem;
+    }
+  }
 `;
 
 const CardTitleContainer = styled.div`
@@ -122,18 +188,50 @@ const CardTitleContainer = styled.div`
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  padding: 2rem;
+  padding: 1.5rem 0;
+
+  @media (max-width: 576px) {
+    padding: 1rem 0;
+  }
 `;
 
 const LoginTitle = styled.h4`
-  padding-top: 1rem;
-  font-size: 1.5rem;
+  padding-top: 1.25rem;
+  font-size: 1.75rem;
+  font-weight: 600;
   margin-left: 0.5rem;
-  color: #333;
+  color: #222;
+  margin-bottom: 0.5rem;
+
+  @media (max-width: 576px) {
+    padding-top: 1rem;
+    font-size: 1.5rem;
+  }
 `;
 
 const WrapperButton = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-top: 1rem;
+
+  .ant-btn {
+    height: 45px;
+    font-size: 1rem;
+    font-weight: 500;
+    border-radius: 0.5rem;
+    width: 100%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transition: all 0.2s ease;
+    }
+
+    @media (max-width: 576px) {
+      height: 40px;
+      font-size: 0.9rem;
+    }
+  }
 `;
