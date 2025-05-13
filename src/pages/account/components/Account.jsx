@@ -2,6 +2,7 @@ import { SkeletonTable } from '@/components/table/SkeletonTable';
 import getColor from '@/helpers/getColor';
 import { useStyle } from '@/hooks/useStyle';
 import { useAppDispatch } from '@/redux/store';
+import http from '@/utils/http';
 import {
   DeleteOutlined,
   EditOutlined,
@@ -10,13 +11,26 @@ import {
   SearchOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import { Avatar, Button, Card, Col, Input, Popconfirm, Row, Space, Table, Tag, Typography, Tooltip } from 'antd';
+import {
+  Avatar,
+  Button,
+  Card,
+  Col,
+  Input,
+  Popconfirm,
+  Row,
+  Space,
+  Table,
+  Tag,
+  Tooltip,
+  Typography,
+  message,
+} from 'antd';
 import { Fragment, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { cancelEditingAccount, deleteAccount, getAccountList, startEditingAccount } from '../redux/account.slice';
 import AddEditAccountForm from './AddEditAccountForm';
-import http from '@/utils/http';
 
 const { Title } = Typography;
 
@@ -58,17 +72,22 @@ export default function Account() {
     setOpen(false);
     dispatch(cancelEditingAccount());
   };
-
   const handleDeleteAccount = async (accountId) => {
-    await dispatch(deleteAccount(accountId));
+    try {
+      await dispatch(deleteAccount(accountId));
 
-    const filters = {
-      pageNo: page - 1,
-      pageSize: size,
-      searchText: searchTerm,
-    };
+      const filters = {
+        pageNo: page - 1,
+        pageSize: size,
+        searchText: searchTerm,
+      };
 
-    await dispatch(getAccountList(filters));
+      await dispatch(getAccountList(filters));
+      message.success('Xóa tài khoản thành công');
+    } catch (error) {
+      console.error('Lỗi khi xóa tài khoản:', error);
+      message.error('Xóa tài khoản thất bại. Vui lòng thử lại!');
+    }
   };
 
   const handleEditAccount = (accountId) => {
@@ -79,28 +98,39 @@ export default function Account() {
     setPage(current);
     setSize(pageSize);
   };
-
   const handleLockAccount = async (accountId) => {
-    await http.post('/auth/user/lock', { id: accountId });
-    const filters = {
-      pageNo: page - 1,
-      pageSize: size,
-      searchText: searchTerm,
-    };
+    try {
+      await http.post('/auth/user/lock', { id: accountId });
 
-    await dispatch(getAccountList(filters));
+      const filters = {
+        pageNo: page - 1,
+        pageSize: size,
+        searchText: searchTerm,
+      };
+
+      await dispatch(getAccountList(filters));
+      message.success('Khóa tài khoản thành công');
+    } catch (error) {
+      console.error('Lỗi khi khóa tài khoản:', error);
+      message.error('Khóa tài khoản thất bại. Vui lòng thử lại!');
+    }
   };
-
   const handleUnlockAccount = async (accountId) => {
-    await http.post('/auth/user/unlock', { id: accountId });
+    try {
+      await http.post('/auth/user/unlock', { id: accountId });
 
-    const filters = {
-      pageNo: page - 1,
-      pageSize: size,
-      searchText: searchTerm,
-    };
+      const filters = {
+        pageNo: page - 1,
+        pageSize: size,
+        searchText: searchTerm,
+      };
 
-    await dispatch(getAccountList(filters));
+      await dispatch(getAccountList(filters));
+      message.success('Mở khóa tài khoản thành công');
+    } catch (error) {
+      console.error('Lỗi khi mở khóa tài khoản:', error);
+      message.error('Mở khóa tài khoản thất bại. Vui lòng thử lại!');
+    }
   };
 
   // Xử lý search khi nhấn Enter
