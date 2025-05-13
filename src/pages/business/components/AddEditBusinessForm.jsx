@@ -102,7 +102,7 @@ export default function AddEditBusinessForm(props) {
             pageSize: 10,
             searchText: '',
           };
-          await dispatch(getBusinessList(filters)).unwrap();
+          await dispatch(getBusinessList(filters));
         } catch (error) {
           notification.error({
             message: 'Lỗi',
@@ -135,7 +135,7 @@ export default function AddEditBusinessForm(props) {
             pageSize: 10,
             searchText: '',
           };
-          await dispatch(getBusinessList(filters)).unwrap();
+          await dispatch(getBusinessList(filters));
 
           onClose();
           navigate('/dashboard/administration/business');

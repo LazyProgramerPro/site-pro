@@ -118,7 +118,7 @@ export default function AddEditAccountForm(props) {
             pageSize: 10,
             searchText: '',
           };
-          await dispatch(getAccountList(filters)).unwrap();
+          await dispatch(getAccountList(filters));
           onClose();
           navigate('/dashboard/administration/account');
         } catch (error) {
@@ -154,7 +154,7 @@ export default function AddEditAccountForm(props) {
             pageSize: 10,
             searchText: '',
           };
-          await dispatch(getAccountList(filters)).unwrap();
+          await dispatch(getAccountList(filters));
         } catch (error) {
           notification.error({
             message: 'Lỗi',
