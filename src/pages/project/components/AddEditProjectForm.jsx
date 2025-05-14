@@ -157,7 +157,8 @@ export default function AddEditProjectForm(props) {
             message: 'Lỗi',
             description: error?.message || 'Đã xảy ra lỗi khi cập nhật dự án',
           });
-        }}
+        }
+      }
     } catch (error) {
       console.log('error:', error);
       notification.error({
@@ -170,8 +171,8 @@ export default function AddEditProjectForm(props) {
   const onFinishFailed = (errorInfo) => {
     console.log('Failed:', errorInfo);
     notification.error({
-      message: 'Errors',
-      description: errorInfo.message,
+      message: 'Lỗi',
+      description: errorInfo.message ?? 'Đã xảy ra lỗi khi xử lý yêu cầu',
     });
   };
   return (
@@ -330,9 +331,7 @@ export default function AddEditProjectForm(props) {
                   }))}
                   showSearch
                   optionFilterProp="label"
-                  filterOption={(input, option) =>
-                    option.label.toLowerCase().includes(input.toLowerCase())
-                  }
+                  filterOption={(input, option) => option.label.toLowerCase().includes(input.toLowerCase())}
                 />
               </Form.Item>
             </Col>
@@ -355,9 +354,7 @@ export default function AddEditProjectForm(props) {
                   }))}
                   showSearch
                   optionFilterProp="label"
-                  filterOption={(input, option) =>
-                    option.label.toLowerCase().includes(input.toLowerCase())
-                  }
+                  filterOption={(input, option) => option.label.toLowerCase().includes(input.toLowerCase())}
                 />
               </Form.Item>
             </Col>
@@ -382,9 +379,7 @@ export default function AddEditProjectForm(props) {
                   }))}
                   showSearch
                   optionFilterProp="label"
-                  filterOption={(input, option) =>
-                    option.label.toLowerCase().includes(input.toLowerCase())
-                  }
+                  filterOption={(input, option) => option.label.toLowerCase().includes(input.toLowerCase())}
                 />
               </Form.Item>
             </Col>
@@ -459,20 +454,20 @@ export default function AddEditProjectForm(props) {
       {loading && (
         <div
           style={{
-            position: 'fixed',
+            position: 'absolute',
+            top: 0,
             bottom: 0,
             left: 0,
             right: 0,
-            padding: '10px 24px',
             background: 'rgba(255, 255, 255, 0.8)',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            borderTop: '1px solid #f0f0f0',
+            zIndex: 1000,
             backdropFilter: 'blur(4px)',
           }}
         >
-          <Spin tip="Đang xử lý..." />
+          <Spin size="large" tip="Đang xử lý..." />
         </div>
       )}
     </Drawer>

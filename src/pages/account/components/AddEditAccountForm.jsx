@@ -173,8 +173,8 @@ export default function AddEditAccountForm(props) {
 
   const onFinishFailed = (errorInfo) => {
     notification.error({
-      message: 'Lỗi',
-      description: errorInfo.message,
+      message: 'Lỗi ',
+      description: errorInfo.message ?? 'Đã xảy ra lỗi khi xử lý yêu cầu',
       icon: <CloseCircleOutlined style={{ color: '#ff4d4f' }} />,
     });
   };
@@ -355,7 +355,7 @@ export default function AddEditAccountForm(props) {
               </Select>
             </Form.Item>
 
-            <Form.List name="doanh_nghiep_list" initialValue={[{}]}>
+            <Form.List name="doanh_nghiep_list" initialValue={[]}>
               {(fields, { add, remove }) => (
                 <>
                   {fields.map(({ key, name, ...restField }) => {
@@ -419,24 +419,24 @@ export default function AddEditAccountForm(props) {
             </Form.List>
           </Card>
         </Form>
-      )}
+      )}{' '}
       {loading && (
         <div
           style={{
-            position: 'fixed',
+            position: 'absolute',
+            top: 0,
             bottom: 0,
             left: 0,
             right: 0,
-            padding: '10px 24px',
             background: 'rgba(255, 255, 255, 0.8)',
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            borderTop: '1px solid #f0f0f0',
+            zIndex: 1000,
             backdropFilter: 'blur(4px)',
           }}
         >
-          <Spin tip="Đang xử lý..." />
+          <Spin size="large" tip="Đang xử lý..." />
         </div>
       )}
     </Drawer>
