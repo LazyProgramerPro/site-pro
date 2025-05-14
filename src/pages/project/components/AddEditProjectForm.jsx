@@ -106,14 +106,17 @@ export default function AddEditProjectForm(props) {
             description: 'Thêm dự án thành công',
           });
 
-          // get new account list
+          // get new project list
           const filters = {
             pageNo: 0,
             pageSize: 10,
             searchText: '',
           };
+
           await dispatch(getProjectList(filters));
+
           onClose();
+
           navigate('/dashboard/project');
         } catch (error) {
           notification.error({
@@ -134,7 +137,6 @@ export default function AddEditProjectForm(props) {
           tu_van_giam_sat_id: values.tu_van_giam_sat_id,
           tu_van_thiet_ke_id: values.tu_van_thiet_ke_id,
         };
-
         try {
           await dispatch(updateProject(payload)).unwrap();
 
@@ -143,14 +145,17 @@ export default function AddEditProjectForm(props) {
             description: 'Cập nhật dự án thành công',
           });
 
-          // get new account list
+          // get new project list
           const filters = {
             pageNo: 0,
             pageSize: 10,
             searchText: '',
           };
+
           await dispatch(getProjectList(filters));
+
           onClose();
+
           navigate('/dashboard/project');
         } catch (error) {
           notification.error({

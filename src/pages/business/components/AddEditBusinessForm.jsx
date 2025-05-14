@@ -102,9 +102,15 @@ export default function AddEditBusinessForm(props) {
             pageSize: 10,
             searchText: '',
           };
-          onClose();
-          navigate('/dashboard/administration/business');
+
+          // Đảm bảo lấy lại dữ liệu trước khi đóng drawer
           await dispatch(getBusinessList(filters));
+
+          // Đóng drawer sau khi lấy dữ liệu thành công
+          onClose();
+
+          // Chuyển hướng sau khi đã đóng drawer
+          navigate('/dashboard/administration/business');
         } catch (error) {
           notification.error({
             message: 'Lỗi',
@@ -138,16 +144,21 @@ export default function AddEditBusinessForm(props) {
             searchText: '',
           };
 
-          onClose();
-          navigate('/dashboard/administration/business');
-
+          // Đảm bảo lấy lại dữ liệu trước khi đóng drawer
           await dispatch(getBusinessList(filters));
+
+          // Đóng drawer sau khi lấy dữ liệu thành công
+          onClose();
+
+          // Chuyển hướng sau khi đã đóng drawer
+          navigate('/dashboard/administration/business');
         } catch (error) {
           notification.error({
             message: 'Lỗi',
             description: error?.message || 'Cập nhật doanh nghiệp thất bại',
             icon: <CloseCircleOutlined style={{ color: '#ff4d4f' }} />,
           });
+          return;
         }
       }
     } catch (error) {

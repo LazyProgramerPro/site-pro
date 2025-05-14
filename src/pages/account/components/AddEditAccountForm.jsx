@@ -118,8 +118,13 @@ export default function AddEditAccountForm(props) {
             pageSize: 10,
             searchText: '',
           };
+          // Đảm bảo lấy lại dữ liệu trước khi đóng drawer
           await dispatch(getAccountList(filters));
+
+          // Đóng drawer sau khi lấy dữ liệu thành công
           onClose();
+
+          // Chuyển hướng sau khi đã đóng drawer
           navigate('/dashboard/administration/account');
         } catch (error) {
           notification.error({
@@ -127,6 +132,7 @@ export default function AddEditAccountForm(props) {
             description: error?.message || 'Thêm tài khoản thất bại',
             icon: <CloseCircleOutlined style={{ color: '#ff4d4f' }} />,
           });
+          return;
         }
       } else {
         // Call API to update existing account
@@ -154,7 +160,14 @@ export default function AddEditAccountForm(props) {
             pageSize: 10,
             searchText: '',
           };
+          // Đảm bảo lấy lại dữ liệu trước khi đóng drawer
           await dispatch(getAccountList(filters));
+
+          // Đóng drawer sau khi lấy dữ liệu thành công
+          onClose();
+
+          // Chuyển hướng sau khi đã đóng drawer
+          navigate('/dashboard/administration/account');
         } catch (error) {
           notification.error({
             message: 'Lỗi',
@@ -164,10 +177,13 @@ export default function AddEditAccountForm(props) {
           return;
         }
       }
-      onClose();
-      navigate('/dashboard/administration/account');
     } catch (error) {
       console.log('error:', error);
+      notification.error({
+        message: 'Lỗi',
+        description: 'Đã xảy ra lỗi không xác định khi xử lý yêu cầu',
+        icon: <CloseCircleOutlined style={{ color: '#ff4d4f' }} />,
+      });
     }
   };
 
