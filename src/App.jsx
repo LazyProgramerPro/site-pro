@@ -1,5 +1,6 @@
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
 import Error from './components/error/Error';
+import LoginRoute from './components/routes/LoginRoute';
 import ProtectedRoute from './components/routes/ProtectedRoute';
 import { AcceptanceRequest } from './pages/acceptance-request';
 import Account from './pages/account/components/Account';
@@ -35,7 +36,11 @@ const router = createBrowserRouter([
       },
       {
         path: 'login',
-        element: <Login />,
+        element: (
+          <LoginRoute>
+            <Login />
+          </LoginRoute>
+        ),
         // action: loginAction(queryClient),
       },
       {
