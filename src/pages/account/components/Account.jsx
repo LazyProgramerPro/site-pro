@@ -6,6 +6,7 @@ import http from '@/utils/http';
 import {
   DeleteOutlined,
   EditOutlined,
+  KeyOutlined,
   LockOutlined,
   PlusOutlined,
   SearchOutlined,
@@ -130,6 +131,16 @@ export default function Account() {
     } catch (error) {
       console.error('Lỗi khi mở khóa tài khoản:', error);
       message.error('Mở khóa tài khoản thất bại. Vui lòng thử lại!');
+    }
+  };
+
+  const handleResetPassword = async (accountId, userName) => {
+    try {
+      await http.post('/auth/user/reset-password', { id: accountId, username: userName });
+      message.success('Đặt lại mật khẩu thành công');
+    } catch (error) {
+      console.error('Lỗi khi đặt lại mật khẩu:', error);
+      message.error('Đặt lại mật khẩu thất bại. Vui lòng thử lại!');
     }
   };
 
@@ -263,6 +274,17 @@ export default function Account() {
               ) : (
                 <LockOutlined className="action-icon action-icon-disabled" />
               )}
+            </Popconfirm>
+          </ActionButton>
+
+          <ActionButton title="Đặt lại mật khẩu">
+            <Popconfirm
+              cancelText="Hủy bỏ"
+              okText="Đặt lại"
+              title="Bạn có chắc chắn muốn đặt lại mật khẩu cho tài khoản này?"
+              onConfirm={() => handleResetPassword(record?.id, record?.username)}
+            >
+              <KeyOutlined className="action-icon" />
             </Popconfirm>
           </ActionButton>
 
