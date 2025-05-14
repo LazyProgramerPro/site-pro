@@ -98,22 +98,29 @@ export default function AddEditProjectForm(props) {
           tu_van_giam_sat_id: values.tu_van_giam_sat_id,
           tu_van_thiet_ke_id: values.tu_van_thiet_ke_id,
         };
-        await dispatch(addProject(payload));
+        try {
+          await dispatch(addProject(payload)).unwrap();
 
-        notification.success({
-          message: 'Thành công',
-          description: 'Thêm dự án thành công',
-        });
+          notification.success({
+            message: 'Thành công',
+            description: 'Thêm dự án thành công',
+          });
 
-        // get new account list
-        const filters = {
-          pageNo: 0,
-          pageSize: 10,
-          searchText: '',
-        };
-        await dispatch(getProjectList(filters));
-        onClose();
-        navigate('/dashboard/project');
+          // get new account list
+          const filters = {
+            pageNo: 0,
+            pageSize: 10,
+            searchText: '',
+          };
+          await dispatch(getProjectList(filters));
+          onClose();
+          navigate('/dashboard/project');
+        } catch (error) {
+          notification.error({
+            message: 'Lỗi',
+            description: error?.message || 'Đã xảy ra lỗi khi thêm dự án',
+          });
+        }
       } else {
         // Format dates for API
         const payload = {
@@ -128,23 +135,29 @@ export default function AddEditProjectForm(props) {
           tu_van_thiet_ke_id: values.tu_van_thiet_ke_id,
         };
 
-        await dispatch(updateProject(payload));
+        try {
+          await dispatch(updateProject(payload)).unwrap();
 
-        notification.success({
-          message: 'Thành công',
-          description: 'Cập nhật dự án thành công',
-        });
-      }
+          notification.success({
+            message: 'Thành công',
+            description: 'Cập nhật dự án thành công',
+          });
 
-      // get new account list
-      const filters = {
-        pageNo: 0,
-        pageSize: 10,
-        searchText: '',
-      };
-      await dispatch(getProjectList(filters));
-      onClose();
-      navigate('/dashboard/project');
+          // get new account list
+          const filters = {
+            pageNo: 0,
+            pageSize: 10,
+            searchText: '',
+          };
+          await dispatch(getProjectList(filters));
+          onClose();
+          navigate('/dashboard/project');
+        } catch (error) {
+          notification.error({
+            message: 'Lỗi',
+            description: error?.message || 'Đã xảy ra lỗi khi cập nhật dự án',
+          });
+        }}
     } catch (error) {
       console.log('error:', error);
       notification.error({
@@ -316,7 +329,10 @@ export default function AddEditProjectForm(props) {
                     value: company.id,
                   }))}
                   showSearch
-                  filterOption={(input, option) => option.label.toLowerCase().includes(input.toLowerCase())}
+                  optionFilterProp="label"
+                  filterOption={(input, option) =>
+                    option.label.toLowerCase().includes(input.toLowerCase())
+                  }
                 />
               </Form.Item>
             </Col>
@@ -338,7 +354,10 @@ export default function AddEditProjectForm(props) {
                     value: company.id,
                   }))}
                   showSearch
-                  filterOption={(input, option) => option.label.toLowerCase().includes(input.toLowerCase())}
+                  optionFilterProp="label"
+                  filterOption={(input, option) =>
+                    option.label.toLowerCase().includes(input.toLowerCase())
+                  }
                 />
               </Form.Item>
             </Col>
@@ -362,7 +381,10 @@ export default function AddEditProjectForm(props) {
                     value: company.id,
                   }))}
                   showSearch
-                  filterOption={(input, option) => option.label.toLowerCase().includes(input.toLowerCase())}
+                  optionFilterProp="label"
+                  filterOption={(input, option) =>
+                    option.label.toLowerCase().includes(input.toLowerCase())
+                  }
                 />
               </Form.Item>
             </Col>
