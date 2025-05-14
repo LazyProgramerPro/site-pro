@@ -4,7 +4,6 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   DeleteOutlined,
-  InfoCircleOutlined,
   LockOutlined,
   MailOutlined,
   PhoneOutlined,
@@ -42,16 +41,11 @@ export default function AddEditAccountForm(props) {
   const { onClose, open } = props;
   const [form] = Form.useForm();
   const [initialValues, setInitialValues] = useState(initialState);
-  const [hasAdminRole, setHasAdminRole] = useState(false);
   const dispatch = useAppDispatch();
   const loading = useSelector((state) => state.account.loading);
   const selectedAccount = useSelector((state) => state.account.editingAccount);
   const groupList = useSelector((state) => state.group.groupList);
   const businessList = useSelector((state) => state.business.businessList);
-
-  // Tìm role ADMIN
-  const adminRole = groupList.find((group) => group.name?.toLowerCase() === 'admin');
-  const adminRoleId = adminRole?.id;
 
   console.log('groupList:', groupList, businessList);
 
@@ -63,11 +57,11 @@ export default function AddEditAccountForm(props) {
       promiseForGetBusiness.abort();
     };
   }, []);
+
   useEffect(() => {
     if (selectedAccount) {
       let formData = { ...selectedAccount };
 
-      // Xử lý danh sách vai trò
       if (selectedAccount.group_id_list && Array.isArray(selectedAccount.group_id_list)) {
       } else if (selectedAccount.role && Array.isArray(selectedAccount.role)) {
         formData.group_id_list = selectedAccount.role.map((role) => role.id);
@@ -75,27 +69,14 @@ export default function AddEditAccountForm(props) {
         formData.group_id_list = [];
       }
 
-      // Kiểm tra xem tài khoản có vai trò ADMIN không
-      const isAdmin =
-        formData.group_id_list &&
-        Array.isArray(formData.group_id_list) &&
-        adminRoleId &&
-        formData.group_id_list.includes(adminRoleId);
-
-      // Nếu là ADMIN, xóa toàn bộ thông tin doanh nghiệp
-      if (isAdmin) {
-        formData.doanh_nghiep_list = [];
+      if (formData.doanh_nghiep_list && Array.isArray(formData.doanh_nghiep_list)) {
+      } else if (selectedAccount.company && Array.isArray(selectedAccount.company)) {
+        formData.doanh_nghiep_list = selectedAccount.company.map((company) => ({
+          doanh_nghiep_id: company.id || company.doanh_nghiep_id || null,
+          position: company.position || company.chucVu || '',
+        }));
       } else {
-        // Xử lý danh sách doanh nghiệp cho các vai trò không phải ADMIN
-        if (formData.doanh_nghiep_list && Array.isArray(formData.doanh_nghiep_list)) {
-        } else if (selectedAccount.company && Array.isArray(selectedAccount.company)) {
-          formData.doanh_nghiep_list = selectedAccount.company.map((company) => ({
-            doanh_nghiep_id: company.id || company.doanh_nghiep_id || null,
-            position: company.position || company.chucVu || '',
-          }));
-        } else {
-          formData.doanh_nghiep_list = [{}];
-        }
+        formData.doanh_nghiep_list = [{}];
       }
 
       // dispatch(getGroupList());
@@ -108,50 +89,22 @@ export default function AddEditAccountForm(props) {
     if (open) {
       form.resetFields();
     }
-  }, [selectedAccount, open, form, adminRoleId]);
+  }, [selectedAccount, open, form]);
 
   // After form is reset, set values for edit mode
   useEffect(() => {
     if (open && !isEmpty(initialValues)) {
       form.setFieldsValue(initialValues);
-
-      // Kiểm tra nếu user đã có role ADMIN
-      if (initialValues.group_id_list && Array.isArray(initialValues.group_id_list) && adminRoleId) {
-        setHasAdminRole(initialValues.group_id_list.includes(adminRoleId));
-      }
     }
-  }, [initialValues, open, form, adminRoleId]);
-
-  // Theo dõi thay đổi của role selection
-  const handleRoleChange = (values) => {
-    if (adminRoleId) {
-      setHasAdminRole(values.includes(adminRoleId));
-    }
-  };
-
-  // Cập nhật đối tượng values trước khi gửi lên API
-  const processFormValues = (values) => {
-    // Nếu có vai trò ADMIN, xóa thông tin doanh nghiệp
-    if (hasAdminRole) {
-      return {
-        ...values,
-        doanh_nghiep_list: [],
-      };
-    }
-    return values;
-  };
-
+  }, [initialValues, open, form]);
   const onFinish = async (values) => {
     console.log('values:', values);
 
     try {
-      // Xử lý dữ liệu form trước khi gọi API
-      const processedValues = processFormValues(values);
-
       if (!selectedAccount) {
         // Gọi API tạo tài khoản mới và xử lý lỗi nếu có
         try {
-          await dispatch(addAccount(processedValues)).unwrap();
+          await dispatch(addAccount(values)).unwrap();
 
           notification.success({
             message: 'Thành công',
@@ -179,11 +132,11 @@ export default function AddEditAccountForm(props) {
         // Call API to update existing account
         const updatePayload = {
           id: selectedAccount.id,
-          full_name: processedValues.full_name,
-          email: processedValues.email,
-          phone_number: processedValues.phone_number,
-          doanh_nghiep_list: processedValues.doanh_nghiep_list,
-          group_id_list: processedValues.group_id_list,
+          full_name: values.full_name,
+          email: values.email,
+          phone_number: values.phone_number,
+          doanh_nghiep_list: values.doanh_nghiep_list,
+          group_id_list: values.group_id_list,
         };
 
         try {
@@ -261,16 +214,10 @@ export default function AddEditAccountForm(props) {
         <Space>
           <Button onClick={onClose} icon={<CloseCircleOutlined />}>
             Hủy
-          </Button>{' '}
+          </Button>
           <Button
             type="primary"
-            onClick={() => {
-              // Trước khi submit form, xử lý dữ liệu
-              const values = form.getFieldsValue();
-              const processedValues = processFormValues(values);
-              form.setFieldsValue(processedValues);
-              form.submit();
-            }}
+            onClick={() => form.submit()}
             loading={loading}
             disabled={loading}
             icon={<SaveOutlined />}
@@ -399,14 +346,7 @@ export default function AddEditAccountForm(props) {
               name="group_id_list"
               rules={[{ required: true, message: 'Vui lòng chọn vai trò!' }]}
             >
-              <Select
-                mode="multiple"
-                showSearch
-                allowClear
-                placeholder="Chọn vai trò"
-                optionFilterProp="children"
-                onChange={handleRoleChange}
-              >
+              <Select mode="multiple" showSearch allowClear placeholder="Chọn vai trò" optionFilterProp="children">
                 {groupList.map((role, idx) => (
                   <Select.Option value={role.id} key={idx}>
                     {role?.name}
@@ -415,80 +355,70 @@ export default function AddEditAccountForm(props) {
               </Select>
             </Form.Item>
 
-            {!hasAdminRole && (
-              <Form.List name="doanh_nghiep_list" initialValue={[{}]}>
-                {(fields, { add, remove }) => (
-                  <>
-                    {fields.map(({ key, name, ...restField }) => {
-                      // Get already selected companies excluding current field
-                      const selectedCompanies = getSelectedCompanies(fields, form, name);
+            <Form.List name="doanh_nghiep_list" initialValue={[{}]}>
+              {(fields, { add, remove }) => (
+                <>
+                  {fields.map(({ key, name, ...restField }) => {
+                    // Get already selected companies excluding current field
+                    const selectedCompanies = getSelectedCompanies(fields, form, name);
 
-                      console.log('selectedCompanies:', selectedCompanies);
+                    console.log('selectedCompanies:', selectedCompanies);
 
-                      return (
-                        <Row gutter={16} key={key} style={{ marginBottom: 16, alignItems: 'flex-start' }}>
-                          <Col xs={24} sm={11}>
-                            <Form.Item
-                              {...restField}
-                              name={[name, 'doanh_nghiep_id']}
-                              rules={[{ required: true, message: 'Vui lòng chọn doanh nghiệp!' }]}
-                              style={{ marginBottom: 0 }}
+                    return (
+                      <Row gutter={16} key={key} style={{ marginBottom: 16, alignItems: 'flex-start' }}>
+                        <Col xs={24} sm={11}>
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'doanh_nghiep_id']}
+                            rules={[{ required: true, message: 'Vui lòng chọn doanh nghiệp!' }]}
+                            style={{ marginBottom: 0 }}
+                          >
+                            <Select
+                              showSearch
+                              allowClear
+                              placeholder="Chọn doanh nghiệp"
+                              optionFilterProp="children"
+                              onChange={(value) => handleCompanyChange(value, name)}
                             >
-                              <Select
-                                showSearch
-                                allowClear
-                                placeholder="Chọn doanh nghiệp"
-                                optionFilterProp="children"
-                                onChange={(value) => handleCompanyChange(value, name)}
-                              >
-                                {businessList.map((company, idx) => (
-                                  <Select.Option
-                                    value={company?.id}
-                                    key={idx}
-                                    disabled={selectedCompanies.includes(company?.id)}
-                                  >
-                                    {company?.name}
-                                    {selectedCompanies.includes(company?.id) && ' (Đã chọn)'}
-                                  </Select.Option>
-                                ))}
-                              </Select>
-                            </Form.Item>
-                          </Col>
-                          <Col xs={24} sm={11}>
-                            <Form.Item
-                              {...restField}
-                              name={[name, 'position']}
-                              rules={[{ required: true, message: 'Vui lòng nhập chức vụ!' }]}
-                              style={{ marginBottom: 0 }}
-                            >
-                              <Input placeholder="Nhập chức vụ" />
-                            </Form.Item>
-                          </Col>
-                          <Col xs={24} sm={2} style={{ display: 'flex', height: '32px' }}>
-                            {fields.length > 1 && (
-                              <Button danger icon={<DeleteOutlined />} onClick={() => remove(name)} />
-                            )}
-                          </Col>
-                        </Row>
-                      );
-                    })}
-                    <Form.Item style={{ marginTop: 16 }}>
-                      <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
-                        Thêm doanh nghiệp và vị trí trong doanh nghiệp
-                      </Button>
-                    </Form.Item>
-                  </>
-                )}
-              </Form.List>
-            )}
-            {hasAdminRole && (
-              <div style={{ backgroundColor: '#f5f5f5', padding: 16, borderRadius: 4, marginBottom: 16 }}>
-                <Typography.Text type="secondary">
-                  <InfoCircleOutlined style={{ marginRight: 8 }} />
-                  Người dùng có vai trò ADMIN không cần chọn doanh nghiệp
-                </Typography.Text>
-              </div>
-            )}
+                              {businessList.map((company, idx) => (
+                                <Select.Option
+                                  value={company?.id}
+                                  key={idx}
+                                  disabled={selectedCompanies.includes(company?.id)}
+                                >
+                                  {company?.name}
+                                  {selectedCompanies.includes(company?.id) && ' (Đã chọn)'}
+                                </Select.Option>
+                              ))}
+                            </Select>
+                          </Form.Item>
+                        </Col>
+                        <Col xs={24} sm={11}>
+                          <Form.Item
+                            {...restField}
+                            name={[name, 'position']}
+                            rules={[{ required: true, message: 'Vui lòng nhập chức vụ!' }]}
+                            style={{ marginBottom: 0 }}
+                          >
+                            <Input placeholder="Nhập chức vụ" />
+                          </Form.Item>
+                        </Col>
+                        <Col xs={24} sm={2} style={{ display: 'flex', height: '32px' }}>
+                          {fields.length > 1 && (
+                            <Button danger icon={<DeleteOutlined />} onClick={() => remove(name)} />
+                          )}
+                        </Col>
+                      </Row>
+                    );
+                  })}
+                  <Form.Item style={{ marginTop: 16 }}>
+                    <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                      Thêm doanh nghiệp và vị trí trong doanh nghiệp
+                    </Button>
+                  </Form.Item>
+                </>
+              )}
+            </Form.List>
           </Card>
         </Form>
       )}
