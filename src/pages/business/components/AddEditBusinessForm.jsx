@@ -102,6 +102,8 @@ export default function AddEditBusinessForm(props) {
             pageSize: 10,
             searchText: '',
           };
+          onClose();
+          navigate('/dashboard/administration/business');
           await dispatch(getBusinessList(filters));
         } catch (error) {
           notification.error({
@@ -135,10 +137,11 @@ export default function AddEditBusinessForm(props) {
             pageSize: 10,
             searchText: '',
           };
-          await dispatch(getBusinessList(filters));
 
           onClose();
           navigate('/dashboard/administration/business');
+
+          await dispatch(getBusinessList(filters));
         } catch (error) {
           notification.error({
             message: 'Lỗi',
@@ -255,19 +258,19 @@ export default function AddEditBusinessForm(props) {
               <Row gutter={16}>
                 <Col span={24}>
                   <Form.Item
-                    label="Người phụ trách"
+                    label="Lãnh đạo"
                     name="leader_id"
                     rules={[
                       {
                         required: false,
-                        message: 'Vui lòng chọn người phụ trách!',
+                        message: 'Vui lòng chọn lãnh đạo!',
                       },
                     ]}
                   >
                     <Select
                       mode="multiple"
                       allowClear
-                      placeholder="Chọn người phụ trách"
+                      placeholder="Chọn lãnh đạo"
                       loading={userLoading}
                       prefix={<TeamOutlined />}
                       filterOption={(input, option) => option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0}

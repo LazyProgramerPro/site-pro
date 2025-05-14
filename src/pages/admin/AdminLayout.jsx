@@ -130,7 +130,7 @@ export default function AdminLayout() {
             <PageContent />
           </ContentWrapper>
         </StyledContent>
-        <StyledFooter>Site Pro ©{new Date().getFullYear()} Created by ThuongDev</StyledFooter>
+        <StyledFooter>Site Pro ©{new Date().getFullYear()} Created by HBO</StyledFooter>
       </Layout>
     </StyledLayout>
   );

@@ -392,7 +392,7 @@ export default function AddEditAccountForm(props) {
                               ))}
                             </Select>
                           </Form.Item>
-                        </Col>
+                        </Col>{' '}
                         <Col xs={24} sm={11}>
                           <Form.Item
                             {...restField}
@@ -404,9 +404,7 @@ export default function AddEditAccountForm(props) {
                           </Form.Item>
                         </Col>
                         <Col xs={24} sm={2} style={{ display: 'flex', height: '32px' }}>
-                          {fields.length > 1 && (
-                            <Button danger icon={<DeleteOutlined />} onClick={() => remove(name)} />
-                          )}
+                          <Button danger icon={<DeleteOutlined />} onClick={() => remove(name)} />
                         </Col>
                       </Row>
                     );

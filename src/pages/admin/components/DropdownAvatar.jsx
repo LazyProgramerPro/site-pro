@@ -74,7 +74,7 @@ const DropdownAvatar = () => {
 
   return (
     <AvatarContainer>
-      <GreetingText>Hi, {userProfile.displayName}</GreetingText>
+      <GreetingText>Xin chào, {userProfile.displayName}</GreetingText>
       <Dropdown menu={{ items }}>
         <a onClick={handleDropdownClick}>
           <Space>

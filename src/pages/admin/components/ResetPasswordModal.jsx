@@ -95,10 +95,15 @@ const ResetPasswordModal = () => {
     setLoading(true);
     try {
       // Gọi API đổi mật khẩu
-      await http.post('/auth/user/update-password', {
+      const { rc } = await http.post('/auth/user/update-password', {
         old_password: values.old_password,
         new_password: values.new_password,
       });
+
+      if (rc?.code !== 0) {
+        message.error(rc?.desc || 'Đổi mật khẩu thất bại. Vui lòng thử lại!');
+        return;
+      }
 
       setSuccess(true);
 
