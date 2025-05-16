@@ -9,7 +9,7 @@ const initialState = {
 };
 
 export const getGroupList = createAsyncThunk('group/getGroupList', async (filters, thunkAPI) => {
-  const { rc, rows } = await http.get('auth/user/list-auth-group', {});
+  const { rc, rows, totalCount } = await http.get('auth/user/list-auth-group', {});
 
   console.log('rows:', rows);
   if (rc?.code !== 0) {
@@ -17,7 +17,7 @@ export const getGroupList = createAsyncThunk('group/getGroupList', async (filter
     return thunkAPI.rejectWithValue(rc?.desc || 'Lỗi không xác định!');
   }
 
-  return rows;
+  return { data: rows, totalCount };
 });
 
 const groupSlice = createSlice({
@@ -27,7 +27,7 @@ const groupSlice = createSlice({
   extraReducers(builder) {
     builder
       .addCase(getGroupList.fulfilled, (state, action) => {
-        state.groupList = action.payload.rows;
+        state.groupList = action.payload.data;
         state.totalCount = action.payload.totalCount;
       })
       .addMatcher(
