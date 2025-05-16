@@ -1,4 +1,5 @@
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
+import { useEffect } from 'react';
 import Error from './components/error/Error';
 import LoginRoute from './components/routes/LoginRoute';
 import ProtectedRoute from './components/routes/ProtectedRoute';
@@ -15,6 +16,9 @@ import Group from './pages/group/components/Group';
 import { HomeLayout, Landing } from './pages/home';
 import { Problem } from './pages/problem';
 import { Project } from './pages/project';
+
+// Import custom hook
+import useTokenRefresh from './hooks/useTokenRefresh';
 
 export const checkDefaultTheme = () => {
   const isDarkTheme = localStorage.getItem('darkTheme') === 'true';
@@ -41,7 +45,6 @@ const router = createBrowserRouter([
             <Login />
           </LoginRoute>
         ),
-        // action: loginAction(queryClient),
       },
       {
         path: 'dashboard',
@@ -112,8 +115,16 @@ const router = createBrowserRouter([
   },
 ]);
 
-const App = () => {
+// Component AppContent để xử lý refresh token với custom hook
+const AppContent = () => {
+  // Kích hoạt cơ chế refresh token tự động với hook
+  useTokenRefresh();
+  
   return <RouterProvider router={router} />;
+};
+
+const App = () => {
+  return <AppContent />;
 };
 
 export default App;
