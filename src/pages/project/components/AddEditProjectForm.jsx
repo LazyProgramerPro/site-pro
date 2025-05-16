@@ -123,6 +123,7 @@ export default function AddEditProjectForm(props) {
             message: 'Lỗi',
             description: error?.message || 'Đã xảy ra lỗi khi thêm dự án',
           });
+          return;
         }
       } else {
         // Format dates for API

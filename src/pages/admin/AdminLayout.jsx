@@ -49,7 +49,7 @@ const items = [
       },
       {
         key: '/dashboard/administration/group',
-        label: 'Nhóm',
+        label: 'Nhóm hạng mục',
         icon: <TeamOutlined style={{ fontSize: '14px' }} />,
       },
     ],
