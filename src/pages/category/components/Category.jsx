@@ -1,6 +1,6 @@
 import { useStyle } from '@/hooks/useStyle';
-import { DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Input, message, Popconfirm, Space, Table, Typography } from 'antd';
+import { DeleteOutlined, EditOutlined, PlusOutlined, QuestionCircleOutlined, SearchOutlined } from '@ant-design/icons';
+import { Button, Card, Col, Input, message, Modal, Space, Table, Typography } from 'antd';
 import { Fragment, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -73,10 +73,39 @@ export default function Category() {
       // searchTerm đã được cập nhật qua onChange
     }
   };
-
   const onShowSizeChange = (current, pageSize) => {
     setPage(current);
     setSize(pageSize);
+  };
+
+  // Hiển thị modal xác nhận xóa
+  const showDeleteConfirm = (record) => {
+    Modal.confirm({
+      title: 'Xác nhận xóa hạng mục',
+      icon: <QuestionCircleOutlined style={{ color: '#ff4d4f' }} />,
+      content: (
+        <div>
+          <p>Bạn có chắc chắn muốn xóa hạng mục này?</p>
+          <p>
+            <strong>Mã hạng mục:</strong> {record?.code}
+          </p>
+          <p>
+            <strong>Tên hạng mục:</strong> {record?.name}
+          </p>
+          <p style={{ color: '#ff4d4f' }}>
+            Lưu ý: Việc xóa hạng mục sẽ xóa tất cả nhóm hạng mục liên quan. Dữ liệu sẽ bị xóa vĩnh viễn và không thể
+            khôi phục.
+          </p>
+        </div>
+      ),
+      okText: 'Xóa',
+      okButtonProps: {
+        danger: true,
+      },
+      cancelText: 'Hủy bỏ',
+      onOk: () => handleDeleteCategory(record?.id),
+      width: 500,
+    });
   };
   const columns = [
     {
@@ -112,16 +141,9 @@ export default function Category() {
           {' '}
           <WrapperIcons title="Sửa hạng mục" onClick={() => handleEditCategory(record?.id)}>
             <EditOutlined className="action-icon" style={{ color: '#1890ff' }} />
-          </WrapperIcons>
-          <WrapperIcons title="Xóa hạng mục">
-            <Popconfirm
-              cancelText="Hủy bỏ"
-              okText="Xóa"
-              title="Bạn có chắc chắn muốn xóa hạng mục này?"
-              onConfirm={() => handleDeleteCategory(record?.id)}
-            >
-              <DeleteOutlined className="delete-icon" style={{ color: '#ff4d4f' }} />
-            </Popconfirm>
+          </WrapperIcons>{' '}
+          <WrapperIcons title="Xóa hạng mục" onClick={() => showDeleteConfirm(record)}>
+            <DeleteOutlined className="delete-icon" style={{ color: '#ff4d4f' }} />
           </WrapperIcons>
         </Space>
       ),

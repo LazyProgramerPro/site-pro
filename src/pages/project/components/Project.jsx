@@ -7,10 +7,11 @@ import {
   EditOutlined,
   EyeOutlined,
   PlusOutlined,
+  QuestionCircleOutlined,
   SearchOutlined,
   ProjectOutlined,
 } from '@ant-design/icons';
-import { Button, Card, Col, Input, Popconfirm, Row, Space, Table, Typography, message } from 'antd';
+import { Button, Card, Col, Input, Modal, Row, Space, Table, Typography, message } from 'antd';
 import { Fragment, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -98,10 +99,39 @@ export default function Project() {
       dispatch(getProjectList({ searchText: searchTerm, pageNo: page - 1, pageSize: size }));
     }
   };
-
   const onShowSizeChange = (current, pageSize) => {
     setPage(current);
     setSize(pageSize);
+  };
+
+  // Hiển thị modal xác nhận xóa
+  const showDeleteConfirm = (record) => {
+    Modal.confirm({
+      title: 'Xác nhận xóa dự án',
+      icon: <QuestionCircleOutlined style={{ color: '#ff4d4f' }} />,
+      content: (
+        <div>
+          <p>Bạn có chắc chắn muốn xóa dự án này?</p>
+          <p>
+            <strong>Mã dự án:</strong> {record?.code}
+          </p>
+          <p>
+            <strong>Tên dự án:</strong> {record?.name}
+          </p>
+          <p style={{ color: '#ff4d4f', fontWeight: 'bold' }}>
+            CẢNH BÁO: Việc xóa dự án sẽ xóa tất cả công trình, hạng mục và nhóm hạng mục liên quan. Dữ liệu sẽ bị xóa
+            vĩnh viễn và không thể khôi phục.
+          </p>
+        </div>
+      ),
+      okText: 'Xóa',
+      okButtonProps: {
+        danger: true,
+      },
+      cancelText: 'Hủy bỏ',
+      onOk: () => handleDeleteProject(record?.id),
+      width: 550,
+    });
   };
   const columns = [
     {
@@ -196,20 +226,11 @@ export default function Project() {
           <ActionButton title="Xem chi tiết dự án" onClick={() => handleViewProject(record?.id)}>
             <EyeOutlined className="action-icon view-icon" />
           </ActionButton>
-
           <ActionButton title="Sửa dự án" onClick={() => handleEditProject(record?.id)}>
             <EditOutlined className="action-icon" />
-          </ActionButton>
-
-          <ActionButton title="Xóa dự án">
-            <Popconfirm
-              cancelText="Hủy bỏ"
-              okText="Xóa"
-              title="Bạn có chắc chắn muốn xóa dự án này?"
-              onConfirm={() => handleDeleteProject(record?.id)}
-            >
-              <DeleteOutlined className="action-icon delete-icon" />
-            </Popconfirm>
+          </ActionButton>{' '}
+          <ActionButton title="Xóa dự án" onClick={() => showDeleteConfirm(record)}>
+            <DeleteOutlined className="action-icon delete-icon" />
           </ActionButton>
         </Space>
       ),

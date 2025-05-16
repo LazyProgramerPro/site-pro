@@ -363,7 +363,7 @@ export default function AddEditAccountForm(props) {
               rules={[{ required: true, message: 'Vui lòng chọn vai trò!' }]}
             >
               <Select mode="multiple" showSearch allowClear placeholder="Chọn vai trò" optionFilterProp="children">
-                {groupList.map((role, idx) => (
+                {groupList?.map((role, idx) => (
                   <Select.Option value={role.id} key={idx}>
                     {role?.name}
                   </Select.Option>

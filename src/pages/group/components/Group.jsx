@@ -1,6 +1,6 @@
 import { useStyle } from '@/hooks/useStyle';
-import { DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Input, message, Popconfirm, Space, Table, Typography } from 'antd';
+import { DeleteOutlined, EditOutlined, PlusOutlined, QuestionCircleOutlined, SearchOutlined } from '@ant-design/icons';
+import { Button, Card, Col, Input, message, Modal, Space, Table, Typography } from 'antd';
 import { Fragment, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -74,10 +74,36 @@ export default function Group() {
       // searchTerm đã được cập nhật qua onChange
     }
   };
-
   const onShowSizeChange = (current, pageSize) => {
     setPage(current);
     setSize(pageSize);
+  };
+
+  // Hiển thị modal xác nhận xóa
+  const showDeleteConfirm = (record) => {
+    Modal.confirm({
+      title: 'Xác nhận xóa nhóm hạng mục',
+      icon: <QuestionCircleOutlined style={{ color: '#ff4d4f' }} />,
+      content: (
+        <div>
+          <p>Bạn có chắc chắn muốn xóa nhóm hạng mục này?</p>
+          <p>
+            <strong>Mã nhóm:</strong> {record?.code}
+          </p>
+          <p>
+            <strong>Tên nhóm:</strong> {record?.name}
+          </p>
+          <p style={{ color: '#ff4d4f' }}>Lưu ý: Dữ liệu sẽ bị xóa vĩnh viễn và không thể khôi phục.</p>
+        </div>
+      ),
+      okText: 'Xóa',
+      okButtonProps: {
+        danger: true,
+      },
+      cancelText: 'Hủy bỏ',
+      onOk: () => handleDeleteGroup(record?.id),
+      width: 500,
+    });
   };
   const columns = [
     {
@@ -112,17 +138,9 @@ export default function Group() {
         <Space size="middle">
           <WrapperIcons title="Sửa nhóm hạng mục" onClick={() => handleEditGroup(record?.id)}>
             <EditOutlined className="action-icon" style={{ color: '#1890ff' }} />
-          </WrapperIcons>
-
-          <WrapperIcons title="Xóa nhóm hạng mục">
-            <Popconfirm
-              cancelText="Hủy bỏ"
-              okText="Xóa"
-              title="Bạn có chắc chắn muốn xóa nhóm này?"
-              onConfirm={() => handleDeleteGroup(record?.id)}
-            >
-              <DeleteOutlined className="delete-icon" style={{ color: '#ff4d4f' }} />
-            </Popconfirm>
+          </WrapperIcons>{' '}
+          <WrapperIcons title="Xóa nhóm hạng mục" onClick={() => showDeleteConfirm(record)}>
+            <DeleteOutlined className="delete-icon" style={{ color: '#ff4d4f' }} />
           </WrapperIcons>
         </Space>
       ),

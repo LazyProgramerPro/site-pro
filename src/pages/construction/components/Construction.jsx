@@ -1,6 +1,13 @@
 import { useStyle } from '@/hooks/useStyle';
-import { BankOutlined, DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Input, message, Popconfirm, Space, Table, Typography } from 'antd';
+import {
+  BankOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  PlusOutlined,
+  QuestionCircleOutlined,
+  SearchOutlined,
+} from '@ant-design/icons';
+import { Button, Card, Col, Input, message, Modal, Space, Table, Typography } from 'antd';
 import { Fragment, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -81,10 +88,39 @@ export default function Construction() {
       // searchTerm đã được cập nhật qua onChange
     }
   };
-
   const onShowSizeChange = (current, pageSize) => {
     setPage(current);
     setSize(pageSize);
+  };
+
+  // Hiển thị modal xác nhận xóa
+  const showDeleteConfirm = (record) => {
+    Modal.confirm({
+      title: 'Xác nhận xóa công trình',
+      icon: <QuestionCircleOutlined style={{ color: '#ff4d4f' }} />,
+      content: (
+        <div>
+          <p>Bạn có chắc chắn muốn xóa công trình này?</p>
+          <p>
+            <strong>Mã công trình:</strong> {record?.code}
+          </p>
+          <p>
+            <strong>Tên công trình:</strong> {record?.name}
+          </p>
+          <p style={{ color: '#ff4d4f' }}>
+            Lưu ý: Việc xóa công trình sẽ xóa tất cả hạng mục và nhóm hạng mục liên quan. Dữ liệu sẽ bị xóa vĩnh viễn và
+            không thể khôi phục.
+          </p>
+        </div>
+      ),
+      okText: 'Xóa',
+      okButtonProps: {
+        danger: true,
+      },
+      cancelText: 'Hủy bỏ',
+      onOk: () => handleDeleteConstruction(record?.id),
+      width: 500,
+    });
   };
 
   const columns = [
@@ -125,16 +161,9 @@ export default function Construction() {
         <Space size="middle">
           <WrapperIcons title="Sửa công trình" onClick={() => handleEditConstruction(record?.id)}>
             <EditOutlined className="action-icon" style={{ color: '#1890ff' }} />
-          </WrapperIcons>
-          <WrapperIcons title="Xóa công trình">
-            <Popconfirm
-              cancelText="Hủy bỏ"
-              okText="Xóa"
-              title="Bạn có chắc chắn muốn xóa công trình này?"
-              onConfirm={() => handleDeleteConstruction(record?.id)}
-            >
-              <DeleteOutlined className="delete-icon" style={{ color: '#ff4d4f' }} />
-            </Popconfirm>
+          </WrapperIcons>{' '}
+          <WrapperIcons title="Xóa công trình" onClick={() => showDeleteConfirm(record)}>
+            <DeleteOutlined className="delete-icon" style={{ color: '#ff4d4f' }} />
           </WrapperIcons>
         </Space>
       ),

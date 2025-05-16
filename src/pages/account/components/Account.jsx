@@ -9,24 +9,11 @@ import {
   KeyOutlined,
   LockOutlined,
   PlusOutlined,
+  QuestionCircleOutlined,
   SearchOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-import {
-  Avatar,
-  Button,
-  Card,
-  Col,
-  Input,
-  Popconfirm,
-  Row,
-  Space,
-  Table,
-  Tag,
-  Tooltip,
-  Typography,
-  message,
-} from 'antd';
+import { Avatar, Button, Card, Col, Input, Modal, Row, Space, Table, Tag, Tooltip, Typography, message } from 'antd';
 import { Fragment, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -94,10 +81,103 @@ export default function Account() {
   const handleEditAccount = (accountId) => {
     showDrawer(accountId);
   };
-
   const onShowSizeChange = (current, pageSize) => {
     setPage(current);
     setSize(pageSize);
+  };
+
+  // Hiển thị modal xác nhận xóa tài khoản
+  const showDeleteConfirm = (record) => {
+    Modal.confirm({
+      title: 'Xác nhận xóa tài khoản',
+      icon: <QuestionCircleOutlined style={{ color: '#ff4d4f' }} />,
+      content: (
+        <div>
+          <p>Bạn có chắc chắn muốn xóa tài khoản này?</p>
+          <p>
+            <strong>Tên đăng nhập:</strong> {record?.username}
+          </p>
+          <p>
+            <strong>Họ tên:</strong> {record?.full_name}
+          </p>
+          <p style={{ color: '#ff4d4f' }}>Lưu ý: Dữ liệu sẽ bị xóa vĩnh viễn và không thể khôi phục.</p>
+        </div>
+      ),
+      okText: 'Xóa',
+      okButtonProps: {
+        danger: true,
+      },
+      cancelText: 'Hủy bỏ',
+      onOk: () => handleDeleteAccount(record?.id),
+      width: 500,
+    });
+  };
+
+  // Hiển thị modal xác nhận khóa/mở khóa tài khoản
+  const showLockUnlockConfirm = (record) => {
+    Modal.confirm({
+      title: record?.is_active ? 'Xác nhận khóa tài khoản' : 'Xác nhận mở khóa tài khoản',
+      icon: <QuestionCircleOutlined style={{ color: record?.is_active ? '#ff4d4f' : '#52c41a' }} />,
+      content: (
+        <div>
+          <p>
+            {record?.is_active
+              ? 'Bạn có chắc chắn muốn khóa tài khoản này?'
+              : 'Bạn có chắc chắn muốn mở khóa tài khoản này?'}
+          </p>
+          <p>
+            <strong>Tên đăng nhập:</strong> {record?.username}
+          </p>
+          <p>
+            <strong>Họ tên:</strong> {record?.full_name}
+          </p>
+          {record?.is_active && (
+            <p style={{ color: '#ff4d4f' }}>Khi bị khóa, người dùng sẽ không thể đăng nhập vào hệ thống.</p>
+          )}
+        </div>
+      ),
+      okText: record?.is_active ? 'Khóa' : 'Mở khóa',
+      okButtonProps: {
+        danger: record?.is_active,
+        type: record?.is_active ? 'primary' : 'default',
+      },
+      cancelText: 'Hủy bỏ',
+      onOk: () => {
+        if (record?.is_active) {
+          handleLockAccount(record?.id);
+        } else {
+          handleUnlockAccount(record?.id);
+        }
+      },
+      width: 500,
+    });
+  };
+
+  // Hiển thị modal xác nhận đặt lại mật khẩu
+  const showResetPasswordConfirm = (record) => {
+    Modal.confirm({
+      title: 'Xác nhận đặt lại mật khẩu',
+      icon: <QuestionCircleOutlined style={{ color: '#faad14' }} />,
+      content: (
+        <div>
+          <p>Bạn có chắc chắn muốn đặt lại mật khẩu cho tài khoản này?</p>
+          <p>
+            <strong>Tên đăng nhập:</strong> {record?.username}
+          </p>
+          <p>
+            <strong>Họ tên:</strong> {record?.full_name}
+          </p>
+          <p style={{ color: '#faad14' }}>Mật khẩu mới sẽ được gửi tới email liên kết với tài khoản này.</p>
+        </div>
+      ),
+      okText: 'Đặt lại',
+      okButtonProps: {
+        type: 'primary',
+      },
+      cancelText: 'Hủy bỏ',
+      onOk: () => handleResetPassword(record?.id, record?.username),
+      width: 500,
+    });
   };
   const handleLockAccount = async (accountId) => {
     try {
@@ -250,53 +330,22 @@ export default function Account() {
         <Space size="middle">
           <ActionButton title="Chỉnh sửa tài khoản" onClick={() => handleEditAccount(record?.id)}>
             <EditOutlined className="action-icon" />
-          </ActionButton>
-
-          <ActionButton title={record?.is_active ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}>
-            <Popconfirm
-              cancelText="Hủy bỏ"
-              okText={record?.is_active ? 'Khóa' : 'Mở khóa'}
-              title={
-                record?.is_active
-                  ? 'Bạn có chắc chắn muốn khóa tài khoản này?'
-                  : 'Bạn có chắc chắn muốn mở khóa tài khoản này?'
-              }
-              onConfirm={() => {
-                if (record?.is_active) {
-                  handleLockAccount(record?.id);
-                } else {
-                  handleUnlockAccount(record?.id);
-                }
-              }}
-            >
-              {record?.is_active ? (
-                <LockOutlined className="action-icon" />
-              ) : (
-                <LockOutlined className="action-icon action-icon-disabled" />
-              )}
-            </Popconfirm>
-          </ActionButton>
-
-          <ActionButton title="Đặt lại mật khẩu">
-            <Popconfirm
-              cancelText="Hủy bỏ"
-              okText="Đặt lại"
-              title="Bạn có chắc chắn muốn đặt lại mật khẩu cho tài khoản này?"
-              onConfirm={() => handleResetPassword(record?.id, record?.username)}
-            >
-              <KeyOutlined className="action-icon" />
-            </Popconfirm>
-          </ActionButton>
-
-          <ActionButton title="Xóa tài khoản">
-            <Popconfirm
-              cancelText="Hủy bỏ"
-              okText="Xóa"
-              title="Bạn có chắc chắn muốn xóa tài khoản này?"
-              onConfirm={() => handleDeleteAccount(record?.id)}
-            >
-              <DeleteOutlined className="action-icon delete-icon" />
-            </Popconfirm>
+          </ActionButton>{' '}
+          <ActionButton
+            title={record?.is_active ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}
+            onClick={() => showLockUnlockConfirm(record)}
+          >
+            {record?.is_active ? (
+              <LockOutlined className="action-icon" />
+            ) : (
+              <LockOutlined className="action-icon action-icon-disabled" />
+            )}
+          </ActionButton>{' '}
+          <ActionButton title="Đặt lại mật khẩu" onClick={() => showResetPasswordConfirm(record)}>
+            <KeyOutlined className="action-icon" />
+          </ActionButton>{' '}
+          <ActionButton title="Xóa tài khoản" onClick={() => showDeleteConfirm(record)}>
+            <DeleteOutlined className="action-icon delete-icon" />
           </ActionButton>
         </Space>
       ),

@@ -1,8 +1,15 @@
 import { SkeletonTable } from '@/components/table/SkeletonTable';
 import { useStyle } from '@/hooks/useStyle';
 import { useAppDispatch } from '@/redux/store';
-import { BankOutlined, DeleteOutlined, EditOutlined, PlusOutlined, SearchOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Input, Popconfirm, Row, Space, Table, Tag, Typography, message } from 'antd';
+import {
+  BankOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  PlusOutlined,
+  QuestionCircleOutlined,
+  SearchOutlined,
+} from '@ant-design/icons';
+import { Button, Card, Col, Input, Modal, Row, Space, Table, Tag, Typography, message } from 'antd';
 import { Fragment, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -77,10 +84,36 @@ export default function Business() {
       dispatch(getBusinessList({ searchText: searchTerm, pageNo: page - 1, pageSize: size }));
     }
   };
-
   const onShowSizeChange = (current, pageSize) => {
     setPage(current);
     setSize(pageSize);
+  };
+
+  // Hiển thị modal xác nhận xóa
+  const showDeleteConfirm = (record) => {
+    Modal.confirm({
+      title: 'Xác nhận xóa doanh nghiệp',
+      icon: <QuestionCircleOutlined style={{ color: '#ff4d4f' }} />,
+      content: (
+        <div>
+          <p>Bạn có chắc chắn muốn xóa doanh nghiệp này?</p>
+          <p>
+            <strong>Mã doanh nghiệp:</strong> {record?.code}
+          </p>
+          <p>
+            <strong>Tên doanh nghiệp:</strong> {record?.name}
+          </p>
+          <p style={{ color: '#ff4d4f' }}>Lưu ý: Dữ liệu sẽ bị xóa vĩnh viễn và không thể khôi phục.</p>
+        </div>
+      ),
+      okText: 'Xóa',
+      okButtonProps: {
+        danger: true,
+      },
+      cancelText: 'Hủy bỏ',
+      onOk: () => handleDeleteBusiness(record?.id),
+      width: 500,
+    });
   };
   const columns = [
     {
@@ -132,17 +165,9 @@ export default function Business() {
         <Space size="middle">
           <ActionButton title="Sửa thông tin doanh nghiệp" onClick={() => handleEditBusiness(record?.id)}>
             <EditOutlined className="action-icon" />
-          </ActionButton>
-
-          <ActionButton title="Xóa doanh nghiệp">
-            <Popconfirm
-              cancelText="Hủy bỏ"
-              okText="Xóa"
-              title="Bạn có chắc chắn muốn xóa doanh nghiệp này?"
-              onConfirm={() => handleDeleteBusiness(record?.id)}
-            >
-              <DeleteOutlined className="action-icon delete-icon" />
-            </Popconfirm>
+          </ActionButton>{' '}
+          <ActionButton title="Xóa doanh nghiệp" onClick={() => showDeleteConfirm(record)}>
+            <DeleteOutlined className="action-icon delete-icon" />
           </ActionButton>
         </Space>
       ),
