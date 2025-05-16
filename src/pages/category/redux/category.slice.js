@@ -1,121 +1,28 @@
 import http from "@/utils/http";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { message } from "antd";
 
 const initialState = {
   categoryList: [],
+  totalCount: 0,
   editingCategory: null,
   loading: false,
   currentRequestId: undefined,
 };
 
-const fakeCategoryList = [
-  {
-    id: '1',
-    categoryCode: 'HM-001',
-    categoryName: 'Phần móng',
-    constructionName: 'Chung cư Sky Garden',
-  },
-  {
-    id: '2',
-    categoryCode: 'HM-002',
-    categoryName: 'Phần kết cấu',
-    constructionName: 'Chung cư Sky Garden',
-  },
-  {
-    id: '3',
-    categoryCode: 'HM-003',
-    categoryName: 'Hệ thống điện',
-    constructionName: 'Trung tâm Thương mại Sunshine',
-  },
-  {
-    id: '4',
-    categoryCode: 'HM-004',
-    categoryName: 'Hệ thống nước',
-    constructionName: 'Trung tâm Thương mại Sunshine',
-  },
-  {
-    id: '5',
-    categoryCode: 'HM-005',
-    categoryName: 'Phần hoàn thiện',
-    constructionName: 'Khu nhà ở Thủ Đức',
-  },
-  {
-    id: '6',
-    categoryCode: 'HM-006',
-    categoryName: 'Công tác xây gạch',
-    constructionName: 'Khu nhà ở Thủ Đức',
-  },
-  {
-    id: '7',
-    categoryCode: 'HM-007',
-    categoryName: 'Công tác lắp kính',
-    constructionName: 'Bệnh viện Đa khoa Quốc tế',
-  },
-  {
-    id: '8',
-    categoryCode: 'HM-008',
-    categoryName: 'Hệ thống PCCC',
-    constructionName: 'Bệnh viện Đa khoa Quốc tế',
-  },
-  {
-    id: '9',
-    categoryCode: 'HM-009',
-    categoryName: 'Hệ thống điều hòa',
-    constructionName: 'Trường Đại học Công nghệ',
-  },
-  {
-    id: '10',
-    categoryCode: 'HM-010',
-    categoryName: 'Công tác sơn',
-    constructionName: 'Trường Đại học Công nghệ',
-  },
-  {
-    id: '11',
-    categoryCode: 'HM-011',
-    categoryName: 'Công tác lát sàn',
-    constructionName: 'Cầu Vượt Sông Hồng',
-  },
-  {
-    id: '12',
-    categoryCode: 'HM-012',
-    categoryName: 'Hệ thống cấp thoát nước',
-    constructionName: 'Nhà máy Xử lý Nước thải',
-  },
-  {
-    id: '13',
-    categoryCode: 'HM-013',
-    categoryName: 'Hệ thống thông tin liên lạc',
-    constructionName: 'Khu Công nghệ cao Hòa Lạc',
-  },
-  {
-    id: '14',
-    categoryCode: 'HM-014',
-    categoryName: 'Công tác mặt đường',
-    constructionName: 'Đường sắt Đô thị Nhổn - Ga Hà Nội',
-  },
-  {
-    id: '15',
-    categoryCode: 'HM-015',
-    categoryName: 'Trần thạch cao',
-    constructionName: 'Khu Đô thị Thủ Thiêm',
-  },
-];
-
-
 export const getCategoryList = createAsyncThunk(
   "category/getCategoryList",
-  async (searchTerm, thunkAPI) => {
-    console.log("getCategoryList with searchTerm:", searchTerm);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    if (!searchTerm) {
-      return fakeCategoryList;
-    }
-
-    const filteredCategories = fakeCategoryList.filter((category) =>
-      category.name.toLowerCase().includes(searchTerm.toLowerCase())
+  async (filters, thunkAPI) => {
+    const { rc, data, totalCount } = await http.post(
+      "/auth/hangmuc/list",
+      { ...filters },
+      { signal: thunkAPI.signal }
     );
-
-    return filteredCategories;
+    if (rc?.code !== 0) {
+      message.error(rc?.desc || "Lỗi không xác định!");
+      return thunkAPI.rejectWithValue(rc?.desc || "Lỗi không xác định!");
+    }
+    return { data, totalCount };
   }
 );
 
@@ -123,10 +30,14 @@ export const addCategory = createAsyncThunk(
   "category/addCategory",
   async (body, thunkAPI) => {
     try {
-      const response = await http.post("categories", body, {
+      const { rc, item } = await http.post("/auth/hangmuc/add", body, {
         signal: thunkAPI.signal,
       });
-      return response.data;
+      if (rc?.code !== 0) {
+        message.error(rc?.desc || "Lỗi không xác định!");
+        return thunkAPI.rejectWithValue(rc?.desc || "Lỗi không xác định!");
+      }
+      return item;
     } catch (error) {
       if (error.name === "AxiosError" && error.response.status === 422) {
         return thunkAPI.rejectWithValue(error.response.data);
@@ -138,12 +49,16 @@ export const addCategory = createAsyncThunk(
 
 export const updateCategory = createAsyncThunk(
   "category/updateCategory",
-  async ({ categoryId, body }, thunkAPI) => {
+  async (body, thunkAPI) => {
     try {
-      const response = await http.put(`categories/${categoryId}`, body, {
+      const { rc, item } = await http.put("/auth/hangmuc/update", body, {
         signal: thunkAPI.signal,
       });
-      return response.data;
+      if (rc?.code !== 0) {
+        message.error(rc?.desc || "Lỗi không xác định!");
+        return thunkAPI.rejectWithValue(rc?.desc || "Lỗi không xác định!");
+      }
+      return item;
     } catch (error) {
       if (error.name === "AxiosError" && error.response.status === 422) {
         return thunkAPI.rejectWithValue(error.response.data);
@@ -156,10 +71,20 @@ export const updateCategory = createAsyncThunk(
 export const deleteCategory = createAsyncThunk(
   "category/deleteCategory",
   async (categoryId, thunkAPI) => {
-    const response = await http.delete(`categories/${categoryId}`, {
-      signal: thunkAPI.signal,
-    });
-    return response.data;
+    try {
+      const { rc } = await http.delete("/auth/hangmuc", {
+        data: { id: categoryId },
+        signal: thunkAPI.signal,
+      });
+      if (!rc || rc.code !== 0) {
+        message.error(rc?.desc || "Lỗi không xác định!");
+        return thunkAPI.rejectWithValue(rc?.desc || "Lỗi không xác định!");
+      }
+      return categoryId;
+    } catch (error) {
+      message.error("Xóa hạng mục thất bại!");
+      return thunkAPI.rejectWithValue("Xóa hạng mục thất bại!");
+    }
   }
 );
 
@@ -180,7 +105,8 @@ const categorySlice = createSlice({
   extraReducers(builder) {
     builder
       .addCase(getCategoryList.fulfilled, (state, action) => {
-        state.categoryList = action.payload;
+        state.categoryList = action.payload.data;
+        state.totalCount = action.payload.totalCount;
       })
       .addCase(addCategory.fulfilled, (state, action) => {
         state.categoryList.push(action.payload);
@@ -195,7 +121,6 @@ const categorySlice = createSlice({
         });
         state.editingCategory = null;
       })
-
       .addCase(deleteCategory.fulfilled, (state, action) => {
         const categoryId = action.meta.arg;
         const deleteCategoryIndex = state.categoryList.findIndex(
@@ -205,7 +130,6 @@ const categorySlice = createSlice({
           state.categoryList.splice(deleteCategoryIndex, 1);
         }
       })
-
       .addMatcher(
         (action) => action.type.endsWith("/pending"),
         (state, action) => {
@@ -228,7 +152,7 @@ const categorySlice = createSlice({
         }
       )
       .addDefaultCase((state, action) => {
-        // console.log(`action type: ${action.type}`, current(state))
+        // ...existing code...
       });
   },
 });
