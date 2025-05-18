@@ -4,20 +4,23 @@ import { useNavigate } from 'react-router-dom';
 
 const ProtectedRoute = ({ children }) => {
   const navigate = useNavigate();
+  // Kiểm tra user và xác thực token
+  const { user, isAuthenticated } = useSelector((state) => state.user);
 
-  const user = useSelector((state) => state.user.user);
+  useEffect(() => {
+    // Kiểm tra nếu không có token hợp lệ hoặc đã hết hạn
+    if (!isAuthenticated || !user?.token) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, user, navigate]);
 
-  useEffect(
-    function () {
-      if (!user) navigate('/login');
-    },
-    [user, navigate],
-  );
-
-  if (user && user?.token) {
-    // If authenticated, render the protected component
+  // Nếu đã xác thực và có thông tin user, hiển thị component được bảo vệ
+  if (isAuthenticated && user?.token) {
     return <>{children}</>;
   }
+
+  // Trường hợp đang kiểm tra xác thực
+  return null;
 };
 
 export default ProtectedRoute;

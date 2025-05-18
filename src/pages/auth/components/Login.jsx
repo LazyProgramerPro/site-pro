@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import Wrapper from '../../../assets/wrappers/Login';
-import { loggedInUser } from '../redux/user.slice';
+import { saveAuthData } from '../../../services/authService';
 import Logo from './../../../components/logo/Logo';
 import ForgotPasswordModal from './ForgotPasswordModal';
 
@@ -15,7 +15,6 @@ export default function Login() {
   const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] = useState(false);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-
   const onFinish = async (values) => {
     setLoading(true);
     try {
@@ -25,26 +24,30 @@ export default function Login() {
         message.error(rc?.desc || 'Đăng nhập thất bại!');
         return;
       }
-
-      const { access_token } = auth;
+      const { access_token, refresh_token, expires_in, refresh_expires_in } = auth;
       const { username, is_active } = info;
 
       if (!is_active) {
         message.error('Tài khoản của bạn đã bị khóa!');
         localStorage.removeItem('user');
         return;
-      }
+      } // Chuẩn bị dữ liệu người dùng trong một đối tượng duy nhất
+      const userData = {
+        // Thông tin xác thực
+        access_token,
+        token: access_token,
+        refresh_token,
+        expires_in,
+        refresh_expires_in, // Thêm refresh_expires_in
+        token_created_at: new Date().toISOString(),
+        refresh_token_created_at: new Date().toISOString(), // Thêm thời điểm tạo refresh token
+        username,
+        is_active,
+      };
 
-      await dispatch(
-        loggedInUser({
-          token: access_token,
-          username,
-          is_active,
-        }),
-      );
-
-      // save token to local storage
-      localStorage.setItem('user', JSON.stringify({ token: access_token, username, is_active }));
+      // Lưu thông tin xác thực và thiết lập auto refresh token
+      // Đóng gói trong cấu trúc mà authService mong đợi
+      saveAuthData(userData);
 
       message.success('Đăng nhập thành công!');
       navigate('/dashboard');

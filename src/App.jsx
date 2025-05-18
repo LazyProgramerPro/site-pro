@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
 import Error from './components/error/Error';
 import LoginRoute from './components/routes/LoginRoute';
@@ -15,6 +16,7 @@ import Group from './pages/group/components/Group';
 import { HomeLayout, Landing } from './pages/home';
 import { Problem } from './pages/problem';
 import { Project } from './pages/project';
+import { restoreAuthSession } from './services/authService';
 
 export const checkDefaultTheme = () => {
   const isDarkTheme = localStorage.getItem('darkTheme') === 'true';
@@ -113,6 +115,11 @@ const router = createBrowserRouter([
 ]);
 
 const App = () => {
+  // Khôi phục phiên đăng nhập khi trang được tải
+  useEffect(() => {
+    restoreAuthSession();
+  }, []);
+
   return <RouterProvider router={router} />;
 };
 

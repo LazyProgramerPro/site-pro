@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { Navigate } from 'react-router-dom';
 
@@ -7,10 +6,11 @@ import { Navigate } from 'react-router-dom';
  * Nếu chưa đăng nhập, sẽ hiển thị trang Login
  */
 const LoginRoute = ({ children }) => {
-  const user = useSelector((state) => state.user.user);
+  // Sử dụng isAuthenticated và user để kiểm tra trạng thái xác thực
+  const { isAuthenticated, user } = useSelector((state) => state.user);
 
-  // Nếu đã đăng nhập (có thông tin user và token), chuyển hướng đến dashboard
-  if (user && user?.token) {
+  // Nếu đã xác thực và có token, chuyển hướng đến dashboard
+  if (isAuthenticated && user?.token) {
     return <Navigate to="/dashboard" replace />;
   }
 

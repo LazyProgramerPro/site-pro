@@ -1,5 +1,5 @@
-import { logOut } from '@/pages/auth/redux/user.slice';
 import { useAppDispatch } from '@/redux/store';
+import { handleLogout } from '@/services/authService';
 import http from '@/utils/http';
 import { CheckCircleOutlined, LockOutlined } from '@ant-design/icons';
 import { Button, Form, Input, message, Modal, Space, Typography } from 'antd';
@@ -107,7 +107,7 @@ const ResetPasswordModal = () => {
 
       setSuccess(true);
 
-      dispatch(logOut());
+      handleLogout();
       localStorage.removeItem('user');
       message.success('Đổi mật khẩu thành công');
     } catch (error) {

@@ -4,8 +4,8 @@ import { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import getColor from '@/helpers/getColor';
-import { logOut } from '@/pages/auth/redux/user.slice';
 import { useAppDispatch } from '@/redux/store';
+import { handleLogout } from '@/services/authService';
 import ResetPasswordModal from './ResetPasswordModal';
 
 const DropdownAvatar = () => {
@@ -57,7 +57,7 @@ const DropdownAvatar = () => {
         label: (
           <a
             onClick={() => {
-              dispatch(logOut());
+              handleLogout();
               localStorage.removeItem('user');
               message.success('Đăng xuất thành công!');
             }}
