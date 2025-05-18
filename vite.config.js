@@ -1,5 +1,5 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
@@ -13,4 +13,9 @@ export default defineConfig({
       '@': '/src',
     },
   },
-})
+  preview: {
+    host: true,
+    port: 8080,
+    allowedHosts: ['localhost', 'app.sitepro.vn'], // Change this to your desired preview host
+  },
+});
