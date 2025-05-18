@@ -100,7 +100,6 @@ export default function Account() {
           <p>
             <strong>Họ tên:</strong> {record?.full_name}
           </p>
-          <p style={{ color: '#ff4d4f' }}>Lưu ý: Dữ liệu sẽ bị xóa vĩnh viễn và không thể khôi phục.</p>
         </div>
       ),
       okText: 'Xóa',

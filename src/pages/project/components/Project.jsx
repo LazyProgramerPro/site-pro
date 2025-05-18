@@ -7,9 +7,9 @@ import {
   EditOutlined,
   EyeOutlined,
   PlusOutlined,
+  ProjectOutlined,
   QuestionCircleOutlined,
   SearchOutlined,
-  ProjectOutlined,
 } from '@ant-design/icons';
 import { Button, Card, Col, Input, Modal, Row, Space, Table, Typography, message } from 'antd';
 import { Fragment, useEffect, useState } from 'react';
@@ -119,8 +119,7 @@ export default function Project() {
             <strong>Tên dự án:</strong> {record?.name}
           </p>
           <p style={{ color: '#ff4d4f', fontWeight: 'bold' }}>
-            CẢNH BÁO: Việc xóa dự án sẽ xóa tất cả công trình, hạng mục và nhóm hạng mục liên quan. Dữ liệu sẽ bị xóa
-            vĩnh viễn và không thể khôi phục.
+            CẢNH BÁO: Việc xóa dự án sẽ xóa tất cả công trình, hạng mục và nhóm hạng mục liên quan.
           </p>
         </div>
       ),

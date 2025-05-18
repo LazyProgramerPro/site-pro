@@ -107,9 +107,8 @@ export default function Construction() {
           <p>
             <strong>Tên công trình:</strong> {record?.name}
           </p>
-          <p style={{ color: '#ff4d4f' }}>
-            Lưu ý: Việc xóa công trình sẽ xóa tất cả hạng mục và nhóm hạng mục liên quan. Dữ liệu sẽ bị xóa vĩnh viễn và
-            không thể khôi phục.
+          <p style={{ color: '#ff4d4f', fontWeight: 'bold' }}>
+            Lưu ý: Việc xóa công trình sẽ xóa tất cả hạng mục và nhóm hạng mục liên quan.
           </p>
         </div>
       ),

@@ -93,7 +93,6 @@ export default function Group() {
           <p>
             <strong>Tên nhóm:</strong> {record?.name}
           </p>
-          <p style={{ color: '#ff4d4f' }}>Lưu ý: Dữ liệu sẽ bị xóa vĩnh viễn và không thể khôi phục.</p>
         </div>
       ),
       okText: 'Xóa',

@@ -92,9 +92,8 @@ export default function Category() {
           <p>
             <strong>Tên hạng mục:</strong> {record?.name}
           </p>
-          <p style={{ color: '#ff4d4f' }}>
-            Lưu ý: Việc xóa hạng mục sẽ xóa tất cả nhóm hạng mục liên quan. Dữ liệu sẽ bị xóa vĩnh viễn và không thể
-            khôi phục.
+          <p style={{ color: '#ff4d4f', fontWeight: 'bold' }}>
+            Lưu ý: Việc xóa hạng mục sẽ xóa tất cả nhóm hạng mục liên quan
           </p>
         </div>
       ),
