@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const axiosParams = {
   // Set different base URL based on the environment
-  baseURL: process.env.NODE_ENV === 'development' ? 'http://10.7.0.4:8808' : '/',
+  baseURL:process.env.NODE_ENV === "development" ? "http://10.7.0.4:8808" : "https://api.sitepro.vn"
 };
 
 // Create axios instance with default params
