@@ -96,7 +96,7 @@ const MIN_REFRESH_INTERVAL = 60 * 1000;
 
 /**
  * Thực hiện refresh token.
- * @returns {Promise<Object|null>}
+ * @returns {Promise<Object>} Trả về {rc, auth} để đảm bảo nhất quán với http.js
  */
 export const refreshToken = async () => {
   try {
@@ -105,14 +105,17 @@ export const refreshToken = async () => {
     // Kiểm tra xem đã gọi refresh gần đây hay chưa
     if (now - lastRefreshTime < MIN_REFRESH_INTERVAL) {
       console.log(`Bỏ qua refresh token vì mới gọi cách đây ${Math.round((now - lastRefreshTime) / 1000)} giây`);
-      return null;
+      return { rc: { code: -1, message: 'Refresh token throttled' }, auth: null };
     }
 
     // Cập nhật thời gian refresh token cuối cùng
     lastRefreshTime = now;
 
     const userStr = localStorage.getItem('user');
-    if (!userStr) return handleLogout();
+    if (!userStr) {
+      handleLogout();
+      return { rc: { code: -1, message: 'No user data found' }, auth: null };
+    }
 
     const userData = JSON.parse(userStr);
     const { refresh_token, refresh_expires_in, refresh_token_created_at } = userData;
@@ -122,7 +125,8 @@ export const refreshToken = async () => {
       const expiredAt = new Date(refresh_token_created_at).getTime() + refresh_expires_in * 1000;
       if (Date.now() >= expiredAt) {
         console.warn('Refresh token đã hết hạn.');
-        return handleLogout();
+        handleLogout();
+        return { rc: { code: -1, message: 'Refresh token expired' }, auth: null };
       }
     }
 
@@ -130,9 +134,7 @@ export const refreshToken = async () => {
     const res = await http.post('/auth/user/refresh-token', { token: refresh_token });
     const { rc, auth } = res || {};
 
-    if (rc?.code == 0 && auth?.access_token) {
-
-
+    if (rc?.code === 0 && auth?.access_token) {
       console.log('Refresh token thành công:', auth);
 
       // Kiểm tra thời gian hết hạn của token mới
@@ -157,14 +159,16 @@ export const refreshToken = async () => {
       saveAuthData(newUserData);
       console.log(`Token mới có hiệu lực ${auth.expires_in}s`);
 
-      return newUserData;
+      // Trả về cấu trúc nhất quán với http.js
+      return { rc, auth };
     }
 
-    return null;
+    // Nếu không thành công nhưng vẫn nhận được response
+    return { rc: rc || { code: -1, message: 'Invalid response' }, auth: null };
   } catch (err) {
     console.error('Refresh token thất bại:', err);
     handleLogout();
-    return null;
+    return { rc: { code: -1, message: err?.message || 'Unknown error' }, auth: null };
   }
 };
 
@@ -230,4 +234,49 @@ export const restoreAuthSession = () => {
     console.error('Lỗi khi khôi phục phiên:', err);
     handleLogout();
   }
+};
+
+/**
+ * Khởi tạo cơ chế lắng nghe sự kiện thay đổi localStorage giữa các tab để đồng bộ trạng thái đăng nhập.
+ * Hàm này nên được gọi khi khởi động ứng dụng.
+ */
+export const setupAuthSync = () => {
+  // Lắng nghe sự kiện storage change từ các tab khác
+  window.addEventListener('storage', (event) => {
+    if (event.key === 'user') {
+      console.log('Phát hiện thay đổi user data từ tab khác');
+      
+      // Tab khác đăng xuất
+      if (!event.newValue) {
+        console.log('Đăng xuất từ tab khác, đồng bộ trạng thái');
+        stopRefreshTokenTimer();
+        store.dispatch(logout());
+        return;
+      }
+      
+      try {
+        const newUserData = JSON.parse(event.newValue);
+        const oldUserStr = localStorage.getItem('user');
+        let oldUserData = null;
+        
+        if (oldUserStr) {
+          try {
+            oldUserData = JSON.parse(oldUserStr);
+          } catch (e) {
+            console.error('Lỗi parse oldUserData:', e);
+          }
+        }
+        
+        // Nếu token thay đổi, cập nhật trạng thái
+        if (newUserData?.token && (!oldUserData || newUserData.token !== oldUserData.token)) {
+          console.log('Token đã thay đổi từ tab khác, đồng bộ trạng thái');
+          store.dispatch(loginSuccess(newUserData));
+          stopRefreshTokenTimer();
+          startRefreshTokenTimer(newUserData);
+        }
+      } catch (e) {
+        console.error('Lỗi khi đồng bộ auth state giữa các tab:', e);
+      }
+    }
+  });
 };

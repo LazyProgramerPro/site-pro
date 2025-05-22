@@ -7,6 +7,13 @@ import App from './App.jsx';
 import './assets/css/index.css'; // Fixed import path
 import { ErrorBoundary } from './error-boundry.jsx';
 import { store } from './redux/store.js';
+import { restoreAuthSession, setupAuthSync } from './services/authService.js';
+
+// Khôi phục phiên đăng nhập từ localStorage nếu có
+restoreAuthSession();
+
+// Khởi tạo cơ chế đồng bộ auth state giữa các tab
+setupAuthSync();
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>

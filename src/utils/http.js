@@ -58,7 +58,6 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => {
     // Handle response data
-    console.log('Response Interceptor:', response);
     return response.data;
   },
   async (error) => {
@@ -73,11 +72,18 @@ axiosInstance.interceptors.response.use(
         try {
           const token = await new Promise((resolve, reject) => {
             failedQueue.push({ resolve, reject });
+            
+            // Thêm timeout để tránh trường hợp promise không bao giờ resolve hoặc reject
+            setTimeout(() => {
+              reject(new Error('Refresh token timeout'));
+            }, 30000); // 30 giây timeout
           });
+          
           // Cập nhật token mới vào header
           originalRequest.headers.Authorization = `Bearer ${token}`;
           return axiosInstance(originalRequest);
         } catch (err) {
+          console.error('Lỗi khi chờ refresh token:', err);
           return Promise.reject(err);
         }
       }
@@ -85,40 +91,57 @@ axiosInstance.interceptors.response.use(
       // Đánh dấu request này đã được retry
       originalRequest._retry = true;
       isRefreshing = true; // Thực hiện refresh token
+      
       try {
-        // Import động để tránh circular dependency
-        const {rc,auth} = await refreshToken();
-
-        if (auth) {
-          // Lấy token mới từ userData
+        // Tạo một promise với timeout
+        const refreshPromise = refreshToken();
+        
+        // Đặt timeout cho quá trình refresh token
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Refresh token timed out')), 30000);
+        });
+        
+        // Race giữa refreshToken và timeout
+        const response = await Promise.race([refreshPromise, timeoutPromise]);
+        const { rc, auth } = response || {};
+        
+        // Kiểm tra cả rc và auth để đảm bảo refresh token thành công
+        if (rc?.code === 0 && auth?.access_token) {
+          // Lấy token mới từ response
           const accessToken = auth.access_token;
 
           // Cập nhật token mới vào header
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+          
           // Xử lý queue các request đang chờ
           processQueue(null, accessToken);
+          
           // Gọi lại request ban đầu với token mới
           return axiosInstance(originalRequest);
         } else {
-          // Nếu refresh token thất bại, từ chối tất cả các request trong queue
-          processQueue(new Error('Refresh token thất bại'));
+          // Log chi tiết về lỗi
+          console.error('Refresh token không thành công:', rc?.message || 'Unknown error');
+          
+          // Từ chối tất cả các request trong queue
+          processQueue(new Error(rc?.message || 'Refresh token thất bại'));
+          
           // Chuyển hướng tới trang login
           window.location.href = '/login';
           return Promise.reject(error);
         }
       } catch (refreshError) {
+        console.error('Lỗi khi refresh token:', refreshError);
         // Nếu có lỗi khi refresh token, từ chối tất cả các request trong queue
         processQueue(refreshError);
         // Chuyển hướng tới trang login
         window.location.href = '/login';
-        return Promise.reject(error);
+        return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
       }
     }
 
     // Handle response error
-    console.error('Response Error:', error);
     return Promise.reject(error);
   },
 );
