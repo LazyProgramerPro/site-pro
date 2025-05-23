@@ -117,6 +117,7 @@ const router = createBrowserRouter([
 const App = () => {
   // Khôi phục phiên đăng nhập khi trang được tải
   useEffect(() => {
+    console.log('Khôi phục phiên đăng nhập khi trang được tải');
     restoreAuthSession();
   }, []);
 

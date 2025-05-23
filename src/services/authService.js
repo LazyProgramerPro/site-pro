@@ -163,10 +163,20 @@ export const refreshToken = async () => {
       return { rc, auth };
     }
 
-    // Nếu không thành công nhưng vẫn nhận được response
-    return { rc: rc || { code: -1, message: 'Invalid response' }, auth: null };
+    // Xử lý trường hợp refresh token không thành công từ phía server hoặc response không hợp lệ
+    if (rc) { // Server đã phản hồi, nhưng không thành công (rc.code !== 0)
+        console.warn(`Refresh token không thành công từ server. Code: ${rc.code}, Message: ${rc.message}. Đăng xuất.`);
+        handleLogout(); // Đảm bảo logout nếu server từ chối refresh token
+        return { rc, auth: null }; // Trả về lỗi từ server
+    }
+    
+    // Trường hợp không có rc (response không hợp lệ từ http client) hoặc các lỗi không mong muốn khác trước khi vào catch
+    console.warn('Refresh token không thành công, không nhận được rc hợp lệ từ server hoặc response trống. Đăng xuất.');
+    handleLogout(); // Logout như một biện pháp an toàn
+    return { rc: { code: -1, message: 'Invalid or missing response from server during refresh' }, auth: null };
+
   } catch (err) {
-    console.error('Refresh token thất bại:', err);
+    console.error('Refresh token thất bại (exception):', err);
     handleLogout();
     return { rc: { code: -1, message: err?.message || 'Unknown error' }, auth: null };
   }
@@ -184,21 +194,40 @@ export const handleLogout = () => {
 
 /**
  * Khôi phục phiên đăng nhập từ localStorage, tự động refresh nếu cần.
+ * @returns {Promise<boolean>} Trả về true nếu phiên được khôi phục thành công (có token hợp lệ), false ngược lại.
  */
-export const restoreAuthSession = () => {
-  const userStr = localStorage.getItem('user');
-  if (!userStr) return;
+export const restoreAuthSession = async () => {
+  const userStringFromStorage = localStorage.getItem('user'); // Chỉ đọc chuỗi từ localStorage
+
+  // console.log('Khôi phục phiên đăng nhập từ localStorage (chuỗi thô):', userStringFromStorage); // Log chuỗi thô để debug nếu cần
+  if (!userStringFromStorage) {
+    console.log('Không tìm thấy user data trong localStorage.');
+    return false; // Không có session để khôi phục
+  }else {
+    console.log('Tìm thấy user data trong localStorage.');
+    saveAuthData(JSON.parse(userStringFromStorage)); // Lưu lại thông tin xác thực vào Redux
+  }
 
   try {
-    const userData = JSON.parse(userStr);
-    if (!userData?.token) return;
+    const userData = JSON.parse(userStringFromStorage); // Parse chuỗi JSON thành object ở đây
+    console.log('Khôi phục phiên đăng nhập từ localStorage (đã parse):', userData);
+
+
+
+    // Kiểm tra sự tồn tại của access_token
+    if (!userData?.access_token) {
+      console.warn('Khôi phục phiên: không tìm thấy access_token trong userData. Đăng xuất.');
+      handleLogout();
+      return false; // Phiên không hợp lệ
+    }
 
     // Kiểm tra refresh token hết hạn
     if (userData.refresh_expires_in && userData.refresh_token_created_at) {
       const expiredAt = new Date(userData.refresh_token_created_at).getTime() + userData.refresh_expires_in * 1000;
       if (Date.now() >= expiredAt) {
         console.warn('Refresh token đã hết hạn khi khôi phục phiên.');
-        return handleLogout();
+        handleLogout();
+        return false; // Refresh token hết hạn
       }
     }
 
@@ -209,30 +238,37 @@ export const restoreAuthSession = () => {
       const now = Date.now();
       const timeLeft = expiresAt - now;
 
-      console.log(`Khôi phục phiên: Token còn ${Math.round(timeLeft / 1000)}s`);
+      console.log(`Khôi phục phiên: Access Token còn ${Math.round(timeLeft / 1000)}s`);
 
       if (timeLeft <= 0) {
-        // Token đã hết hạn, cần refresh ngay
-        console.log('Token đã hết hạn, cần refresh ngay');
-        return refreshToken();
-      } else if (timeLeft < 60 * 1000) {
-        // Nếu token còn dưới 60 giây, refresh ngay để tránh hết hạn sớm
-        console.log('Token còn ít hơn 60 giây, refresh để đảm bảo không gián đoạn');
-        store.dispatch(loginSuccess(userData));
-        refreshToken();
+        // Access Token đã hết hạn, cần refresh ngay
+        console.log('Access Token đã hết hạn, cần refresh ngay');
+        const refreshResult = await refreshToken();
+        // Kiểm tra kết quả refresh: rc.code === 0 và có access_token mới
+        return !!(refreshResult && refreshResult.rc?.code === 0 && refreshResult.auth?.access_token);
       } else {
-        // Token còn đủ thời gian, đặt timer cho việc refresh
-        store.dispatch(loginSuccess(userData));
-        startRefreshTokenTimer(userData);
+        // Access Token còn hạn
+        store.dispatch(loginSuccess(userData)); // Cập nhật Redux với token hiện tại
+        if (timeLeft < 60 * 1000) {
+          // Nếu token còn dưới 60 giây, refresh ngầm để không gián đoạn
+          console.log('Access Token còn ít hơn 60 giây, refresh ngầm để đảm bảo không gián đoạn');
+          refreshToken(); // Không cần await ở đây vì phiên đã được coi là hợp lệ
+        } else {
+          // Token còn đủ thời gian, đặt timer cho việc refresh
+          startRefreshTokenTimer(userData);
+        }
+        return true; // Phiên hợp lệ với token hiện tại
       }
     } else {
-      // Không có thông tin về thời hạn token, vẫn đăng nhập và refresh ngay
-      store.dispatch(loginSuccess(userData));
-      refreshToken();
+      // Không có thông tin về thời hạn access token, thử refresh ngay
+      console.log('Không có thông tin thời hạn access token, thử refresh ngay.');
+      const refreshResult = await refreshToken();
+      return !!(refreshResult && refreshResult.rc?.code === 0 && refreshResult.auth?.access_token);
     }
   } catch (err) {
     console.error('Lỗi khi khôi phục phiên:', err);
     handleLogout();
+    return false; // Lỗi, coi như khôi phục thất bại
   }
 };
 
