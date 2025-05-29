@@ -1,112 +1,28 @@
 import http from "@/utils/http";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { message } from "antd";
 
 const initialState = {
   contractList: [],
+  totalCount: 0,
   editingContract: null,
   loading: false,
   currentRequestId: undefined,
 };
 
-// Sample contract data for testing
-const fakeContractList = [
-  {
-    id: 1,
-    contractCode: "CTR-2023-001",
-    contractName: "Hợp đồng thi công phần móng",
-    projectName: "Khu đô thị Phú Mỹ Hưng",
-    construction: "Phần móng và tầng hầm",
-    partyB: "Công ty TNHH Xây dựng ABC",
-  },
-  {
-    id: 2,
-    contractCode: "CTR-2023-002",
-    contractName: "Hợp đồng cung cấp và lắp đặt thiết bị điện",
-    projectName: "Cầu Nhật Tân",
-    construction: "Hệ thống điện chiếu sáng",
-    partyB: "Công ty Điện lực MHT",
-  },
-  {
-    id: 3,
-    contractCode: "CTR-2023-003",
-    contractName: "Hợp đồng tư vấn thiết kế kiến trúc",
-    projectName: "Tòa nhà Landmark 81",
-    construction: "Thiết kế kiến trúc",
-    partyB: "Công ty Tư vấn Kiến trúc Sao Việt",
-  },
-  {
-    id: 4,
-    contractCode: "CTR-2023-004",
-    contractName: "Hợp đồng thi công hạ tầng kỹ thuật",
-    projectName: "Đường cao tốc Bắc Nam",
-    construction: "Hệ thống thoát nước và cấp nước",
-    partyB: "Tổng công ty Xây dựng Công trình Giao thông",
-  },
-  {
-    id: 5,
-    contractCode: "CTR-2023-005",
-    contractName: "Hợp đồng cung cấp vật liệu xây dựng",
-    projectName: "Khu công nghiệp Vân Trung",
-    construction: "Vật liệu xây dựng",
-    partyB: "Công ty TNHH Vật liệu Xây dựng Hòa Phát",
-  },
-  {
-    id: 6,
-    contractCode: "CTR-2023-006",
-    contractName: "Hợp đồng thi công phần thô",
-    projectName: "Nhà máy nhiệt điện Vũng Áng",
-    construction: "Thi công phần thô",
-    partyB: "Công ty Cổ phần Xây lắp Điện 1",
-  },
-  {
-    id: 7,
-    contractCode: "CTR-2023-007",
-    contractName: "Hợp đồng lắp đặt hệ thống PCCC",
-    projectName: "Metro Bến Thành - Suối Tiên",
-    construction: "Hệ thống PCCC",
-    partyB: "Công ty TNHH PCCC An Toàn",
-  },
-  {
-    id: 8,
-    contractCode: "CTR-2023-008",
-    contractName: "Hợp đồng tư vấn giám sát",
-    projectName: "Đập Thủy điện Sơn La",
-    construction: "Giám sát thi công",
-    partyB: "Công ty Cổ phần Tư vấn Xây dựng Điện 2",
-  },
-  {
-    id: 9,
-    contractCode: "CTR-2024-001",
-    contractName: "Hợp đồng thi công hoàn thiện",
-    projectName: "Khu đô thị Phú Mỹ Hưng",
-    construction: "Hoàn thiện nội thất",
-    partyB: "Công ty Cổ phần Nội thất Toàn Cầu",
-  },
-  {
-    id: 10,
-    contractCode: "CTR-2024-002",
-    contractName: "Hợp đồng lắp đặt hệ thống điều hòa",
-    projectName: "Tòa nhà Landmark 81",
-    construction: "Hệ thống điều hòa trung tâm",
-    partyB: "Công ty TNHH Kỹ thuật Lạnh",
-  }
-];
-
-// You can use this data in your Redux store or for testing purposes
 export const getContractList = createAsyncThunk(
   "contract/getContractList",
-  async (searchTerm, thunkAPI) => {
-    console.log("getContractList with searchTerm:", searchTerm);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    if (!searchTerm) {
-      return fakeContractList;
-    }
-
-    const filteredContracts = fakeContractList.filter((contract) =>
-      contract.name.toLowerCase().includes(searchTerm.toLowerCase())
+  async (filters, thunkAPI) => {
+    const { rc, data, totalCount } = await http.post(
+      "/auth/hopdong/list",
+      { ...filters },
+      { signal: thunkAPI.signal }
     );
-
-    return filteredContracts;
+    if (rc?.code !== 0) {
+      message.error(rc?.desc || "Lỗi không xác định!");
+      return thunkAPI.rejectWithValue(rc?.desc || "Lỗi không xác định!");
+    }
+    return { data, totalCount };
   }
 );
 
@@ -114,10 +30,14 @@ export const addContract = createAsyncThunk(
   "contract/addContract",
   async (body, thunkAPI) => {
     try {
-      const response = await http.post("contracts", body, {
+      const { rc, item } = await http.post("/auth/hopdong/add", body, {
         signal: thunkAPI.signal,
       });
-      return response.data;
+      if (rc?.code !== 0) {
+        message.error(rc?.desc || "Lỗi không xác định!");
+        return thunkAPI.rejectWithValue(rc?.desc || "Lỗi không xác định!");
+      }
+      return item;
     } catch (error) {
       if (error.name === "AxiosError" && error.response.status === 422) {
         return thunkAPI.rejectWithValue(error.response.data);
@@ -129,12 +49,16 @@ export const addContract = createAsyncThunk(
 
 export const updateContract = createAsyncThunk(
   "contract/updateContract",
-  async ({ contractId, body }, thunkAPI) => {
+  async (body, thunkAPI) => {
     try {
-      const response = await http.put(`contracts/${contractId}`, body, {
+      const { rc, item } = await http.put("/auth/hopdong/update", body, {
         signal: thunkAPI.signal,
       });
-      return response.data;
+      if (rc?.code !== 0) {
+        message.error(rc?.desc || "Lỗi không xác định!");
+        return thunkAPI.rejectWithValue(rc?.desc || "Lỗi không xác định!");
+      }
+      return item;
     } catch (error) {
       if (error.name === "AxiosError" && error.response.status === 422) {
         return thunkAPI.rejectWithValue(error.response.data);
@@ -147,10 +71,20 @@ export const updateContract = createAsyncThunk(
 export const deleteContract = createAsyncThunk(
   "contract/deleteContract",
   async (contractId, thunkAPI) => {
-    const response = await http.delete(`contracts/${contractId}`, {
-      signal: thunkAPI.signal,
-    });
-    return response.data;
+    try {
+      const { rc } = await http.delete("/auth/hopdong", {
+        data: { id: contractId },
+        signal: thunkAPI.signal,
+      });
+      if (!rc || rc.code !== 0) {
+        message.error(rc?.desc || "Lỗi không xác định!");
+        return thunkAPI.rejectWithValue(rc?.desc || "Lỗi không xác định!");
+      }
+      return contractId;
+    } catch (error) {
+      message.error("Xóa hợp đồng thất bại!");
+      return thunkAPI.rejectWithValue("Xóa hợp đồng thất bại!");
+    }
   }
 );
 
@@ -169,9 +103,9 @@ const contractSlice = createSlice({
     },
   },
   extraReducers(builder) {
-    builder
-      .addCase(getContractList.fulfilled, (state, action) => {
-        state.contractList = action.payload;
+    builder      .addCase(getContractList.fulfilled, (state, action) => {
+        state.contractList = action.payload.data;
+        state.totalCount = action.payload.totalCount;
       })
       .addCase(addContract.fulfilled, (state, action) => {
         state.contractList.push(action.payload);

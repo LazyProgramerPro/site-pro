@@ -156,7 +156,7 @@ export default function Group() {
           <Col span={18}>
             <SearchInput
               prefix={<SearchOutlined style={{ color: '#bfbfbf' }} />}
-              placeholder="Tìm kiếm nhóm theo mã hoặc tên..."
+              placeholder="Tìm kiếm nhóm hạng mục theo mã hoặc tên..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyPress={handleSearchKeyPress}
