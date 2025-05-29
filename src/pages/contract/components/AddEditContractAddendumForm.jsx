@@ -21,6 +21,9 @@ import { useAppDispatch } from '../../../redux/store';
 import { useSelector } from 'react-redux';
 import TextArea from 'antd/es/input/TextArea';
 import { addContractAddendum, getContractAddendumList, updateContractAddendum } from '../redux/contractAddendum.slide';
+import { getCategoryList } from '../../category/redux/category.slice';
+import { getGroupList } from '../../group/redux/group.slice';
+import { getBusinessList } from '../../business/redux/business.slice';
 
 const initialState = {
   code: '',
@@ -50,11 +53,36 @@ export default function AddEditContractAddendumForm(props) {
   const { onClose, open } = props;
   const [form] = Form.useForm();
   const [initialValues, setInitialValues] = useState(initialState);
-
   const loading = useSelector((state) => state.contractAddendum.loading);
   const selectedContractAddendum = useSelector((state) => state.contractAddendum.editingContractAddendum);
   const selectedContract = useSelector((state) => state.contract.selectedContract);
+
+  // Data từ database
+  const categoryList = useSelector((state) => state.category.categoryList);
+  const groupList = useSelector((state) => state.group.groupList);
+  const businessList = useSelector((state) => state.business.businessList);
   const dispatch = useAppDispatch();
+
+  // Load data from database when component mounts
+  useEffect(() => {
+    const loadBasicData = async () => {
+      try {
+        // Load categories (hạng mục)
+        await dispatch(getCategoryList({ pageNo: 0, pageSize: 100, searchText: '' }));
+
+        // Load groups (nhóm hạng mục)
+        await dispatch(getGroupList({ pageNo: 0, pageSize: 100, searchText: '' }));
+
+        // Load businesses (doanh nghiệp/nhà thầu)
+        await dispatch(getBusinessList({ pageNo: 0, pageSize: 100, searchText: '' }));
+      } catch (error) {
+        console.error('Error loading basic data:', error);
+      }
+    };
+
+    loadBasicData();
+  }, [dispatch]);
+
   // Set initial values for editing
   useEffect(() => {
     if (selectedContractAddendum) {
@@ -276,6 +304,7 @@ export default function AddEditContractAddendumForm(props) {
           </Row>
           <Row gutter={16}>
             <Col span={12}>
+              {' '}
               <Form.Item
                 label="Nhóm hạng mục"
                 name="nhom_hang_muc_id"
@@ -287,15 +316,15 @@ export default function AddEditContractAddendumForm(props) {
                   placeholder="Chọn nhóm hạng mục"
                   optionFilterProp="label"
                   filterOption={(input, option) => option.label.toLowerCase().includes(input.toLowerCase())}
-                  options={[
-                    { label: 'Nhóm A', value: 'nhom_a' },
-                    { label: 'Nhóm B', value: 'nhom_b' },
-                    { label: 'Nhóm C', value: 'nhom_c' },
-                  ]}
+                  options={groupList?.map((group) => ({
+                    label: group.name,
+                    value: group.id,
+                  }))}
                 />
               </Form.Item>
             </Col>
             <Col span={12}>
+              {' '}
               <Form.Item
                 label="Hạng mục"
                 name="hang_muc_id"
@@ -307,11 +336,10 @@ export default function AddEditContractAddendumForm(props) {
                   placeholder="Chọn hạng mục"
                   optionFilterProp="label"
                   filterOption={(input, option) => option.label.toLowerCase().includes(input.toLowerCase())}
-                  options={[
-                    { label: 'Hạng mục 1', value: 'hang_muc_1' },
-                    { label: 'Hạng mục 2', value: 'hang_muc_2' },
-                    { label: 'Hạng mục 3', value: 'hang_muc_3' },
-                  ]}
+                  options={categoryList?.map((category) => ({
+                    label: category.name,
+                    value: category.id,
+                  }))}
                 />
               </Form.Item>
             </Col>
@@ -378,6 +406,7 @@ export default function AddEditContractAddendumForm(props) {
           </Row>{' '}
           <Row gutter={16}>
             <Col span={12}>
+              {' '}
               <Form.Item
                 label="Nhà thầu thi công"
                 name="nha_thau_thi_cong_id"
@@ -389,17 +418,15 @@ export default function AddEditContractAddendumForm(props) {
                   placeholder="Chọn nhà thầu thi công"
                   optionFilterProp="label"
                   filterOption={(input, option) => option.label.toLowerCase().includes(input.toLowerCase())}
-                  options={[
-                    { label: 'Công ty xây dựng A', value: 'cong_ty_xay_dung_a' },
-                    { label: 'Công ty xây dựng B', value: 'cong_ty_xay_dung_b' },
-                    { label: 'Công ty xây dựng C', value: 'cong_ty_xay_dung_c' },
-                    { label: 'Công ty xây dựng D', value: 'cong_ty_xay_dung_d' },
-                    { label: 'Công ty xây dựng E', value: 'cong_ty_xay_dung_e' },
-                  ]}
+                  options={businessList?.map((business) => ({
+                    label: business.name,
+                    value: business.id,
+                  }))}
                 />
               </Form.Item>
             </Col>
             <Col span={12}>
+              {' '}
               <Form.Item
                 label="Tư vấn giám sát"
                 name="tu_van_giam_sat_id"
@@ -411,19 +438,17 @@ export default function AddEditContractAddendumForm(props) {
                   placeholder="Chọn tư vấn giám sát"
                   optionFilterProp="label"
                   filterOption={(input, option) => option.label.toLowerCase().includes(input.toLowerCase())}
-                  options={[
-                    { label: 'Tư vấn giám sát A', value: 'tu_van_giam_sat_a' },
-                    { label: 'Tư vấn giám sát B', value: 'tu_van_giam_sat_b' },
-                    { label: 'Tư vấn giám sát C', value: 'tu_van_giam_sat_c' },
-                    { label: 'Tư vấn giám sát D', value: 'tu_van_giam_sat_d' },
-                    { label: 'Tư vấn giám sát E', value: 'tu_van_giam_sat_e' },
-                  ]}
+                  options={businessList?.map((business) => ({
+                    label: business.name,
+                    value: business.id,
+                  }))}
                 />
               </Form.Item>
             </Col>
           </Row>{' '}
           <Row gutter={16}>
             <Col span={12}>
+              {' '}
               <Form.Item
                 label="Tư vấn thiết kế"
                 name="tu_van_thiet_ke_id"
@@ -435,13 +460,10 @@ export default function AddEditContractAddendumForm(props) {
                   placeholder="Chọn tư vấn thiết kế"
                   optionFilterProp="label"
                   filterOption={(input, option) => option.label.toLowerCase().includes(input.toLowerCase())}
-                  options={[
-                    { label: 'Tư vấn thiết kế A', value: 'tu_van_thiet_ke_a' },
-                    { label: 'Tư vấn thiết kế B', value: 'tu_van_thiet_ke_b' },
-                    { label: 'Tư vấn thiết kế C', value: 'tu_van_thiet_ke_c' },
-                    { label: 'Tư vấn thiết kế D', value: 'tu_van_thiet_ke_d' },
-                    { label: 'Tư vấn thiết kế E', value: 'tu_van_thiet_ke_e' },
-                  ]}
+                  options={businessList?.map((business) => ({
+                    label: business.name,
+                    value: business.id,
+                  }))}
                 />
               </Form.Item>
             </Col>
