@@ -103,12 +103,13 @@ const contractSlice = createSlice({
     },
   },
   extraReducers(builder) {
-    builder      .addCase(getContractList.fulfilled, (state, action) => {
+    builder.addCase(getContractList.fulfilled, (state, action) => {
         state.contractList = action.payload.data;
         state.totalCount = action.payload.totalCount;
       })
       .addCase(addContract.fulfilled, (state, action) => {
         state.contractList.push(action.payload);
+        state.totalCount = state.totalCount + 1;
       })
       .addCase(updateContract.fulfilled, (state, action) => {
         state.contractList.find((contract, index) => {
@@ -128,6 +129,7 @@ const contractSlice = createSlice({
         );
         if (deleteContractIndex !== -1) {
           state.contractList.splice(deleteContractIndex, 1);
+          state.totalCount = Math.max(0, state.totalCount - 1);
         }
       })
 

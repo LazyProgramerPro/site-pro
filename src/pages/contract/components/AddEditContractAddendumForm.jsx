@@ -1,7 +1,6 @@
 import {
   Button,
   Col,
-  DatePicker,
   Drawer,
   Form,
   Input,
@@ -9,26 +8,42 @@ import {
   Select,
   Spin,
   notification,
+  Space,
+  Avatar,
+  InputNumber,
   Upload,
-} from "antd";
-import { isEmpty } from "lodash";
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAppDispatch } from "../../../redux/store";
-import { useSelector } from "react-redux";
-import TextArea from "antd/es/input/TextArea";
-import {
-  DeleteOutlined,
-  EditOutlined,
-  PlusOutlined,
-  InboxOutlined,
-} from "@ant-design/icons";
+} from 'antd';
+import { FileTextOutlined, CloseCircleOutlined, SaveOutlined, InboxOutlined } from '@ant-design/icons';
+import { isEmpty } from 'lodash';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAppDispatch } from '../../../redux/store';
+import { useSelector } from 'react-redux';
+import TextArea from 'antd/es/input/TextArea';
+import { addContractAddendum, getContractAddendumList, updateContractAddendum } from '../redux/contractAddendum.slide';
 
 const initialState = {
-
+  code: '',
+  name: '',
+  description: '',
+  hang_muc_id: '',
+  nhom_hang_muc_id: '',
+  don_vi: '',
+  khoi_luong: 0,
+  don_gia: 0,
+  thanh_tien: 0,
+  nha_thau_thi_cong_id: '',
+  tu_van_giam_sat_id: '',
+  tu_van_thiet_ke_id: '',
+  documents: [],
 };
 
-
+const normFile = (e) => {
+  if (Array.isArray(e)) {
+    return e;
+  }
+  return e?.fileList;
+};
 
 export default function AddEditContractAddendumForm(props) {
   const navigate = useNavigate();
@@ -37,64 +52,184 @@ export default function AddEditContractAddendumForm(props) {
   const [initialValues, setInitialValues] = useState(initialState);
 
   const loading = useSelector((state) => state.contractAddendum.loading);
-
-  const selectedContractAddendum = useSelector(
-    (state) => state.contractAddendum.editingContractAddendum
-  );
-  console.log("editingContractAddendum:", selectedContractAddendum);
+  const selectedContractAddendum = useSelector((state) => state.contractAddendum.editingContractAddendum);
+  const selectedContract = useSelector((state) => state.contract.selectedContract);
   const dispatch = useAppDispatch();
-
+  // Set initial values for editing
   useEffect(() => {
-    setInitialValues(selectedContractAddendum || initialState);
+    if (selectedContractAddendum) {
+      setInitialValues(selectedContractAddendum);
+    } else {
+      setInitialValues(initialState);
+    }
   }, [selectedContractAddendum]);
 
+  // Reset fields when opening form
+  useEffect(() => {
+    if (open) {
+      form.resetFields();
+      if (selectedContractAddendum) {
+        form.setFieldsValue({ ...selectedContractAddendum });
+      }
+    }
+  }, [open, selectedContractAddendum, form]);
+  // Auto calculate total amount
+  const handleCalculateTotal = () => {
+    const khoi_luong = form.getFieldValue('khoi_luong') || 0;
+    const don_gia = form.getFieldValue('don_gia') || 0;
+    const total = khoi_luong * don_gia;
+    form.setFieldsValue({ thanh_tien: total });
+  };
   const onFinish = async (values) => {
     try {
       if (!selectedContractAddendum) {
-        // dispatch(createContractAddendum(values));
+        const payload = {
+          code: values.code,
+          name: values.name,
+          description: values.description,
+          du_an_id: selectedContract?.du_an_id,
+          cong_trinh_id: selectedContract?.cong_trinh_id,
+          hop_dong_id: selectedContract?.id,
+          hang_muc_id: values.hang_muc_id,
+          nhom_hang_muc_id: values.nhom_hang_muc_id,
+          don_vi: values.don_vi,
+          khoi_luong: values.khoi_luong,
+          don_gia: values.don_gia,
+          thanh_tien: values.thanh_tien,
+          nha_thau_thi_cong_id: values.nha_thau_thi_cong_id,
+          tu_van_giam_sat_id: values.tu_van_giam_sat_id,
+          tu_van_thiet_ke_id: values.tu_van_thiet_ke_id,
+          documents: values.documents || [],
+        };
 
-        notification.success({
-          message: "Success",
-          description: "Add contract addendum successfully",
-        });
+        try {
+          await dispatch(addContractAddendum(payload)).unwrap();
+
+          notification.success({
+            message: 'Thành công',
+            description: 'Thêm phụ lục hợp đồng thành công',
+          });
+
+          // get new contract list
+          const filters = {
+            pageNo: 0,
+            pageSize: 10,
+            searchText: '',
+          };
+
+          await dispatch(getContractAddendumList(filters));
+
+          onClose();
+        } catch (error) {
+          notification.error({
+            message: 'Lỗi',
+            description: error?.message || 'Đã xảy ra lỗi khi thêm phụ lục hợp đồng',
+          });
+          return;
+        }
       } else {
-        // dispatch(updateContractAddendum({ ...values, id: selectedContractAddendum }));
+        const payload = {
+          id: selectedContractAddendum.id,
+          code: values.code,
+          name: values.name,
+          description: values.description,
+          du_an_id: selectedContract?.du_an_id,
+          cong_trinh_id: selectedContract?.cong_trinh_id,
+          hop_dong_id: selectedContract?.id,
+          hang_muc_id: values.hang_muc_id,
+          nhom_hang_muc_id: values.nhom_hang_muc_id,
+          don_vi: values.don_vi,
+          khoi_luong: values.khoi_luong,
+          don_gia: values.don_gia,
+          thanh_tien: values.thanh_tien,
+          nha_thau_thi_cong_id: values.nha_thau_thi_cong_id,
+          tu_van_giam_sat_id: values.tu_van_giam_sat_id,
+          tu_van_thiet_ke_id: values.tu_van_thiet_ke_id,
+          documents: values.documents || [],
+        };
 
-        notification.success({
-          message: "Success",
-          description: "Update contract addendum successfully",
-        });
+        try {
+          await dispatch(updateContractAddendum(payload)).unwrap();
+
+          notification.success({
+            message: 'Thành công',
+            description: 'Cập nhật phụ lục hợp đồng thành công',
+          });
+
+          // get new contract list
+          const filters = {
+            pageNo: 0,
+            pageSize: 10,
+            searchText: '',
+          };
+
+          await dispatch(getContractAddendumList(filters));
+
+          onClose();
+        } catch (error) {
+          notification.error({
+            message: 'Lỗi',
+            description: error?.message || 'Đã xảy ra lỗi khi cập nhật phụ lục hợp đồng',
+          });
+        }
       }
-
-      onClose();
-
-      navigate("/dashboard/administration/contract-addendum");
     } catch (error) {
-      console.log("error:", error);
+      console.error('Error:', error);
+      notification.error({
+        message: 'Lỗi',
+        description: error?.message || 'Đã xảy ra lỗi khi xử lý yêu cầu',
+      });
     }
   };
-
   const onFinishFailed = (errorInfo) => {
-    console.log("Failed:", errorInfo);
     notification.error({
-      message: "Errors",
-      description: errorInfo.message,
+      message: 'Lỗi',
+      description: errorInfo.message ?? 'Đã xảy ra lỗi khi xử lý yêu cầu',
     });
   };
   return (
     <Drawer
-      width={720}
+      width={window.innerWidth > 768 ? 720 : '100%'}
       title={
-        isEmpty(selectedContractAddendum)
-          ? "Thêm mới phụ lục hợp đồng"
-          : `Sửa phụ lục hợp đồng ${initialValues && initialValues?.code}`
+        <Space align="center">
+          <Avatar
+            icon={<FileTextOutlined />}
+            style={{ backgroundColor: isEmpty(selectedContractAddendum) ? '#1890ff' : '#52c41a' }}
+          />
+          <span>
+            {isEmpty(selectedContractAddendum)
+              ? 'Thêm mới phụ lục hợp đồng'
+              : `Sửa phụ lục hợp đồng ${initialValues?.code || ''}`}
+          </span>
+        </Space>
       }
       placement="right"
       onClose={onClose}
       open={open}
+      destroyOnClose
+      extra={
+        <Space>
+          <Button onClick={onClose} icon={<CloseCircleOutlined />}>
+            Hủy
+          </Button>
+          <Button
+            type="primary"
+            onClick={() => form.submit()}
+            loading={loading}
+            disabled={loading}
+            icon={<SaveOutlined />}
+          >
+            {isEmpty(selectedContractAddendum) ? 'Tạo phụ lục' : 'Cập nhật'}
+          </Button>
+        </Space>
+      }
+      bodyStyle={{ paddingBottom: 24 }}
     >
+      {' '}
       {!isEmpty(selectedContractAddendum) && isEmpty(initialValues) ? (
-        <Spin></Spin>
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+          <Spin size="large" tip="Đang tải thông tin phụ lục hợp đồng..." />
+        </div>
       ) : (
         <Form
           name="form-add-edit-contract-addendum"
@@ -104,328 +239,265 @@ export default function AddEditContractAddendumForm(props) {
           onFinishFailed={onFinishFailed}
           autoComplete="off"
           layout="vertical"
+          requiredMark={false}
         >
           <Row gutter={16}>
+            {' '}
             <Col span={12}>
               <Form.Item
                 label="Mã phụ lục hợp đồng"
                 name="code"
-                rules={[
-                  {
-                    required: true,
-                    message: "Bạn phải nhập mã phụ lục hợp đồng!",
-                  },
-                ]}
+                rules={[{ required: true, message: 'Vui lòng nhập mã phụ lục hợp đồng!' }]}
+                tooltip="Mã phụ lục hợp đồng phải là duy nhất"
               >
-                <Input />
+                <Input autoFocus placeholder="Nhập mã phụ lục hợp đồng" />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
                 label="Tên phụ lục hợp đồng"
                 name="name"
-                rules={[
-                  {
-                    required: true,
-                    message: "Bạn phải nhập tên phụ lục hợp đồng!",
-                  },
-                ]}
+                rules={[{ required: true, message: 'Vui lòng nhập tên phụ lục hợp đồng!' }]}
               >
-                <Input />
+                <Input placeholder="Nhập tên phụ lục hợp đồng" />
+              </Form.Item>
+            </Col>
+          </Row>{' '}
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item
+                label="Mô tả"
+                name="description"
+                rules={[{ required: false, message: 'Vui lòng nhập mô tả phụ lục hợp đồng!' }]}
+              >
+                <TextArea rows={3} placeholder="Nhập mô tả chi tiết về phụ lục hợp đồng" />
               </Form.Item>
             </Col>
           </Row>
-
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
-                label="Tên dự án"
-                name="projectName"
-                rules={[
-                  {
-                    required: true,
-                    message: "Bạn phải chọn tên dự án!",
-                  },
-                ]}
-              >
-                <Select showSearch allowClear placeholder="Chọn dự án">
-                  {["Dự án A", "Dự án B", "Dự án C", "Dự án D", "Dự án E"].map(
-                    (b, index) => {
-                      return (
-                        <Select.Option value={b} key={index}>
-                          {b}
-                        </Select.Option>
-                      );
-                    }
-                  )}
-                </Select>
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                label="Tên công trình"
-                name="constructionName"
-                rules={[
-                  {
-                    required: true,
-                    message: "Bạn phải chọn tên công trình!",
-                  },
-                ]}
+                label="Nhóm hạng mục"
+                name="nhom_hang_muc_id"
+                rules={[{ required: true, message: 'Vui lòng chọn nhóm hạng mục!' }]}
               >
                 <Select
                   showSearch
                   allowClear
-                  placeholder="Chọn công trình"
-                >
-                  {["Công trình 1", "Công trình 2", "Công trình 3", "Công trình 4", "Công trình 5"].map(
-                    (b, index) => {
-                      return (
-                        <Select.Option value={b} key={index}>
-                          {b}
-                        </Select.Option>
-                      );
-                    }
-                  )}
-                </Select>
-              </Form.Item>
-            </Col>
-          </Row>
-
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                label="Tên hợp đồng"
-                name="contractName"
-                rules={[
-                  {
-                    required: true,
-                    message: "Bạn phải chọn tên hợp đồng!",
-                  },
-                ]}
-              >
-                <Select showSearch allowClear placeholder="Chọn hợp đồng">
-                  {["Hợp đồng A-001", "Hợp đồng B-002", "Hợp đồng C-003", "Hợp đồng D-004", "Hợp đồng E-005"].map(
-                    (b, index) => {
-                      return (
-                        <Select.Option value={b} key={index}>
-                          {b}
-                        </Select.Option>
-                      );
-                    }
-                  )}
-                </Select>
+                  placeholder="Chọn nhóm hạng mục"
+                  optionFilterProp="label"
+                  filterOption={(input, option) => option.label.toLowerCase().includes(input.toLowerCase())}
+                  options={[
+                    { label: 'Nhóm A', value: 'nhom_a' },
+                    { label: 'Nhóm B', value: 'nhom_b' },
+                    { label: 'Nhóm C', value: 'nhom_c' },
+                  ]}
+                />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
                 label="Hạng mục"
-                name="category"
-                rules={[
-                  {
-                    required: true,
-                    message: "Bạn phải chọn hạng mục!",
-                  },
-                ]}
+                name="hang_muc_id"
+                rules={[{ required: true, message: 'Vui lòng chọn hạng mục!' }]}
               >
                 <Select
                   showSearch
                   allowClear
                   placeholder="Chọn hạng mục"
-                >
-                  {["Hạng mục 1", "Hạng mục 2", "Hạng mục 3", "Hạng mục 4", "Hạng mục 5"].map(
-                    (b, index) => {
-                      return (
-                        <Select.Option value={b} key={index}>
-                          {b}
-                        </Select.Option>
-                      );
-                    }
-                  )}
-                </Select>
+                  optionFilterProp="label"
+                  filterOption={(input, option) => option.label.toLowerCase().includes(input.toLowerCase())}
+                  options={[
+                    { label: 'Hạng mục 1', value: 'hang_muc_1' },
+                    { label: 'Hạng mục 2', value: 'hang_muc_2' },
+                    { label: 'Hạng mục 3', value: 'hang_muc_3' },
+                  ]}
+                />
               </Form.Item>
             </Col>
           </Row>
-
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item
-                label="Nhóm"
-                name="group"
-                rules={[
-                  {
-                    required: true,
-                    message: "Bạn phải chọn nhóm!",
-                  },
-                ]}
-              >
-                <Select showSearch allowClear placeholder="Chọn nhóm">
-                  {["Nhóm A", "Nhóm B", "Nhóm C", "Nhóm D", "Nhóm E"].map(
-                    (b, index) => {
-                      return (
-                        <Select.Option value={b} key={index}>
-                          {b}
-                        </Select.Option>
-                      );
-                    }
-                  )}
-                </Select>
+              <Form.Item label="Đơn vị" name="don_vi" rules={[{ required: true, message: 'Vui lòng nhập đơn vị!' }]}>
+                <Input placeholder="Nhập đơn vị (kg, m2, m3, ...)" />
               </Form.Item>
             </Col>
-            <Col span={12}>
-              <Form.Item
-                label="Đơn vị"
-                name="unit"
-                rules={[
-                  {
-                    required: true,
-                    message: "Bạn phải nhập đơn vị!",
-                  },
-                ]}
-              >
-                <Input />
-              </Form.Item>
-            </Col>
-          </Row>
-
+          </Row>{' '}
           <Row gutter={16}>
             <Col span={8}>
               <Form.Item
                 label="Khối lượng"
-                name="quantity"
-                rules={[
-                  {
-                    required: true,
-                    message: "Bạn phải nhập khối lượng!",
-                  },
-                ]}
+                name="khoi_luong"
+                rules={[{ required: true, message: 'Vui lòng nhập khối lượng!' }]}
               >
-                <Input />
+                <InputNumber
+                  style={{ width: '100%' }}
+                  placeholder="Nhập khối lượng"
+                  min={0}
+                  precision={2}
+                  formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                  parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
+                  onChange={handleCalculateTotal}
+                />
               </Form.Item>
             </Col>
 
             <Col span={8}>
-              <Form.Item
-                label="Đơn giá"
-                name="unitPrice"
-                rules={[
-                  {
-                    required: true,
-                    message: "Bạn phải nhập đơn giá!",
-                  },
-                ]}
-              >
-                <Input />
+              <Form.Item label="Đơn giá" name="don_gia" rules={[{ required: true, message: 'Vui lòng nhập đơn giá!' }]}>
+                <InputNumber
+                  style={{ width: '100%' }}
+                  placeholder="Nhập đơn giá"
+                  min={0}
+                  precision={0}
+                  formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                  parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
+                  addonAfter="VNĐ"
+                  onChange={handleCalculateTotal}
+                />
               </Form.Item>
             </Col>
 
             <Col span={8}>
               <Form.Item
                 label="Thành tiền"
-                name="totalAmount"
-                rules={[
-                  {
-                    required: true,
-                    message: "Bạn phải nhập thành tiền!",
-                  },
-                ]}
+                name="thanh_tien"
+                rules={[{ required: true, message: 'Vui lòng nhập thành tiền!' }]}
               >
-                <Input />
+                <InputNumber
+                  style={{ width: '100%' }}
+                  placeholder="Thành tiền"
+                  min={0}
+                  precision={0}
+                  formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                  parser={(value) => value.replace(/\$\s?|(,*)/g, '')}
+                  addonAfter="VNĐ"
+                  readOnly
+                />
               </Form.Item>
             </Col>
-          </Row>
-
+          </Row>{' '}
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
                 label="Nhà thầu thi công"
-                name="contractor"
-                rules={[
-                  {
-                    required: true,
-                    message: "Bạn phải chọn nhà thầu thi công!",
-                  },
-                ]}
+                name="nha_thau_thi_cong_id"
+                rules={[{ required: true, message: 'Vui lòng chọn nhà thầu thi công!' }]}
               >
-                <Select showSearch allowClear placeholder="Chọn nhà thầu thi công">
-                  {["Công ty xây dựng A", "Công ty xây dựng B", "Công ty xây dựng C", "Công ty xây dựng D", "Công ty xây dựng E"].map(
-                    (b, index) => {
-                      return (
-                        <Select.Option value={b} key={index}>
-                          {b}
-                        </Select.Option>
-                      );
-                    }
-                  )}
-                </Select>
+                <Select
+                  showSearch
+                  allowClear
+                  placeholder="Chọn nhà thầu thi công"
+                  optionFilterProp="label"
+                  filterOption={(input, option) => option.label.toLowerCase().includes(input.toLowerCase())}
+                  options={[
+                    { label: 'Công ty xây dựng A', value: 'cong_ty_xay_dung_a' },
+                    { label: 'Công ty xây dựng B', value: 'cong_ty_xay_dung_b' },
+                    { label: 'Công ty xây dựng C', value: 'cong_ty_xay_dung_c' },
+                    { label: 'Công ty xây dựng D', value: 'cong_ty_xay_dung_d' },
+                    { label: 'Công ty xây dựng E', value: 'cong_ty_xay_dung_e' },
+                  ]}
+                />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item
                 label="Tư vấn giám sát"
-                name="supervisionConsultant"
-                rules={[
-                  {
-                    required: true,
-                    message: "Bạn phải chọn tư vấn giám sát!",
-                  },
-                ]}
+                name="tu_van_giam_sat_id"
+                rules={[{ required: true, message: 'Vui lòng chọn tư vấn giám sát!' }]}
               >
                 <Select
                   showSearch
                   allowClear
                   placeholder="Chọn tư vấn giám sát"
-                >
-                  {["Tư vấn giám sát A", "Tư vấn giám sát B", "Tư vấn giám sát C", "Tư vấn giám sát D", "Tư vấn giám sát E"].map(
-                    (b, index) => {
-                      return (
-                        <Select.Option value={b} key={index}>
-                          {b}
-                        </Select.Option>
-                      );
-                    }
-                  )}
-                </Select>
+                  optionFilterProp="label"
+                  filterOption={(input, option) => option.label.toLowerCase().includes(input.toLowerCase())}
+                  options={[
+                    { label: 'Tư vấn giám sát A', value: 'tu_van_giam_sat_a' },
+                    { label: 'Tư vấn giám sát B', value: 'tu_van_giam_sat_b' },
+                    { label: 'Tư vấn giám sát C', value: 'tu_van_giam_sat_c' },
+                    { label: 'Tư vấn giám sát D', value: 'tu_van_giam_sat_d' },
+                    { label: 'Tư vấn giám sát E', value: 'tu_van_giam_sat_e' },
+                  ]}
+                />
               </Form.Item>
             </Col>
-          </Row>
-
+          </Row>{' '}
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item
                 label="Tư vấn thiết kế"
-                name="designConsultant"
-                rules={[
-                  {
-                    required: true,
-                    message: "Bạn phải chọn tư vấn thiết kế!",
-                  },
-                ]}
+                name="tu_van_thiet_ke_id"
+                rules={[{ required: true, message: 'Vui lòng chọn tư vấn thiết kế!' }]}
               >
                 <Select
                   showSearch
                   allowClear
                   placeholder="Chọn tư vấn thiết kế"
-                >
-                  {["Tư vấn thiết kế A", "Tư vấn thiết kế B", "Tư vấn thiết kế C", "Tư vấn thiết kế D", "Tư vấn thiết kế E"].map(
-                    (b, index) => {
-                      return (
-                        <Select.Option value={b} key={index}>
-                          {b}
-                        </Select.Option>
-                      );
-                    }
-                  )}
-                </Select>
+                  optionFilterProp="label"
+                  filterOption={(input, option) => option.label.toLowerCase().includes(input.toLowerCase())}
+                  options={[
+                    { label: 'Tư vấn thiết kế A', value: 'tu_van_thiet_ke_a' },
+                    { label: 'Tư vấn thiết kế B', value: 'tu_van_thiet_ke_b' },
+                    { label: 'Tư vấn thiết kế C', value: 'tu_van_thiet_ke_c' },
+                    { label: 'Tư vấn thiết kế D', value: 'tu_van_thiet_ke_d' },
+                    { label: 'Tư vấn thiết kế E', value: 'tu_van_thiet_ke_e' },
+                  ]}
+                />
               </Form.Item>
             </Col>
           </Row>
-
-          <Form.Item>
-            <Button type="primary" htmlType="submit" disabled={loading}>
-              {isEmpty(selectedContractAddendum) ? "Thêm phụ lục" : "Cập nhật"}
-            </Button>
-          </Form.Item>
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item
+                label="Tài liệu"
+                name="documents"
+                valuePropName="fileList"
+                getValueFromEvent={normFile}
+                rules={[{ required: false, message: 'Vui lòng chọn tài liệu!' }]}
+                tooltip="Tải lên các tài liệu liên quan đến phụ lục hợp đồng"
+              >
+                <Upload.Dragger
+                  name="documents"
+                  multiple
+                  listType="text"
+                  beforeUpload={() => false}
+                  showUploadList={{
+                    showDownloadIcon: true,
+                    showRemoveIcon: true,
+                    showPreviewIcon: true,
+                  }}
+                >
+                  <p className="ant-upload-drag-icon">
+                    <InboxOutlined />
+                  </p>
+                  <p className="ant-upload-text">Nhấp hoặc kéo thả file vào vùng này để tải lên</p>
+                  <p className="ant-upload-hint">
+                    Hỗ trợ tải lên đơn lẻ hoặc hàng loạt. Chỉ chấp nhận file PDF, DOC, DOCX, XLS, XLSX.
+                  </p>
+                </Upload.Dragger>
+              </Form.Item>
+            </Col>
+          </Row>{' '}
         </Form>
+      )}
+      {loading && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            background: 'rgba(255, 255, 255, 0.8)',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            zIndex: 1000,
+            backdropFilter: 'blur(4px)',
+          }}
+        >
+          <Spin size="large" tip="Đang xử lý..." />
+        </div>
       )}
     </Drawer>
   );
