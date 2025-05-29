@@ -264,7 +264,7 @@ export default function Contract() {
       render: (_, record) => (
         <Space size="small">
           <WrapperIcons title="Xem chi tiết hợp đồng" onClick={() => handleViewContract(record?.id)}>
-            <EyeOutlined className="action-icon" />
+            <EyeOutlined className="action-icon" style={{ color: '#52c41a' }} />
           </WrapperIcons>
           <WrapperIcons title="Sửa hợp đồng" onClick={() => handleEditContract(record?.id)}>
             <EditOutlined className="action-icon" style={{ color: '#1890ff' }} />
