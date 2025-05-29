@@ -10,7 +10,7 @@ import {
   ReconciliationOutlined,
   SearchOutlined,
 } from '@ant-design/icons';
-import { Button, Card, Col, Input, message, Modal, Select, Space, Table, Typography } from 'antd';
+import { Button, Card, Col, Input, message, Modal, Select, Space, Table, Tag, Typography } from 'antd';
 import { Fragment, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
@@ -248,6 +248,12 @@ export default function Contract() {
       key: 'creator_name',
       width: 120,
       ellipsis: true,
+      // Render với tên người tạo với COmponent Chip
+      render: (text) => (
+        <Tag color="blue" className="company-tag">
+          {text || 'Chưa xác định'}
+        </Tag>
+      ),
     },
     {
       title: 'Ngày tạo',
@@ -290,11 +296,14 @@ export default function Contract() {
         <SearchContainer>
           <Col span={18}>
             <FilterGroup>
+              {' '}
               <FilterSelect
                 value={selectedProjectId}
-                onChange={setSelectedProjectId}
+                onChange={(value) => {
+                  setSelectedProjectId(value);
+                  setSelectedConstructionId('all'); // Reset công trình về "all" khi chọn dự án mới
+                }}
                 placeholder="Chọn dự án"
-                allowClear
               >
                 <Select.Option value="all">Tất cả dự án</Select.Option>
                 {projectList.map((project) => (
@@ -302,13 +311,12 @@ export default function Contract() {
                     {project.name}
                   </Select.Option>
                 ))}
-              </FilterSelect>
-
+              </FilterSelect>{' '}
               <FilterSelect
                 value={selectedConstructionId}
                 onChange={setSelectedConstructionId}
-                placeholder="Chọn công trình"
-                allowClear
+                placeholder={selectedProjectId === 'all' ? 'Vui lòng chọn dự án trước' : 'Chọn công trình'}
+                disabled={selectedProjectId === 'all'}
               >
                 <Select.Option value="all">Tất cả công trình</Select.Option>
                 {constructionList.map((construction) => (
@@ -317,7 +325,6 @@ export default function Contract() {
                   </Select.Option>
                 ))}
               </FilterSelect>
-
               <SearchInput
                 prefix={<SearchOutlined style={{ color: '#bfbfbf' }} />}
                 placeholder="Tìm kiếm hợp đồng theo mã hoặc tên..."
@@ -326,7 +333,6 @@ export default function Contract() {
                 onKeyPress={handleSearchKeyPress}
                 allowClear
               />
-
               <Button type="primary" onClick={handleSearch}>
                 Tìm kiếm
               </Button>
