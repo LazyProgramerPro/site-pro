@@ -172,34 +172,6 @@ export default function Contract() {
     );
   };
 
-  // // Filter data based on selections
-  // const filteredContracts =
-  //   contractList?.filter((contract) => {
-  //     const matchesSearch =
-  //       !searchTerm ||
-  //       contract.code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //       contract.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //       contract.du_an_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //       contract.cong_trinh_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-  //       contract.ben_b_name?.toLowerCase().includes(searchTerm.toLowerCase());
-
-  //     const matchesProject = selectedProjectId === 'all' || contract.du_an_id === selectedProjectId;
-  //     const matchesConstruction = selectedConstructionId === 'all' || contract.cong_trinh_id === selectedConstructionId;
-
-  //     return matchesSearch && matchesProject && matchesConstruction;
-  //   }) || [];
-
-  // Get unique projects and constructions for filters
-  const uniqueProjects = [
-    ...new Map(
-      contractList?.map((item) => [item.du_an_id, { id: item.du_an_id, name: item.du_an_name }]) || [],
-    ).values(),
-  ];
-  const uniqueConstructions = [
-    ...new Map(
-      contractList?.map((item) => [item.cong_trinh_id, { id: item.cong_trinh_id, name: item.cong_trinh_name }]) || [],
-    ).values(),
-  ];
   // Hiển thị modal xác nhận xóa
   const showDeleteConfirm = (record) => {
     Modal.confirm({
@@ -377,7 +349,6 @@ export default function Contract() {
               className={styles.customTable}
               columns={columns}
               dataSource={contractList}
-              rowKey="id"
               pagination={{
                 showSizeChanger: true,
                 onShowSizeChange: (current, size) => {
@@ -392,9 +363,10 @@ export default function Contract() {
                 },
                 showTotal: (total) => `Tổng số ${total} hợp đồng`,
               }}
-              scroll={{ x: 1200, y: 450 }}
+              scroll={{ x: 'max-content', y: 450 }}
               size="middle"
-              rowClassName={(record) => (editingContract?.id === record.id ? 'active-row' : '')}
+              rowClassName={(record) => (editingContract?.id === record?.id ? 'active-row' : '')}
+              rowKey="id"
             />
           </TableContainer>
         )}
