@@ -62,7 +62,7 @@ export default function ContractAddendum(props) {
     return () => {
       promise.abort();
     };
-  }, [dispatch, page, size]);
+  }, [dispatch, page, size, selectedContract?.id]);
 
   const showDrawer = (contractAddendumId) => {
     setOpen(true);
@@ -223,6 +223,13 @@ export default function ContractAddendum(props) {
       title: 'Hạng mục',
       dataIndex: 'hang_muc_name',
       key: 'hang_muc_name',
+      width: 150,
+      ellipsis: true,
+    },
+    {
+      title: 'Nhóm hạng mục',
+      dataIndex: 'nhom_hang_muc_name',
+      key: 'nhom_hang_muc_name',
       width: 150,
       ellipsis: true,
     },

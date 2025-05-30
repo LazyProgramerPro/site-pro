@@ -25,7 +25,7 @@ export default function Login() {
         return;
       }
       const { access_token, refresh_token, expires_in, refresh_expires_in } = auth;
-      const { username, is_active } = info;
+      const { username, is_active, phone_number, full_name, email, last_login, avatar_url, company, role } = info;
 
       if (!is_active) {
         message.error('Tài khoản của bạn đã bị khóa!');
@@ -43,6 +43,13 @@ export default function Login() {
         refresh_token_created_at: new Date().toISOString(), // Thêm thời điểm tạo refresh token
         username,
         is_active,
+        phone_number,
+        full_name,
+        email,
+        last_login,
+        avatar_url,
+        company: company || [],
+        role: role || [],
       };
 
       // Lưu thông tin xác thực và thiết lập auto refresh token

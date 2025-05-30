@@ -19,6 +19,13 @@ export const saveAuthData = (authData) => {
     refresh_token_created_at: authData?.refresh_token_created_at,
     username: authData?.username,
     is_active: authData?.is_active,
+    phone_number: authData?.phone_number,
+    full_name: authData?.full_name,
+    email: authData?.email,
+    last_login: authData?.last_login,
+    avatar_url: authData?.avatar_url,
+    company: authData?.company,
+    role: authData?.role,
   });
 
   if (!authData?.access_token) {
@@ -28,6 +35,7 @@ export const saveAuthData = (authData) => {
 
   const now = new Date();
   const userData = {
+    ...authData,
     access_token: authData.access_token,
     token: authData.access_token,
     refresh_token: authData.refresh_token,
@@ -39,7 +47,13 @@ export const saveAuthData = (authData) => {
       : authData.refresh_token_created_at || now.toISOString(),
     username: authData.username,
     is_active: authData.is_active,
-    ...authData,
+    phone_number: authData.phone_number,
+    full_name: authData.full_name,
+    email: authData.email,
+    last_login: authData.last_login,
+    avatar_url: authData.avatar_url,
+    company: authData.company,
+    role: authData.role,
   };
 
   localStorage.setItem('user', JSON.stringify(userData));
@@ -164,17 +178,17 @@ export const refreshToken = async () => {
     }
 
     // Xử lý trường hợp refresh token không thành công từ phía server hoặc response không hợp lệ
-    if (rc) { // Server đã phản hồi, nhưng không thành công (rc.code !== 0)
-        console.warn(`Refresh token không thành công từ server. Code: ${rc.code}, Message: ${rc.message}. Đăng xuất.`);
-        handleLogout(); // Đảm bảo logout nếu server từ chối refresh token
-        return { rc, auth: null }; // Trả về lỗi từ server
+    if (rc) {
+      // Server đã phản hồi, nhưng không thành công (rc.code !== 0)
+      console.warn(`Refresh token không thành công từ server. Code: ${rc.code}, Message: ${rc.message}. Đăng xuất.`);
+      handleLogout(); // Đảm bảo logout nếu server từ chối refresh token
+      return { rc, auth: null }; // Trả về lỗi từ server
     }
-    
+
     // Trường hợp không có rc (response không hợp lệ từ http client) hoặc các lỗi không mong muốn khác trước khi vào catch
     console.warn('Refresh token không thành công, không nhận được rc hợp lệ từ server hoặc response trống. Đăng xuất.');
     handleLogout(); // Logout như một biện pháp an toàn
     return { rc: { code: -1, message: 'Invalid or missing response from server during refresh' }, auth: null };
-
   } catch (err) {
     console.error('Refresh token thất bại (exception):', err);
     handleLogout();
@@ -203,7 +217,7 @@ export const restoreAuthSession = async () => {
   if (!userStringFromStorage) {
     console.log('Không tìm thấy user data trong localStorage.');
     return false; // Không có session để khôi phục
-  }else {
+  } else {
     console.log('Tìm thấy user data trong localStorage.');
     saveAuthData(JSON.parse(userStringFromStorage)); // Lưu lại thông tin xác thực vào Redux
   }
@@ -211,8 +225,6 @@ export const restoreAuthSession = async () => {
   try {
     const userData = JSON.parse(userStringFromStorage); // Parse chuỗi JSON thành object ở đây
     console.log('Khôi phục phiên đăng nhập từ localStorage (đã parse):', userData);
-
-
 
     // Kiểm tra sự tồn tại của access_token
     if (!userData?.access_token) {
@@ -281,7 +293,7 @@ export const setupAuthSync = () => {
   window.addEventListener('storage', (event) => {
     if (event.key === 'user') {
       console.log('Phát hiện thay đổi user data từ tab khác');
-      
+
       // Tab khác đăng xuất
       if (!event.newValue) {
         console.log('Đăng xuất từ tab khác, đồng bộ trạng thái');
@@ -289,12 +301,12 @@ export const setupAuthSync = () => {
         store.dispatch(logout());
         return;
       }
-      
+
       try {
         const newUserData = JSON.parse(event.newValue);
         const oldUserStr = localStorage.getItem('user');
         let oldUserData = null;
-        
+
         if (oldUserStr) {
           try {
             oldUserData = JSON.parse(oldUserStr);
@@ -302,7 +314,7 @@ export const setupAuthSync = () => {
             console.error('Lỗi parse oldUserData:', e);
           }
         }
-        
+
         // Nếu token thay đổi, cập nhật trạng thái
         if (newUserData?.token && (!oldUserData || newUserData.token !== oldUserData.token)) {
           console.log('Token đã thay đổi từ tab khác, đồng bộ trạng thái');

@@ -15,6 +15,7 @@ import { Contract } from './pages/contract';
 import Group from './pages/group/components/Group';
 import { HomeLayout, Landing } from './pages/home';
 import { Problem } from './pages/problem';
+import Profile from './pages/profile/component/Profile';
 import { Project } from './pages/project';
 import { restoreAuthSession } from './services/authService';
 
@@ -44,6 +45,14 @@ const router = createBrowserRouter([
           </LoginRoute>
         ),
         // action: loginAction(queryClient),
+      },
+      {
+        path: 'profile',
+        element: (
+          <ProtectedRoute>
+            <Profile />
+           </ProtectedRoute>
+        ),
       },
       {
         path: 'dashboard',
