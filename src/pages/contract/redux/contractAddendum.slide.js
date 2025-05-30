@@ -1,5 +1,6 @@
 import http from "@/utils/http";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { message } from "antd";
 
 const initialState = {
   contractAddendumList: [],
@@ -71,17 +72,17 @@ export const updateContractAddendum = createAsyncThunk(
 
 export const deleteContractAddendum = createAsyncThunk(
   "contractAddendum/deleteContractAddendum",
-  async (contractId, thunkAPI) => {
+  async (contractAddendumId, thunkAPI) => {
     try {
-      const { rc } = await http.delete("/auth/hopdong", {
-        data: { id: contractId },
+      const { rc } = await http.delete("/auth/phuluchopdong", {
+        data: { id: contractAddendumId },
         signal: thunkAPI.signal,
       });
       if (!rc || rc.code !== 0) {
         message.error(rc?.desc || "Lỗi không xác định!");
         return thunkAPI.rejectWithValue(rc?.desc || "Lỗi không xác định!");
       }
-      return contractId;
+      return contractAddendumId;
     } catch (error) {
       message.error("Xóa hợp đồng thất bại!");
       return thunkAPI.rejectWithValue("Xóa hợp đồng thất bại!");
@@ -94,9 +95,9 @@ const contractAddendumSlice = createSlice({
   initialState,
   reducers: {
     startEditingContractAddendum: (state, action) => {
-      const contractId = action.payload;
+      const contractAddendumId = action.payload;
       const foundContract =
-        state.contractAddendumList.find((contract) => contract.id === contractId) || null;
+        state.contractAddendumList.find((contract) => contract.id === contractAddendumId) || null;
       state.editingContractAddendum = foundContract;
     },
     cancelEditingContractAddendum: (state) => {

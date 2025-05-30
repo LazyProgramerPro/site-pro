@@ -55,11 +55,13 @@ export default function AddEditContractAddendumForm(props) {
   const [initialValues, setInitialValues] = useState(initialState);
   const loading = useSelector((state) => state.contractAddendum.loading);
   const selectedContractAddendum = useSelector((state) => state.contractAddendum.editingContractAddendum);
-  const selectedContract = useSelector((state) => state.contract.selectedContract);
+  const selectedContract = useSelector((state) => state.contract.editingContract);
 
   // Data từ database
   const categoryList = useSelector((state) => state.category.categoryList);
   const groupList = useSelector((state) => state.group.groupList);
+
+  console.log('groupList:', selectedContractAddendum);
   const businessList = useSelector((state) => state.business.businessList);
   const dispatch = useAppDispatch();
 
@@ -82,7 +84,6 @@ export default function AddEditContractAddendumForm(props) {
 
     loadBasicData();
   }, [dispatch]);
-
   // Set initial values for editing
   useEffect(() => {
     if (selectedContractAddendum) {
@@ -92,21 +93,67 @@ export default function AddEditContractAddendumForm(props) {
     }
   }, [selectedContractAddendum]);
 
-  // Reset fields when opening form
+  // Reset fields when opening form and load data for edit mode
   useEffect(() => {
     if (open) {
       form.resetFields();
       if (selectedContractAddendum) {
-        form.setFieldsValue({ ...selectedContractAddendum });
+        // Load nhóm hạng mục theo hạng mục đã chọn trước khi set form values
+        if (selectedContractAddendum.hang_muc_id) {
+          dispatch(
+            getGroupList({
+              pageNo: 0,
+              pageSize: 100,
+              searchText: '',
+              hang_muc_id: selectedContractAddendum.hang_muc_id,
+            }),
+          )
+            .unwrap()
+            .then(() => {
+              // Sau khi load xong danh sách nhóm hạng mục, mới set form values
+              form.setFieldsValue({ ...selectedContractAddendum });
+            })
+            .catch((error) => {
+              console.error('Error loading groups for edit:', error);
+              // Nếu có lỗi, vẫn set form values
+              form.setFieldsValue({ ...selectedContractAddendum });
+            });
+        } else {
+          // Nếu không có hang_muc_id, vẫn set form values
+          form.setFieldsValue({ ...selectedContractAddendum });
+        }
       }
     }
-  }, [open, selectedContractAddendum, form]);
-  // Auto calculate total amount
+  }, [open, selectedContractAddendum, form, dispatch]); // Auto calculate total amount
   const handleCalculateTotal = () => {
     const khoi_luong = form.getFieldValue('khoi_luong') || 0;
     const don_gia = form.getFieldValue('don_gia') || 0;
     const total = khoi_luong * don_gia;
     form.setFieldsValue({ thanh_tien: total });
+  };
+  // Handle category change - reset group and reload group list
+  const handleCategoryChange = async (categoryId) => {
+    // Reset nhóm hạng mục field
+    form.setFieldValue('nhom_hang_muc_id', undefined);
+
+    if (categoryId) {
+      try {
+        // Load nhóm hạng mục theo hạng mục đã chọn
+        await dispatch(
+          getGroupList({
+            pageNo: 0,
+            pageSize: 100,
+            searchText: '',
+            hang_muc_id: categoryId,
+          }),
+        );
+      } catch (error) {
+        console.error('Error loading groups by category:', error);
+      }
+    } else {
+      // Nếu không chọn hạng mục, load toàn bộ nhóm hạng mục
+      await dispatch(getGroupList({ pageNo: 0, pageSize: 100, searchText: '' }));
+    }
   };
   const onFinish = async (values) => {
     try {
@@ -143,6 +190,9 @@ export default function AddEditContractAddendumForm(props) {
             pageNo: 0,
             pageSize: 10,
             searchText: '',
+            du_an_id: selectedContract?.du_an_id,
+            cong_trinh_id: selectedContract?.cong_trinh_id,
+            hop_dong_id: selectedContract?.id,
           };
 
           await dispatch(getContractAddendumList(filters));
@@ -189,6 +239,9 @@ export default function AddEditContractAddendumForm(props) {
             pageNo: 0,
             pageSize: 10,
             searchText: '',
+            du_an_id: selectedContract?.du_an_id,
+            cong_trinh_id: selectedContract?.cong_trinh_id,
+            hop_dong_id: selectedContract?.id,
           };
 
           await dispatch(getContractAddendumList(filters));
@@ -303,6 +356,28 @@ export default function AddEditContractAddendumForm(props) {
             </Col>
           </Row>
           <Row gutter={16}>
+            {' '}
+            <Col span={12}>
+              {' '}
+              <Form.Item
+                label="Hạng mục"
+                name="hang_muc_id"
+                rules={[{ required: true, message: 'Vui lòng chọn hạng mục!' }]}
+              >
+                <Select
+                  showSearch
+                  allowClear
+                  placeholder="Chọn hạng mục"
+                  optionFilterProp="label"
+                  filterOption={(input, option) => option.label.toLowerCase().includes(input.toLowerCase())}
+                  onChange={handleCategoryChange}
+                  options={categoryList?.map((category) => ({
+                    label: category.name,
+                    value: category.id,
+                  }))}
+                />
+              </Form.Item>
+            </Col>
             <Col span={12}>
               {' '}
               <Form.Item
@@ -319,26 +394,6 @@ export default function AddEditContractAddendumForm(props) {
                   options={groupList?.map((group) => ({
                     label: group.name,
                     value: group.id,
-                  }))}
-                />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              {' '}
-              <Form.Item
-                label="Hạng mục"
-                name="hang_muc_id"
-                rules={[{ required: true, message: 'Vui lòng chọn hạng mục!' }]}
-              >
-                <Select
-                  showSearch
-                  allowClear
-                  placeholder="Chọn hạng mục"
-                  optionFilterProp="label"
-                  filterOption={(input, option) => option.label.toLowerCase().includes(input.toLowerCase())}
-                  options={categoryList?.map((category) => ({
-                    label: category.name,
-                    value: category.id,
                   }))}
                 />
               </Form.Item>
@@ -475,7 +530,7 @@ export default function AddEditContractAddendumForm(props) {
                 name="documents"
                 valuePropName="fileList"
                 getValueFromEvent={normFile}
-                rules={[{ required: false, message: 'Vui lòng chọn tài liệu!' }]}
+                // rules={[{ required: false, message: 'Vui lòng chọn tài liệu!' }]}
                 tooltip="Tải lên các tài liệu liên quan đến phụ lục hợp đồng"
               >
                 <Upload.Dragger
