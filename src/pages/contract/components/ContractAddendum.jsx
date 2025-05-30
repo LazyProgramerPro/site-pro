@@ -97,7 +97,6 @@ export default function ContractAddendum(props) {
   // Xử lý search khi nhấn Enter
   const handleSearchKeyPress = (e) => {
     if (e.key === 'Enter') {
-      setPage(1);
       dispatch(
         getContractAddendumList({
           searchText: searchTerm,
@@ -140,12 +139,16 @@ export default function ContractAddendum(props) {
   };
 
   const handleSearch = () => {
-    setPage(1);
+    // setPage(1);
     dispatch(
       getContractAddendumList({
         searchText: searchTerm,
         pageNo: 0,
         pageSize: size,
+
+        du_an_id: selectedContract?.du_an_id,
+        cong_trinh_id: selectedContract?.cong_trinh_id,
+        hop_dong_id: selectedContract?.id,
       }),
     );
   };

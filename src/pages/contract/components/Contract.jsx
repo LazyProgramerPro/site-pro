@@ -37,7 +37,7 @@ export default function Contract() {
   const totalCount = useSelector((state) => state.contract.totalCount);
   const projectList = useSelector((state) => state.project.projectList);
   const constructionList = useSelector((state) => state.construction.constructionList);
-
+  console.log('contractAddendumList:', contractList);
   // Phân trang
   const [page, setPage] = useState(1);
   const [size, setSize] = useState(10);
@@ -76,7 +76,7 @@ export default function Contract() {
     const filters = {
       pageNo: page - 1,
       pageSize: size,
-      searchText: searchTerm,
+      searchText: '',
       du_an_id: selectedProjectId === 'all' ? null : selectedProjectId,
       cong_trinh_id: selectedConstructionId === 'all' ? null : selectedConstructionId,
     };
@@ -118,7 +118,6 @@ export default function Contract() {
   // Xử lý search khi nhấn Enter
   const handleSearchKeyPress = (e) => {
     if (e.key === 'Enter') {
-      setPage(1);
       dispatch(
         getContractList({
           searchText: searchTerm,

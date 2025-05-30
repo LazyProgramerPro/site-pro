@@ -35,7 +35,6 @@ export const saveAuthData = (authData) => {
 
   const now = new Date();
   const userData = {
-    ...authData,
     access_token: authData.access_token,
     token: authData.access_token,
     refresh_token: authData.refresh_token,
@@ -54,6 +53,7 @@ export const saveAuthData = (authData) => {
     avatar_url: authData.avatar_url,
     company: authData.company,
     role: authData.role,
+    ...authData,
   };
 
   localStorage.setItem('user', JSON.stringify(userData));
@@ -168,6 +168,13 @@ export const refreshToken = async () => {
         refresh_token_created_at: new Date().toISOString(), // Thêm thời điểm tạo refresh token
         username: userData.username,
         is_active: userData.is_active,
+        phone_number: userData?.phone_number,
+        full_name: userData?.full_name,
+        email: userData?.email,
+        last_login: userData?.last_login,
+        avatar_url: userData?.avatar_url,
+        company: userData?.company,
+        role: userData?.role,
       };
 
       saveAuthData(newUserData);
