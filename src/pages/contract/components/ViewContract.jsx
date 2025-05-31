@@ -2,14 +2,12 @@ import {
   BuildOutlined,
   CalendarOutlined,
   ClockCircleOutlined,
-  DownloadOutlined,
   FileOutlined,
   FileTextOutlined,
   HistoryOutlined,
   PictureOutlined,
   ProjectOutlined,
   TeamOutlined,
-  UploadOutlined,
 } from '@ant-design/icons';
 import {
   Alert,
@@ -30,14 +28,14 @@ import {
   Tabs,
   Tag,
   Timeline,
-  Tooltip,
   Typography,
 } from 'antd';
 import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import http from '../../../utils/http';
 import { ProjectDocumentList, ProjectImageList } from '../../project';
+import { getContractDocumentList, uploadContractDocumentThunk } from '../redux/contract.slice';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -58,6 +56,7 @@ const themeColors = {
 
 export default function ViewContract(props) {
   const { onClose, open } = props;
+  const dispatch = useDispatch();
   const [initialValues, setInitialValues] = useState(initialState);
   const [contractDetail, setContractDetail] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -67,6 +66,9 @@ export default function ViewContract(props) {
   const [error, setError] = useState(null);
 
   const selectedContract = useSelector((state) => state.contract.editingContract);
+  const contractDocuments = useSelector((state) => state.contract.contractDocuments);
+  const contractImages = useSelector((state) => state.contract.contractImages);
+  const loadingDocuments = useSelector((state) => state.contract.loadingDocuments);
 
   // Fetch contract detail
   const fetchContractDetail = async (contractId) => {
@@ -102,8 +104,10 @@ export default function ViewContract(props) {
   useEffect(() => {
     if (selectedContract?.id && open) {
       fetchContractDetail(selectedContract.id);
+      // Load documents and images for contract
+      dispatch(getContractDocumentList(selectedContract.id));
     }
-  }, [selectedContract?.id, open]); // Reset states when closing
+  }, [selectedContract?.id, open, dispatch]); // Reset states when closing
   const handleClose = () => {
     setContractDetail(null);
     setInitialValues(initialState);
@@ -193,44 +197,57 @@ export default function ViewContract(props) {
       avatar: 'B',
       color: '#52c41a',
     },
-  ];
-
-  // Mock timeline data
+  ]; // Mock timeline data
   const mockTimeline = [
     { time: '29/05/2025', title: 'Tạo hợp đồng', description: 'Hợp đồng được tạo và khởi tạo trong hệ thống' },
     { time: '30/05/2025', title: 'Gửi phê duyệt', description: 'Hợp đồng được gửi đi để phê duyệt' },
     { time: '01/06/2025', title: 'Đang thực hiện', description: 'Bắt đầu thực hiện theo điều khoản hợp đồng' },
-  ]; // Mock documents
-  const mockDocuments = [
-    { name: 'Hợp đồng gốc.pdf', type: 'pdf', size: '2.5MB', date: '29/05/2025' },
-    { name: 'Phụ lục điều khoản.pdf', type: 'pdf', size: '1.8MB', date: '29/05/2025' },
-    { name: 'Bảng thanh toán.xlsx', type: 'xlsx', size: '1.2MB', date: '30/05/2025' },
   ];
 
-  // Mock images
-  const mockImages = [
-    {
-      name: 'Ảnh ký kết hợp đồng.jpg',
-      url: 'https://picsum.photos/400/300?random=1',
-      size: '1.2MB',
-      date: '29/05/2025',
-      creator: 'Nguyễn Văn A',
-    },
-    {
-      name: 'Ảnh hiện trường công trình.jpg',
-      url: 'https://picsum.photos/400/300?random=2',
-      size: '2.1MB',
-      date: '30/05/2025',
-      creator: 'Trần Thị B',
-    },
-    {
-      name: 'Ảnh bản vẽ thiết kế.png',
-      url: 'https://picsum.photos/400/300?random=3',
-      size: '3.5MB',
-      date: '31/05/2025',
-      creator: 'Lê Văn C',
-    },
-  ];
+  // Upload handlers for documents
+  const handleDocumentUpload = async (file) => {
+    if (!selectedContract?.id) {
+      message.error('Không tìm thấy thông tin hợp đồng');
+      return;
+    }
+
+    try {
+      await dispatch(
+        uploadContractDocumentThunk({
+          file,
+          contractId: selectedContract.id,
+          name: file.name,
+          description: `Tài liệu hợp đồng - ${file.name}`,
+        }),
+      ).unwrap();
+      message.success('Upload tài liệu thành công');
+    } catch (error) {
+      console.error('Upload error:', error);
+      message.error('Upload tài liệu thất bại');
+    }
+  };
+
+  const handleImageUpload = async (file) => {
+    if (!selectedContract?.id) {
+      message.error('Không tìm thấy thông tin hợp đồng');
+      return;
+    }
+
+    try {
+      await dispatch(
+        uploadContractDocumentThunk({
+          file,
+          contractId: selectedContract.id,
+          name: file.name,
+          description: `Hình ảnh hợp đồng - ${file.name}`,
+        }),
+      ).unwrap();
+      message.success('Upload hình ảnh thành công');
+    } catch (error) {
+      console.error('Upload error:', error);
+      message.error('Upload hình ảnh thất bại');
+    }
+  };
 
   // Tabs for the detail view
   const tabItems = [
@@ -438,15 +455,15 @@ export default function ViewContract(props) {
       ),
       children: (
         <ProjectDocumentList
-          documents={mockDocuments}
-          loading={false}
+          documents={contractDocuments}
+          loading={loadingDocuments}
           title="Tài liệu hợp đồng"
           entityType="hợp đồng"
           showUploadButton={true}
-          onUpload={() => message.info('Chức năng tải lên đang phát triển')}
+          onUpload={handleDocumentUpload}
           onPreview={(doc) => message.info(`Xem trước: ${doc.name}`)}
           onDownload={(url, name) => message.info(`Tải xuống: ${name}`)}
-          formatDate={(dateString) => dateString}
+          formatDate={formatDate}
         />
       ),
     },
@@ -460,15 +477,15 @@ export default function ViewContract(props) {
       ),
       children: (
         <ProjectImageList
-          images={mockImages}
-          loading={false}
+          images={contractImages}
+          loading={loadingDocuments}
           title="Hình ảnh hợp đồng"
           entityType="hợp đồng"
           showUploadButton={true}
-          onUpload={() => message.info('Chức năng tải lên hình ảnh đang phát triển')}
+          onUpload={handleImageUpload}
           onPreview={(image) => message.info(`Xem ảnh: ${image.name}`)}
           onDownload={(url, name) => message.info(`Tải xuống: ${name}`)}
-          formatDate={(dateString) => dateString}
+          formatDate={formatDate}
         />
       ),
     },

@@ -63,12 +63,12 @@ export const updateProject = createAsyncThunk('project/updateProject', async (bo
 });
 
 export const deleteProject = createAsyncThunk('project/deleteProject', async (projectId, thunkAPI) => {
-    const response = await http.delete(`/auth/duan`, {
-      data: {
-        id: projectId,
-      },
-      signal: thunkAPI.signal,
-    });
+  const response = await http.delete(`/auth/duan`, {
+    data: {
+      id: projectId,
+    },
+    signal: thunkAPI.signal,
+  });
   return response.data;
 });
 
@@ -87,14 +87,14 @@ export const getProjectDocumentList = createAsyncThunk(
 
       const response = await http.post('/auth/document/list', body);
       console.log('API raw response:', response);
-      
+
       // Kiểm tra các cấu trúc response khác nhau
       if (response?.rc?.code !== 0) {
         console.error('API error:', response?.rc);
         message.error(response?.rc?.desc || 'Không thể tải danh sách tài liệu');
         return thunkAPI.rejectWithValue(response?.rc?.desc || 'Không thể tải danh sách tài liệu');
       }
-      
+
       // Các trường hợp cấu trúc response
       if (response?.rootNode) {
         // Cấu trúc 1: { rootNode: { childDocs: [...] } }
@@ -122,7 +122,7 @@ export const getProjectDocumentList = createAsyncThunk(
       message.error('Không thể tải danh sách tài liệu dự án');
       return thunkAPI.rejectWithValue('Không thể tải danh sách tài liệu dự án');
     }
-  }
+  },
 );
 
 /**
@@ -159,7 +159,7 @@ export const uploadProjectDocumentThunk = createAsyncThunk(
       message.error('Không thể upload tài liệu dự án');
       return thunkAPI.rejectWithValue('Không thể upload tài liệu dự án');
     }
-  }
+  },
 );
 
 const projectSlice = createSlice({
@@ -193,33 +193,35 @@ const projectSlice = createSlice({
           return false;
         });
         state.editingProject = null;
-      })      .addCase(deleteProject.fulfilled, (state, action) => {
+      })
+      .addCase(deleteProject.fulfilled, (state, action) => {
         const projectId = action.meta.arg;
         const deleteProjectIndex = state.projectList.findIndex((project) => project.id === projectId);
         if (deleteProjectIndex !== -1) {
           state.projectList.splice(deleteProjectIndex, 1);
         }
       })
-      
+
       .addCase(getProjectDocumentList.pending, (state) => {
         state.loadingDocuments = true;
-      })      .addCase(getProjectDocumentList.fulfilled, (state, action) => {
+      })
+      .addCase(getProjectDocumentList.fulfilled, (state, action) => {
         state.loadingDocuments = false;
-        
+
         // Khởi tạo arrays rỗng cho ảnh và tài liệu
         const images = [];
         const documents = [];
-        
+
         // Log dữ liệu nhận được để debug
         console.log('API Response rootNode:', action.payload);
-          // Xử lý dữ liệu từ API
+        // Xử lý dữ liệu từ API
         try {
           // Kiểm tra cấu trúc dữ liệu và xử lý đúng định dạng
           let childDocs = [];
-          
+
           // Log chi tiết cấu trúc dữ liệu
           console.log('Raw API response structure:', JSON.stringify(action.payload, null, 2).substring(0, 500) + '...');
-          
+
           if (action.payload?.childDocs && Array.isArray(action.payload.childDocs)) {
             console.log('Using childDocs from rootNode');
             childDocs = action.payload.childDocs;
@@ -231,27 +233,29 @@ const projectSlice = createSlice({
             console.log('Using data array from response');
             childDocs = action.payload.data;
           }
-          
-          console.log('Processing childDocs length:', childDocs.length);
-          
+
+          console.log('Processing childDocs length:', action.payload);
+
           // Xử lý từng item trong danh sách tài liệu
           childDocs.forEach((doc) => {
             if (!doc) {
               console.log('Invalid doc item: null or undefined');
               return; // Bỏ qua nếu item không hợp lệ
             }
-            
+
             // Kiểm tra cấu trúc tài liệu - có thể là { doc: {...} } hoặc trực tiếp là tài liệu
             const docData = doc.doc || doc;
-            
+
             if (!docData || !docData.name) {
               console.log('Invalid document data:', docData);
               return; // Bỏ qua nếu không có thông tin cần thiết
             }
-              // Lấy extension từ tên file
+            // Lấy extension từ tên file
             const fileName = docData.name || '';
-            const extension = fileName.toLowerCase().split('.').pop();
-            
+            const extension = docData?.extension?.toLowerCase() || fileName.split('.').pop().toLowerCase();
+
+            console.log('Processing document:', extension);
+
             // Tạo đối tượng tài liệu chuẩn
             const item = {
               id: docData.id || doc.id || `temp-${Date.now()}`,
@@ -261,9 +265,11 @@ const projectSlice = createSlice({
               date: docData.created_at || doc.created_at || new Date().toISOString(),
               size: docData.file_size ? (docData.file_size / (1024 * 1024)).toFixed(2) + ' MB' : 'N/A',
             };
-                // Phân loại tài liệu hoặc hình ảnh
+            // Phân loại tài liệu hoặc hình ảnh
             const isImage = ['jpg', 'jpeg', 'png', 'gif', 'bmp'].includes(extension);
-            
+
+            console.log('Processing item:', item);
+
             if (isImage) {
               images.push(item);
             } else {
@@ -273,9 +279,9 @@ const projectSlice = createSlice({
         } catch (error) {
           console.error('Error processing project documents:', error);
         }
-        
+
         console.log('Processed images:', images.length, 'documents:', documents.length);
-        
+
         // Cập nhật state
         state.projectImages = images;
         state.projectDocuments = documents; // Chỉ lưu tài liệu, không bao gồm ảnh
@@ -285,7 +291,7 @@ const projectSlice = createSlice({
         state.projectImages = [];
         state.projectDocuments = [];
       })
-      
+
       .addCase(uploadProjectDocumentThunk.pending, (state) => {
         state.loading = true;
       })

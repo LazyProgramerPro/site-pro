@@ -13,6 +13,7 @@ import {
   Col,
   Descriptions,
   Drawer,
+  message,
   Row,
   Skeleton,
   Space,
@@ -23,11 +24,12 @@ import {
 } from 'antd';
 import { isEmpty } from 'lodash';
 import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useAppDispatch } from '../../../redux/store';
 import { ProjectDocumentList } from '../../project';
+import { getContractAddendumDocumentList, uploadContractAddendumDocumentThunk } from '../redux/contractAddendum.slide';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -49,6 +51,7 @@ const themeColors = {
 export default function ViewContractAddendum(props) {
   const navigate = useNavigate();
   const { onClose, open } = props;
+  const dispatch = useDispatch();
   const [initialValues, setInitialValues] = useState(initialState);
   const [contractAddendumDetail, setContractAddendumDetail] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -58,8 +61,11 @@ export default function ViewContractAddendum(props) {
   const [error, setError] = useState(null);
 
   const selectedContractAddendum = useSelector((state) => state.contractAddendum.editingContractAddendum);
+  const contractAddendumDocuments = useSelector((state) => state.contractAddendum.contractAddendumDocuments);
+  const contractAddendumImages = useSelector((state) => state.contractAddendum.contractAddendumImages);
+  const loadingDocuments = useSelector((state) => state.contractAddendum.loadingDocuments);
 
-  const dispatch = useAppDispatch();
+  const appDispatch = useAppDispatch();
 
   // Fetch contract addendum detail
   const fetchContractAddendumDetail = async (contractAddendumId) => {
@@ -81,12 +87,13 @@ export default function ViewContractAddendum(props) {
       setLoading(false);
     }
   };
-
   useEffect(() => {
     if (selectedContractAddendum?.id && open) {
       fetchContractAddendumDetail(selectedContractAddendum.id);
+      // Load documents and images for contract addendum
+      dispatch(getContractAddendumDocumentList(selectedContractAddendum.id));
     }
-  }, [selectedContractAddendum?.id, open]);
+  }, [selectedContractAddendum?.id, open, dispatch]);
 
   const handleClose = () => {
     setActiveTab('1');
@@ -130,7 +137,6 @@ export default function ViewContractAddendum(props) {
       return 'N/A';
     }
   };
-
   // Format currency
   const formatCurrency = (value) => {
     if (!value) return 'N/A';
@@ -138,6 +144,51 @@ export default function ViewContractAddendum(props) {
       style: 'currency',
       currency: 'VND',
     }).format(value);
+  };
+
+  // Upload handlers for documents
+  const handleDocumentUpload = async (file) => {
+    if (!selectedContractAddendum?.id) {
+      message.error('Không tìm thấy thông tin phụ lục hợp đồng');
+      return;
+    }
+
+    try {
+      await dispatch(
+        uploadContractAddendumDocumentThunk({
+          file,
+          contractAddendumId: selectedContractAddendum.id,
+          name: file.name,
+          description: `Tài liệu phụ lục hợp đồng - ${file.name}`,
+        }),
+      ).unwrap();
+      message.success('Upload tài liệu thành công');
+    } catch (error) {
+      console.error('Upload error:', error);
+      message.error('Upload tài liệu thất bại');
+    }
+  };
+
+  const handleImageUpload = async (file) => {
+    if (!selectedContractAddendum?.id) {
+      message.error('Không tìm thấy thông tin phụ lục hợp đồng');
+      return;
+    }
+
+    try {
+      await dispatch(
+        uploadContractAddendumDocumentThunk({
+          file,
+          contractAddendumId: selectedContractAddendum.id,
+          name: file.name,
+          description: `Hình ảnh phụ lục hợp đồng - ${file.name}`,
+        }),
+      ).unwrap();
+      message.success('Upload hình ảnh thành công');
+    } catch (error) {
+      console.error('Upload error:', error);
+      message.error('Upload hình ảnh thất bại');
+    }
   };
 
   // Contract addendum basic info items
@@ -391,11 +442,14 @@ export default function ViewContractAddendum(props) {
       ),
       children: (
         <ProjectDocumentList
-          documents={mockDocuments}
-          loading={loading}
+          documents={contractAddendumDocuments}
+          loading={loadingDocuments}
           title="Tài liệu đính kèm"
           entityType="phụ lục hợp đồng"
-          showUploadButton={false}
+          showUploadButton={true}
+          onUpload={handleDocumentUpload}
+          onPreview={(doc) => message.info(`Xem trước: ${doc.name}`)}
+          onDownload={(url, name) => message.info(`Tải xuống: ${name}`)}
           formatDate={formatDate}
         />
       ),
