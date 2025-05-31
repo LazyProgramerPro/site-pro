@@ -2,7 +2,7 @@ import http from '@/utils/http';
 import { notification } from 'antd';
 
 /**
- * Hàm upload chung cho tất cả loại file (ảnh, tài liệu, hợp đồng, phụ lục) 
+ * Hàm upload chung cho tất cả loại file (ảnh, tài liệu, hợp đồng, phụ lục)
  * Sử dụng multipart/form-data để upload raw file binary
  * @param {Object} params
  * @param {File} params.file - File cần upload
@@ -14,48 +14,38 @@ import { notification } from 'antd';
  * @param {Object} params.additionalData - Dữ liệu bổ sung (optional)
  * @returns {Promise<Object>} Kết quả trả về từ API
  */
-export const uploadFile = async ({
-  file,
-  ownerId,
-  ownerType,
-  parentId,
-  name,
-  description,
-  additionalData = {}
-}) => {
+export const uploadFile = async ({ file, ownerId, ownerType, parentId, name, description, additionalData = {} }) => {
   try {
     // Tạo FormData để upload multipart
     const formData = new FormData();
-    
+
     // Append file (binary data)
     formData.append('file', file);
-    
+
     // Append metadata
     formData.append('owner_id', ownerId);
     formData.append('owner_type', ownerType);
     formData.append('parent_id', parentId || '');
     formData.append('name', name || file.name);
     formData.append('description', description || `File upload - ${file.name}`);
-    
+
     // Append additional data
-    Object.keys(additionalData).forEach(key => {
+    Object.keys(additionalData).forEach((key) => {
       formData.append(key, additionalData[key]);
     });
 
-    const response = await http.post('/auth/document/upload', formData, {
+    const { rc } = await http.post('/auth/document/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     });
 
-    console.log('Upload file response:', response);
-    return response.data;
+    if (rc?.code !== 0) {
+      throw new Error(rc?.desc || 'Không thể upload file');
+    }
+
+    return rc.code;
   } catch (error) {
-    console.error('Upload file error:', error);
-    notification.error({
-      message: 'Lỗi upload',
-      description: error?.response?.data?.message || 'Không thể upload file',
-    });
     throw error;
   }
 };
@@ -69,11 +59,7 @@ export const uploadFile = async ({
  * @param {Object} params.additionalData - Dữ liệu bổ sung (optional)
  * @returns {Promise<Object>} Kết quả trả về từ API
  */
-export const deleteFile = async ({
-  ownerId,
-  ownerType,
-  id,
-}) => {
+export const deleteFile = async ({ ownerId, ownerType, id }) => {
   try {
     const body = {
       owner_id: ownerId,
@@ -81,16 +67,16 @@ export const deleteFile = async ({
       id,
     };
 
-    const response = await http.delete('/auth/document', {
-      data: body
+    const { rc } = await http.delete('/auth/document', {
+      data: body,
     });
-    return response.data;
+
+    if (rc?.code !== 0) {
+      throw new Error(rc?.desc || 'Không thể xóa file');
+    }
+    return rc.code;
   } catch (error) {
-    console.error('Delete file error:', error);
-    notification.error({
-      message: 'Lỗi xóa file',
-      description: error?.response?.data?.message || 'Không thể xóa file',
-    });
+
     throw error;
   }
 };
@@ -109,8 +95,8 @@ export const getDocumentList = async ({ ownerId, ownerType }) => {
       owner_type: ownerType,
     };
 
-    const {rc, rootNode} = await http.post('/auth/document/list', body);
-    if(rc?.code !== 0) {
+    const { rc, rootNode } = await http.post('/auth/document/list', body);
+    if (rc?.code !== 0) {
       throw new Error(rc?.message || 'Không thể tải danh sách tài liệu');
     }
     return rootNode;
@@ -176,8 +162,8 @@ export const uploadContract = async (file, contractId, name = '', description = 
     additionalData: {
       category: 'CONTRACT',
       file_type: file.type,
-      file_size: file.size
-    }
+      file_size: file.size,
+    },
   });
 };
 
@@ -196,8 +182,8 @@ export const uploadContractAppendix = async (file, contractId, appendixId, name 
       category: 'CONTRACT_APPENDIX',
       contract_id: contractId,
       file_type: file.type,
-      file_size: file.size
-    }
+      file_size: file.size,
+    },
   });
 };
 
@@ -208,7 +194,7 @@ export const deleteProjectImage = async (imageId, projectId) => {
   return deleteFile({
     ownerId: projectId,
     ownerType: 'DU_AN',
-    id: imageId
+    id: imageId,
   });
 };
 
@@ -219,7 +205,7 @@ export const deleteProjectDocument = async (documentId, projectId) => {
   return deleteFile({
     ownerId: projectId,
     ownerType: 'DU_AN',
-    id: documentId
+    id: documentId,
   });
 };
 
@@ -230,7 +216,7 @@ export const deleteContract = async (contractId, ownerId) => {
   return deleteFile({
     ownerId: ownerId,
     ownerType: 'HOP_DONG',
-    id: contractId
+    id: contractId,
   });
 };
 
@@ -241,6 +227,6 @@ export const deleteContractAppendix = async (appendixId, contractId) => {
   return deleteFile({
     ownerId: contractId,
     ownerType: 'PHU_LUC',
-    id: appendixId
+    id: appendixId,
   });
 };
