@@ -1,18 +1,28 @@
 import { useAppDispatch } from '@/redux/store';
-import { CloseCircleOutlined, InboxOutlined, ProjectOutlined, SaveOutlined } from '@ant-design/icons';
+import {
+  CloseCircleOutlined,
+  DeleteOutlined,
+  InboxOutlined,
+  LoadingOutlined,
+  ProjectOutlined,
+  SaveOutlined,
+} from '@ant-design/icons';
 import {
   Avatar,
   Button,
+  Card,
   Col,
   DatePicker,
   Drawer,
   Form,
   Input,
+  List,
   notification,
   Row,
   Select,
   Space,
   Spin,
+  Typography,
   Upload,
 } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
@@ -21,25 +31,33 @@ import moment from 'moment';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import {
+  deleteProjectDocument,
+  deleteProjectImage,
+  uploadProjectDocument,
+  uploadProjectImage,
+} from '../../../services/uploadService';
 import { getBusinessList } from '../../business/redux/business.slice';
 import { addProject, getProjectList, updateProject } from '../redux/project.slice';
 
+const { Text } = Typography;
+
 const initialState = {};
 
-// Thêm code để xử lý việc upload
-const normFile = (e) => {
-  if (Array.isArray(e)) {
-    return e;
-  }
-  return e?.fileList;
-};
-
+// Upload states and handlers
 export default function AddEditProjectForm(props) {
   const navigate = useNavigate();
   const { onClose, open } = props;
   const [form] = Form.useForm();
   const [initialValues, setInitialValues] = useState(initialState);
   const [companies, setCompanies] = useState([]);
+
+  // Upload-related states
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingDocument, setUploadingDocument] = useState(false);
+  const [uploadedImages, setUploadedImages] = useState([]);
+  const [uploadedDocuments, setUploadedDocuments] = useState([]);
+
   const dispatch = useAppDispatch();
 
   const loading = useSelector((state) => state.project.loading);
@@ -65,6 +83,7 @@ export default function AddEditProjectForm(props) {
   }, [dispatch]);
 
   const selectedProject = useSelector((state) => state.project.editingProject);
+
   console.log('editingProject:', selectedProject);
   useEffect(() => {
     // Transform dates from string to moment objects with explicit format
@@ -78,12 +97,143 @@ export default function AddEditProjectForm(props) {
         tu_van_thiet_ke_id: selectedProject.tu_van_thiet_ke_id || '',
       };
       setInitialValues(formattedProject);
+
+      // Load existing uploaded files (mock data for now - replace with actual API call)
+      // TODO: Replace with actual API call to get uploaded files
+      if (selectedProject.uploaded_images) {
+        setUploadedImages(selectedProject.uploaded_images);
+      }
+      if (selectedProject.uploaded_documents) {
+        setUploadedDocuments(selectedProject.uploaded_documents);
+      }
     } else {
       setInitialValues(initialState);
+      setUploadedImages([]);
+      setUploadedDocuments([]);
     }
   }, [selectedProject]);
-
   console.log('selectedProject1111:', selectedProject);
+
+  // Upload handlers
+  const handleImageUpload = async (file) => {
+    if (!selectedProject?.id) {
+      notification.error({
+        message: 'Lỗi',
+        description: 'Vui lòng lưu dự án trước khi upload hình ảnh',
+      });
+      return false;
+    }
+
+    setUploadingImage(true);
+    try {
+      const parentId = null;
+
+      const result = await uploadProjectImage(file, selectedProject.id, parentId);
+
+      console.log('Upload result:', result);
+
+      const newImage = {
+        id: result?.id || Date.now(),
+        name: file.name,
+        url: result?.url || URL.createObjectURL(file),
+        status: 'done',
+      };
+
+      setUploadedImages((prev) => [...prev, newImage]);
+
+      notification.success({
+        message: 'Thành công',
+        description: 'Upload hình ảnh thành công',
+      });
+    } catch (error) {
+      notification.error({
+        message: 'Lỗi upload',
+        description: error?.message || 'Không thể upload hình ảnh',
+      });
+    } finally {
+      setUploadingImage(false);
+    }
+
+    return false; // Prevent default upload behavior
+  };
+
+  const handleDocumentUpload = async (file) => {
+    if (!selectedProject?.id) {
+      notification.error({
+        message: 'Lỗi',
+        description: 'Vui lòng lưu dự án trước khi upload tài liệu',
+      });
+      return false;
+    }
+
+    setUploadingDocument(true);
+    try {
+      const result = await uploadProjectDocument(file, selectedProject.id);
+
+      const newDocument = {
+        id: result.id || Date.now(),
+        name: file.name,
+        url: result.url || '#',
+        status: 'done',
+        size: (file.size / (1024 * 1024)).toFixed(2) + ' MB',
+      };
+
+      setUploadedDocuments((prev) => [...prev, newDocument]);
+
+      notification.success({
+        message: 'Thành công',
+        description: 'Upload tài liệu thành công',
+      });
+    } catch (error) {
+      notification.error({
+        message: 'Lỗi upload',
+        description: error?.message || 'Không thể upload tài liệu',
+      });
+    } finally {
+      setUploadingDocument(false);
+    }
+
+    return false; // Prevent default upload behavior
+  };
+
+  const handleImageDelete = async (imageId) => {
+    if (!selectedProject?.id) return;
+
+    try {
+      await deleteProjectImage(imageId, selectedProject.id);
+      setUploadedImages((prev) => prev.filter((img) => img.id !== imageId));
+
+      notification.success({
+        message: 'Thành công',
+        description: 'Xóa hình ảnh thành công',
+      });
+    } catch (error) {
+      notification.error({
+        message: 'Lỗi',
+        description: error?.message || 'Không thể xóa hình ảnh',
+      });
+    }
+  };
+
+  const handleDocumentDelete = async (documentId) => {
+    if (!selectedProject?.id) return;
+
+    try {
+      await deleteProjectDocument(documentId, selectedProject.id);
+      setUploadedDocuments((prev) => prev.filter((doc) => doc.id !== documentId));
+
+      notification.success({
+        message: 'Thành công',
+        description: 'Xóa tài liệu thành công',
+      });
+    } catch (error) {
+      notification.error({
+        message: 'Lỗi',
+        description: error?.message || 'Không thể xóa tài liệu',
+      });
+    }
+  };
+
   const onFinish = async (values) => {
     try {
       if (!selectedProject) {
@@ -388,73 +538,135 @@ export default function AddEditProjectForm(props) {
                   filterOption={(input, option) => option.label.toLowerCase().includes(input.toLowerCase())}
                 />
               </Form.Item>
-            </Col>
+            </Col>{' '}
           </Row>{' '}
-          {/* Trường upload ảnh */}
-          <Row gutter={16}>
-            <Col span={24}>
-              <Form.Item
-                label="Hình ảnh dự án"
-                name="projectImages"
-                valuePropName="fileList"
-                getValueFromEvent={normFile}
-                rules={[
-                  {
-                    required: false,
-                    message: 'Vui lòng upload hình ảnh dự án',
-                  },
-                ]}
-              >
-                <Upload.Dragger
-                  name="projectImages"
-                  listType="picture-card"
-                  multiple
-                  beforeUpload={() => false} // Ngăn upload tự động
-                  accept="image/*"
-                >
-                  <p className="ant-upload-drag-icon">
-                    <InboxOutlined />
-                  </p>
-                  <p className="ant-upload-text">Kéo thả hoặc nhấp để tải lên hình ảnh</p>
-                  <p className="ant-upload-hint">
-                    Hỗ trợ tải lên nhiều file cùng lúc. Chỉ chấp nhận file ảnh (JPG, PNG, GIF...)
-                  </p>
-                </Upload.Dragger>
-              </Form.Item>
-            </Col>
-          </Row>
-          {/* Trường upload file */}
-          <Row gutter={16}>
-            <Col span={24}>
-              <Form.Item
-                label="Tài liệu dự án"
-                name="projectDocuments"
-                valuePropName="fileList"
-                getValueFromEvent={normFile}
-                rules={[
-                  {
-                    required: false,
-                    message: 'Vui lòng upload tài liệu dự án',
-                  },
-                ]}
-              >
-                <Upload.Dragger
-                  name="projectDocuments"
-                  multiple
-                  beforeUpload={() => false} // Ngăn upload tự động
-                  accept=".pdf,.doc,.docx,.xls,.xlsx,.txt"
-                >
-                  <p className="ant-upload-drag-icon">
-                    <InboxOutlined />
-                  </p>
-                  <p className="ant-upload-text">Kéo thả hoặc nhấp để tải lên tài liệu</p>
-                  <p className="ant-upload-hint">
-                    Hỗ trợ tải lên nhiều file cùng lúc. Chấp nhận các định dạng: PDF, DOC, DOCX, XLS, XLSX, TXT
-                  </p>
-                </Upload.Dragger>
-              </Form.Item>
-            </Col>
-          </Row>
+          {/* Chỉ hiển thị form upload khi đang ở chế độ edit */}
+          {selectedProject && (
+            <>
+              {/* Upload hình ảnh dự án */}
+              <Row gutter={16}>
+                <Col span={24}>
+                  <Form.Item
+                    label={
+                      <Space>
+                        <span>Hình ảnh dự án</span>
+                        {uploadingImage && <LoadingOutlined />}
+                      </Space>
+                    }
+                  >
+                    <Upload.Dragger
+                      beforeUpload={handleImageUpload}
+                      // accept="image/*"
+                      showUploadList={false}
+                      disabled={uploadingImage}
+                      style={{ marginBottom: 16 }}
+                    >
+                      <p className="ant-upload-drag-icon">
+                        <InboxOutlined />
+                      </p>
+                      <p className="ant-upload-text">
+                        {uploadingImage ? 'Đang upload...' : 'Kéo thả hoặc nhấp để tải lên hình ảnh'}
+                      </p>
+                      <p className="ant-upload-hint">
+                        Chỉ cho phép upload 1 file mỗi lần. Chấp nhận file ảnh (JPG, PNG, GIF...)
+                      </p>
+                    </Upload.Dragger>
+
+                    {/* Hiển thị danh sách hình ảnh đã upload */}
+                    {uploadedImages.length > 0 && (
+                      <Card title="Hình ảnh đã upload" size="small">
+                        <List
+                          dataSource={uploadedImages}
+                          renderItem={(image) => (
+                            <List.Item
+                              actions={[
+                                <Button
+                                  type="text"
+                                  icon={<DeleteOutlined />}
+                                  onClick={() => handleImageDelete(image.id)}
+                                  danger
+                                  size="small"
+                                >
+                                  Xóa
+                                </Button>,
+                              ]}
+                            >
+                              <List.Item.Meta
+                                avatar={<Avatar src={image.url} shape="square" />}
+                                title={image.name}
+                                description="Hình ảnh dự án"
+                              />
+                            </List.Item>
+                          )}
+                        />
+                      </Card>
+                    )}
+                  </Form.Item>
+                </Col>
+              </Row>
+
+              {/* Upload tài liệu dự án */}
+              <Row gutter={16}>
+                <Col span={24}>
+                  <Form.Item
+                    label={
+                      <Space>
+                        <span>Tài liệu dự án</span>
+                        {uploadingDocument && <LoadingOutlined />}
+                      </Space>
+                    }
+                  >
+                    <Upload.Dragger
+                      beforeUpload={handleDocumentUpload}
+                      accept=".pdf,.doc,.docx,.xls,.xlsx,.txt"
+                      showUploadList={false}
+                      disabled={uploadingDocument}
+                      style={{ marginBottom: 16 }}
+                    >
+                      <p className="ant-upload-drag-icon">
+                        <InboxOutlined />
+                      </p>
+                      <p className="ant-upload-text">
+                        {uploadingDocument ? 'Đang upload...' : 'Kéo thả hoặc nhấp để tải lên tài liệu'}
+                      </p>
+                      <p className="ant-upload-hint">
+                        Chỉ cho phép upload 1 file mỗi lần. Chấp nhận các định dạng: PDF, DOC, DOCX, XLS, XLSX, TXT
+                      </p>
+                    </Upload.Dragger>
+
+                    {/* Hiển thị danh sách tài liệu đã upload */}
+                    {uploadedDocuments.length > 0 && (
+                      <Card title="Tài liệu đã upload" size="small">
+                        <List
+                          dataSource={uploadedDocuments}
+                          renderItem={(document) => (
+                            <List.Item
+                              actions={[
+                                <Button
+                                  type="text"
+                                  icon={<DeleteOutlined />}
+                                  onClick={() => handleDocumentDelete(document.id)}
+                                  danger
+                                  size="small"
+                                >
+                                  Xóa
+                                </Button>,
+                              ]}
+                            >
+                              <List.Item.Meta
+                                title={document.name}
+                                description={`Tài liệu dự án • ${document.size || 'N/A'}`}
+                              />
+                            </List.Item>
+                          )}
+                        />
+                      </Card>
+                    )}
+                  </Form.Item>
+                </Col>
+              </Row>
+            </>
+          )}
         </Form>
       )}
       {loading && (
