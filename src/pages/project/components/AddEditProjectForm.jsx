@@ -441,7 +441,7 @@ export default function AddEditProjectForm(props) {
           {selectedProject && (
             <DocumentImageUpload
               entityId={selectedProject.id}
-              entityType="project"
+              entityType="Dự án"
               onUploadImage={handleProjectImageUpload}
               onUploadDocument={handleProjectDocumentUpload}
               onDeleteImage={handleProjectImageDelete}

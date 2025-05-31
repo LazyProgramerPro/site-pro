@@ -387,7 +387,7 @@ export default function AddEditContractForm(props) {
           {selectedContract && (
             <DocumentImageUpload
               entityId={selectedContract.id}
-              entityType="contract"
+              entityType="Hợp đồng"
               onUploadImage={handleContractImageUpload}
               onUploadDocument={handleContractDocumentUpload}
               onDeleteImage={handleContractImageDelete}
