@@ -7,7 +7,7 @@ import { notification } from 'antd';
  * @param {Object} params
  * @param {File} params.file - File cần upload
  * @param {string} params.ownerId - ID chủ sở hữu
- * @param {string} params.ownerType - Loại chủ sở hữu (DU_AN, HOP_DONG, PHU_LUC, etc.)
+ * @param {string} params.ownerType - Loại chủ sở hữu (DU_AN, HOP_DONG, PHU_LUC_HOP_DONG, etc.)
  * @param {string} params.parentId - ID cha
  * @param {string} params.name - Tên file
  * @param {string} params.description - Mô tả file
@@ -54,7 +54,7 @@ export const uploadFile = async ({ file, ownerId, ownerType, parentId, name, des
  * Hàm xóa file chung
  * @param {Object} params
  * @param {string} params.ownerId - ID chủ sở hữu
- * @param {string} params.ownerType - Loại chủ sở hữu (DU_AN, HOP_DONG, PHU_LUC, etc.)
+ * @param {string} params.ownerType - Loại chủ sở hữu (DU_AN, HOP_DONG, PHU_LUC_HOP_DONG, etc.)
  * @param {string} params.id - ID file cần xóa
  * @param {Object} params.additionalData - Dữ liệu bổ sung (optional)
  * @returns {Promise<Object>} Kết quả trả về từ API
@@ -85,7 +85,7 @@ export const deleteFile = async ({ ownerId, ownerType, id }) => {
  * Lấy danh sách tài liệu và hình ảnh theo owner_id và owner_type
  * @param {Object} params
  * @param {string} params.ownerId - ID chủ sở hữu
- * @param {string} params.ownerType - Loại chủ sở hữu (DU_AN, HOP_DONG, PHU_LUC, etc.)
+ * @param {string} params.ownerType - Loại chủ sở hữu (DU_AN, HOP_DONG, PHU_LUC_HOP_DONG, etc.)
  * @returns {Promise<Object>} Danh sách tài liệu và hình ảnh
  */
 export const getDocumentList = async ({ ownerId, ownerType }) => {
@@ -174,7 +174,7 @@ export const uploadContractAppendix = async (file, contractId, appendixId, name 
   return uploadFile({
     file,
     ownerId: appendixId,
-    ownerType: 'PHU_LUC',
+    ownerType: 'PHU_LUC_HOP_DONG',
     parentId: contractId,
     name: name || file.name,
     description: description || `Phụ lục hợp đồng - ${file.name}`,
@@ -226,7 +226,7 @@ export const deleteContract = async (contractId, ownerId) => {
 export const deleteContractAppendix = async (appendixId, contractId) => {
   return deleteFile({
     ownerId: contractId,
-    ownerType: 'PHU_LUC',
+    ownerType: 'PHU_LUC_HOP_DONG',
     id: appendixId,
   });
 };
@@ -289,5 +289,40 @@ export const getContractDocuments = async (contractId) => {
   return getDocumentList({
     ownerId: contractId,
     ownerType: 'HOP_DONG',
+  });
+};
+
+/**
+ * Upload tài liệu phụ lục hợp đồng
+ */
+export const uploadContractAddendumDocument = async (file, addendumId, parentId, name = '', description = '') => {
+  return uploadFile({
+    file,
+    ownerId: addendumId,
+    ownerType: 'PHU_LUC_HOP_DONG',
+    parentId: parentId,
+    name: name || file.name,
+    description: description || `Tài liệu phụ lục hợp đồng - ${file.name}`,
+  });
+};
+
+/**
+ * Xóa tài liệu phụ lục hợp đồng
+ */
+export const deleteContractAddendumDocument = async (documentId, addendumId) => {
+  return deleteFile({
+    ownerId: addendumId,
+    ownerType: 'PHU_LUC_HOP_DONG',
+    id: documentId,
+  });
+};
+
+/**
+ * Lấy danh sách tài liệu của phụ lục hợp đồng
+ */
+export const getContractAddendumDocuments = async (addendumId) => {
+  return getDocumentList({
+    ownerId: addendumId,
+    ownerType: 'PHU_LUC_HOP_DONG',
   });
 };

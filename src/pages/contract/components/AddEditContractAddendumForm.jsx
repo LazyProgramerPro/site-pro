@@ -1,19 +1,5 @@
-import {
-  Button,
-  Col,
-  Drawer,
-  Form,
-  Input,
-  Row,
-  Select,
-  Spin,
-  notification,
-  Space,
-  Avatar,
-  InputNumber,
-  Upload,
-} from 'antd';
-import { FileTextOutlined, CloseCircleOutlined, SaveOutlined, InboxOutlined } from '@ant-design/icons';
+import { Button, Col, Drawer, Form, Input, Row, Select, Spin, notification, Space, Avatar, InputNumber } from 'antd';
+import { FileTextOutlined, CloseCircleOutlined, SaveOutlined } from '@ant-design/icons';
 import { isEmpty } from 'lodash';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -24,6 +10,12 @@ import { addContractAddendum, getContractAddendumList, updateContractAddendum } 
 import { getCategoryList } from '../../category/redux/category.slice';
 import { getGroupList } from '../../group/redux/group.slice';
 import { getBusinessList } from '../../business/redux/business.slice';
+import DocumentImageUpload from '../../../components/upload/DocumentImageUpload';
+import {
+  uploadContractAddendumDocument,
+  deleteContractAddendumDocument,
+  getContractAddendumDocuments,
+} from '../../../services/uploadService';
 
 const initialState = {
   code: '',
@@ -38,14 +30,6 @@ const initialState = {
   nha_thau_thi_cong_id: '',
   tu_van_giam_sat_id: '',
   tu_van_thiet_ke_id: '',
-  documents: [],
-};
-
-const normFile = (e) => {
-  if (Array.isArray(e)) {
-    return e;
-  }
-  return e?.fileList;
 };
 
 export default function AddEditContractAddendumForm(props) {
@@ -60,10 +44,23 @@ export default function AddEditContractAddendumForm(props) {
   // Data từ database
   const categoryList = useSelector((state) => state.category.categoryList);
   const groupList = useSelector((state) => state.group.groupList);
-
   console.log('groupList:', selectedContractAddendum);
   const businessList = useSelector((state) => state.business.businessList);
   const dispatch = useAppDispatch();
+
+  // Upload handlers for contract addendum documents
+  const handleContractAddendumDocumentUpload = async (file, addendumId) => {
+    const parentId = null;
+    return await uploadContractAddendumDocument(file, addendumId, parentId);
+  };
+
+  const handleContractAddendumDocumentDelete = async (documentId, addendumId) => {
+    return await deleteContractAddendumDocument(documentId, addendumId);
+  };
+
+  const handleLoadContractAddendumDocuments = async (addendumId) => {
+    return await getContractAddendumDocuments(addendumId);
+  };
 
   // Load data from database when component mounts
   useEffect(() => {
@@ -174,7 +171,6 @@ export default function AddEditContractAddendumForm(props) {
           nha_thau_thi_cong_id: values.nha_thau_thi_cong_id,
           tu_van_giam_sat_id: values.tu_van_giam_sat_id,
           tu_van_thiet_ke_id: values.tu_van_thiet_ke_id,
-          documents: values.documents || [],
         };
 
         try {
@@ -223,7 +219,6 @@ export default function AddEditContractAddendumForm(props) {
           nha_thau_thi_cong_id: values.nha_thau_thi_cong_id,
           tu_van_giam_sat_id: values.tu_van_giam_sat_id,
           tu_van_thiet_ke_id: values.tu_van_thiet_ke_id,
-          documents: values.documents || [],
         };
 
         try {
@@ -521,40 +516,23 @@ export default function AddEditContractAddendumForm(props) {
                   }))}
                 />
               </Form.Item>
-            </Col>
+            </Col>{' '}
           </Row>
-          <Row gutter={16}>
-            <Col span={24}>
-              <Form.Item
-                label="Tài liệu"
-                name="documents"
-                valuePropName="fileList"
-                getValueFromEvent={normFile}
-                // rules={[{ required: false, message: 'Vui lòng chọn tài liệu!' }]}
-                tooltip="Tải lên các tài liệu liên quan đến phụ lục hợp đồng"
-              >
-                <Upload.Dragger
-                  name="documents"
-                  multiple
-                  listType="text"
-                  beforeUpload={() => false}
-                  showUploadList={{
-                    showDownloadIcon: true,
-                    showRemoveIcon: true,
-                    showPreviewIcon: true,
-                  }}
-                >
-                  <p className="ant-upload-drag-icon">
-                    <InboxOutlined />
-                  </p>
-                  <p className="ant-upload-text">Nhấp hoặc kéo thả file vào vùng này để tải lên</p>
-                  <p className="ant-upload-hint">
-                    Hỗ trợ tải lên đơn lẻ hoặc hàng loạt. Chỉ chấp nhận file PDF, DOC, DOCX, XLS, XLSX.
-                  </p>
-                </Upload.Dragger>
-              </Form.Item>
-            </Col>
-          </Row>{' '}
+          {/* Upload section - only show in edit mode and only for documents */}
+          {selectedContractAddendum && (
+            <DocumentImageUpload
+              entityId={selectedContractAddendum.id}
+              entityType="Phụ lục hợp đồng"
+              onUploadDocument={handleContractAddendumDocumentUpload}
+              onDeleteDocument={handleContractAddendumDocumentDelete}
+              onLoadDocuments={handleLoadContractAddendumDocuments}
+              showImageUpload={false}
+              showDocumentUpload={true}
+              documentTitle="Tài liệu phụ lục hợp đồng"
+              acceptedDocumentTypes={['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.txt']}
+              documentAcceptAttribute=".pdf,.doc,.docx,.xls,.xlsx,.txt"
+            />
+          )}
         </Form>
       )}
       {loading && (
