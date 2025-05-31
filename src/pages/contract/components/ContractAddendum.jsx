@@ -400,7 +400,9 @@ export default function ContractAddendum(props) {
 
       {open && <AddEditContractAddendumForm open={open} onClose={onClose} />}
       {openDetail && <ViewContractAddendum open={openDetail} onClose={handleCloseDetail} />}
-      {openImportExcel && <ImportExcel open={openImportExcel} onClose={handleCloseImportExcel} />}
+      {openImportExcel && (
+        <ImportExcel open={openImportExcel} onClose={handleCloseImportExcel} selectedContract={selectedContract} />
+      )}
     </>
   );
 }

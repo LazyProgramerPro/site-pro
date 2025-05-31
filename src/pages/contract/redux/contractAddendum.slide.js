@@ -92,6 +92,46 @@ export const deleteContractAddendum = createAsyncThunk(
   },
 );
 
+export const importContractAddendumExcel = createAsyncThunk(
+  'contractAddendum/importContractAddendumExcel',
+  async (body, thunkAPI) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', body.file);
+      formData.append('description', body.description || 'Import Excel phụ lục hợp đồng');
+      
+      const { rc, item } = await http.post('/auth/phuluchopdong/import', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        signal: thunkAPI.signal,
+      });      if (rc?.code !== 0) {
+        message.error(rc?.desc || 'Import Excel thất bại!');
+        return thunkAPI.rejectWithValue(rc?.desc || 'Import Excel thất bại!');
+      }
+
+      // Message hiển thị ở component
+      return item;
+    } catch (error) {
+      if (error.name === 'AxiosError' && error.response?.status === 422) {
+        const errorMessage = error.response.data?.message || error.response.data?.desc || 'Dữ liệu không hợp lệ!';
+        message.error(errorMessage);
+        return thunkAPI.rejectWithValue(error.response.data);
+      }
+      
+      if (error.name === 'AxiosError' && error.response?.status === 400) {
+        const errorMessage = error.response.data?.message || error.response.data?.desc || 'File Excel không đúng định dạng!';
+        message.error(errorMessage);
+        return thunkAPI.rejectWithValue(errorMessage);
+      }
+      
+      const errorMessage = 'Import Excel thất bại! Vui lòng kiểm tra lại file và thử lại.';
+      message.error(errorMessage);
+      return thunkAPI.rejectWithValue(errorMessage);
+    }
+  },
+);
+
 const contractAddendumSlice = createSlice({
   name: 'contractAddendum',
   initialState,
@@ -132,6 +172,18 @@ const contractAddendumSlice = createSlice({
           state.contractAddendumList.splice(deleteContractIndex, 1);
           state.totalCount = Math.max(0, state.totalCount - 1);
         }
+      })      .addCase(importContractAddendumExcel.fulfilled, (state, action) => {
+        // Có thể thêm logic để cập nhật danh sách sau khi import thành công
+        // Ví dụ: reload danh sách hoặc thêm các item mới vào state
+        if (action.payload && Array.isArray(action.payload)) {
+          // Nếu API trả về danh sách các item đã import
+          state.contractAddendumList = [...state.contractAddendumList, ...action.payload];
+          state.totalCount = state.totalCount + action.payload.length;
+        }
+      })
+      .addCase(importContractAddendumExcel.rejected, (state, action) => {
+        // Xử lý khi import thất bại
+        console.error('Import Excel failed:', action.payload);
       })
       .addMatcher(
         (action) => action.type.endsWith('/pending'),
