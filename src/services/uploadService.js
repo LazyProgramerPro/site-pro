@@ -81,7 +81,9 @@ export const deleteFile = async ({
       id,
     };
 
-    const response = await http.delete('/auth/document', body);
+    const response = await http.delete('/auth/document', {
+      data: body
+    });
     return response.data;
   } catch (error) {
     console.error('Delete file error:', error);
@@ -93,7 +95,44 @@ export const deleteFile = async ({
   }
 };
 
-// ==================== WRAPPER FUNCTIONS ====================
+/**
+ * Lấy danh sách tài liệu và hình ảnh theo owner_id và owner_type
+ * @param {Object} params
+ * @param {string} params.ownerId - ID chủ sở hữu
+ * @param {string} params.ownerType - Loại chủ sở hữu (DU_AN, HOP_DONG, PHU_LUC, etc.)
+ * @returns {Promise<Object>} Danh sách tài liệu và hình ảnh
+ */
+export const getDocumentList = async ({ ownerId, ownerType }) => {
+  try {
+    const body = {
+      owner_id: ownerId,
+      owner_type: ownerType,
+    };
+
+    const {rc, rootNode} = await http.post('/auth/document/list', body);
+    if(rc?.code !== 0) {
+      throw new Error(rc?.message || 'Không thể tải danh sách tài liệu');
+    }
+    return rootNode;
+  } catch (error) {
+    console.error('Get document list error:', error);
+    notification.error({
+      message: 'Lỗi',
+      description: error?.response?.data?.message || 'Không thể tải danh sách tài liệu',
+    });
+    throw error;
+  }
+};
+
+/**
+ * Lấy danh sách tài liệu dự án
+ */
+export const getProjectDocuments = async (projectId) => {
+  return getDocumentList({
+    ownerId: projectId,
+    ownerType: 'DU_AN',
+  });
+};
 
 /**
  * Upload ảnh dự án

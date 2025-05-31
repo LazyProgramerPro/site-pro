@@ -15,6 +15,7 @@ import {
   DatePicker,
   Drawer,
   Form,
+  Image,
   Input,
   List,
   notification,
@@ -34,6 +35,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   deleteProjectDocument,
   deleteProjectImage,
+  getProjectDocuments,
   uploadProjectDocument,
   uploadProjectImage,
 } from '../../../services/uploadService';
@@ -51,12 +53,12 @@ export default function AddEditProjectForm(props) {
   const [form] = Form.useForm();
   const [initialValues, setInitialValues] = useState(initialState);
   const [companies, setCompanies] = useState([]);
-
   // Upload-related states
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadingDocument, setUploadingDocument] = useState(false);
   const [uploadedImages, setUploadedImages] = useState([]);
   const [uploadedDocuments, setUploadedDocuments] = useState([]);
+  const [loadingDocuments, setLoadingDocuments] = useState(false);
 
   const dispatch = useAppDispatch();
 
@@ -71,7 +73,6 @@ export default function AddEditProjectForm(props) {
           setCompanies(result.data);
         }
       } catch (error) {
-        console.error('Failed to fetch companies:', error);
         notification.error({
           message: 'Lỗi',
           description: 'Không thể tải danh sách công ty',
@@ -81,10 +82,66 @@ export default function AddEditProjectForm(props) {
 
     fetchCompanies();
   }, [dispatch]);
-
   const selectedProject = useSelector((state) => state.project.editingProject);
 
-  console.log('editingProject:', selectedProject);
+  // Function để load danh sách tài liệu và hình ảnh từ API
+  const loadProjectDocuments = async (projectId) => {
+    if (!projectId) return;
+
+    setLoadingDocuments(true);
+    try {
+      const { doc, childDocs } = await getProjectDocuments(projectId);
+
+      if (childDocs && childDocs.length > 0) {
+        // Phân loại tài liệu thành images và documents
+        const images = [];
+        const documents = [];
+        childDocs.forEach((item) => {
+          // Kiểm tra file type để phân loại
+          const isImage = item.doc.extension && item.doc.extension.match(/(jpg|jpeg|png|gif|bmp)$/i);
+
+          if (isImage) {
+            const imageUrl = debugImageUrl(item.doc.url, item.doc.name);
+            images.push({
+              id: item.doc.id,
+              name: item.doc.name,
+              url: imageUrl,
+              status: 'done',
+            });
+          } else {
+            documents.push({
+              id: item.doc.id,
+              name: item.doc.name,
+              url: item.doc.url,
+              status: 'done',
+              size: item.doc.file_size ? (item.doc.file_size / (1024 * 1024)).toFixed(2) + ' MB' : 'N/A',
+            });
+          }
+        });
+        setUploadedImages(images);
+        setUploadedDocuments(documents);
+      }
+    } catch (error) {
+      setUploadedImages([]);
+      setUploadedDocuments([]);
+    } finally {
+      setLoadingDocuments(false);
+    }
+  };
+  // Enhanced debug function để kiểm tra URL hình ảnh
+  const debugImageUrl = (url, name) => {
+    // Test if it's a valid URL format
+    try {
+      if (url) {
+        const urlObj = new URL(url);
+      }
+    } catch (e) {
+      // URL parsing failed
+    }
+
+    return url;
+  };
+
   useEffect(() => {
     // Transform dates from string to moment objects with explicit format
     if (selectedProject) {
@@ -98,21 +155,139 @@ export default function AddEditProjectForm(props) {
       };
       setInitialValues(formattedProject);
 
-      // Load existing uploaded files (mock data for now - replace with actual API call)
-      // TODO: Replace with actual API call to get uploaded files
-      if (selectedProject.uploaded_images) {
-        setUploadedImages(selectedProject.uploaded_images);
-      }
-      if (selectedProject.uploaded_documents) {
-        setUploadedDocuments(selectedProject.uploaded_documents);
-      }
+      // Load danh sách tài liệu và hình ảnh từ API
+      loadProjectDocuments(selectedProject.id);
     } else {
       setInitialValues(initialState);
       setUploadedImages([]);
       setUploadedDocuments([]);
     }
   }, [selectedProject]);
-  console.log('selectedProject1111:', selectedProject);
+
+  // Component để hiển thị hình ảnh với error handling cải tiến
+  const ProjectImageDisplay = ({ image, size = 'small' }) => {
+    const [imageError, setImageError] = useState(false);
+    const [imageLoaded, setImageLoaded] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+
+    // Size configurations
+    const sizeConfig = {
+      small: { width: 48, height: 48, fallbackFontSize: '9px' },
+      large: { width: 160, height: 120, fallbackFontSize: '12px' },
+    };
+
+    const currentSize = sizeConfig[size] || sizeConfig.small;
+
+    // Validate URL with detailed checking
+    const isValidUrl = (url) => {
+      if (!url || url === 'null' || url === 'undefined' || url === '') {
+        return false;
+      }
+
+      try {
+        const urlObj = new URL(url);
+        return true;
+      } catch (error) {
+        return false;
+      }
+    };
+    const handleImageError = (event) => {
+      setImageError(true);
+      setIsLoading(false);
+    };
+    const handleImageLoad = (event) => {
+      setImageLoaded(true);
+      setImageError(false);
+      setIsLoading(false);
+    };
+    const handleImageLoadStart = () => {
+      setIsLoading(true);
+    };
+
+    // Fallback component
+    const ImageFallback = ({ message, bgColor = '#f5f5f5' }) => (
+      <div
+        style={{
+          width: currentSize.width,
+          height: currentSize.height,
+          background: bgColor,
+          border: '1px solid #d9d9d9',
+          borderRadius: '8px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: currentSize.fallbackFontSize,
+          color: '#999',
+          textAlign: 'center',
+          lineHeight: '1.2',
+          padding: '8px',
+        }}
+      >
+        {message}
+      </div>
+    );
+
+    if (!isValidUrl(image.url)) {
+      return <ImageFallback message="URL không hợp lệ" bgColor="#fff2e8" />;
+    }
+
+    if (imageError) {
+      return <ImageFallback message="Lỗi tải ảnh" bgColor="#fff1f0" />;
+    }
+
+    return (
+      <div style={{ position: 'relative', width: currentSize.width, height: currentSize.height }}>
+        {isLoading && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: currentSize.width,
+              height: currentSize.height,
+              background: 'rgba(255, 255, 255, 0.9)',
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1,
+              backdropFilter: 'blur(2px)',
+            }}
+          >
+            <Spin size={size === 'large' ? 'default' : 'small'} />
+          </div>
+        )}
+        <Image
+          src={image.url}
+          alt={image.name || 'Project Image'}
+          width={currentSize.width}
+          height={currentSize.height}
+          style={{
+            objectFit: 'cover',
+            borderRadius: '8px',
+            border: '1px solid #f0f0f0',
+            transition: 'all 0.3s ease',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+          }}
+          onError={handleImageError}
+          onLoad={handleImageLoad}
+          onLoadStart={handleImageLoadStart}
+          fallback="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAMIAAADDCAYAAADQvc6UAAABRWlDQ1BJQ0MgUHJvZmlsZQAAKJFjYGASSSwoyGFhYGDIzSspCnJ3UoiIjFJgf8LAwSDCIMogwMCcmFxc4BgQ4ANUwgCjUcG3awyMIPqyLsis7PPOq3QdDFcvjV3jOD1boQVTPQrgSkktTgbSf4A4LbmgqISBgTEFyFYuLykAsTuAbJEioKOA7DkgdjqEvQHEToKwj4DVhAQ5A9k3gGyB5IxEoBmML4BsnSQk8XQkNtReEOBxcfXxUQg1Mjc0dyHgXNJBSWpFCYh2zi+oLMpMzyhRcASGUqqCZ16yno6CkYGRAQMDKMwhqj/fAIcloxgHQqxAjIHBEugw5sUIsSQpBobtQPdLciLEVJYzMPBHMDBsayhILEqEO4DxG0txmrERhM29nYGBddr//5/DGRjYNRkY/l7////39v///y4Dmn+LgeHANwDrkl1AuO+pmgAAADhlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAAqACAAQAAAABAAAAwqADAAQAAAABAAAAwwAAAAD9b/HnAAAHlklEQVR4Ae3dP3Ik1RnG4W+FgYxN"
+          preview={{
+            mask: (
+              <div style={{ color: 'white', fontSize: '12px', textAlign: 'center' }}>
+                <div>🔍 Xem ảnh</div>
+                {imageLoaded && size === 'large' && (
+                  <div style={{ fontSize: '10px', marginTop: '4px', opacity: 0.8 }}>{image.name}</div>
+                )}
+              </div>
+            ),
+            src: image.url,
+          }}
+        />
+      </div>
+    );
+  };
 
   // Upload handlers
   const handleImageUpload = async (file) => {
@@ -127,19 +302,10 @@ export default function AddEditProjectForm(props) {
     setUploadingImage(true);
     try {
       const parentId = null;
-
       const result = await uploadProjectImage(file, selectedProject.id, parentId);
 
-      console.log('Upload result:', result);
-
-      const newImage = {
-        id: result?.id || Date.now(),
-        name: file.name,
-        url: result?.url || URL.createObjectURL(file),
-        status: 'done',
-      };
-
-      setUploadedImages((prev) => [...prev, newImage]);
+      // Reload danh sách tài liệu từ API để cập nhật
+      await loadProjectDocuments(selectedProject.id);
 
       notification.success({
         message: 'Thành công',
@@ -156,7 +322,6 @@ export default function AddEditProjectForm(props) {
 
     return false; // Prevent default upload behavior
   };
-
   const handleDocumentUpload = async (file) => {
     if (!selectedProject?.id) {
       notification.error({
@@ -170,15 +335,8 @@ export default function AddEditProjectForm(props) {
     try {
       const result = await uploadProjectDocument(file, selectedProject.id);
 
-      const newDocument = {
-        id: result.id || Date.now(),
-        name: file.name,
-        url: result.url || '#',
-        status: 'done',
-        size: (file.size / (1024 * 1024)).toFixed(2) + ' MB',
-      };
-
-      setUploadedDocuments((prev) => [...prev, newDocument]);
+      // Reload danh sách tài liệu từ API để cập nhật
+      await loadProjectDocuments(selectedProject.id);
 
       notification.success({
         message: 'Thành công',
@@ -195,13 +353,14 @@ export default function AddEditProjectForm(props) {
 
     return false; // Prevent default upload behavior
   };
-
   const handleImageDelete = async (imageId) => {
     if (!selectedProject?.id) return;
 
     try {
       await deleteProjectImage(imageId, selectedProject.id);
-      setUploadedImages((prev) => prev.filter((img) => img.id !== imageId));
+
+      // Reload danh sách tài liệu từ API để cập nhật
+      await loadProjectDocuments(selectedProject.id);
 
       notification.success({
         message: 'Thành công',
@@ -214,13 +373,14 @@ export default function AddEditProjectForm(props) {
       });
     }
   };
-
   const handleDocumentDelete = async (documentId) => {
     if (!selectedProject?.id) return;
 
     try {
       await deleteProjectDocument(documentId, selectedProject.id);
-      setUploadedDocuments((prev) => prev.filter((doc) => doc.id !== documentId));
+
+      // Reload danh sách tài liệu từ API để cập nhật
+      await loadProjectDocuments(selectedProject.id);
 
       notification.success({
         message: 'Thành công',
@@ -316,16 +476,13 @@ export default function AddEditProjectForm(props) {
         }
       }
     } catch (error) {
-      console.log('error:', error);
       notification.error({
         message: 'Lỗi',
         description: 'Đã xảy ra lỗi khi xử lý yêu cầu',
       });
     }
   };
-
   const onFinishFailed = (errorInfo) => {
-    console.log('Failed:', errorInfo);
     notification.error({
       message: 'Lỗi',
       description: errorInfo.message ?? 'Đã xảy ra lỗi khi xử lý yêu cầu',
@@ -365,7 +522,36 @@ export default function AddEditProjectForm(props) {
       }
       bodyStyle={{ paddingBottom: 24 }}
     >
-      {' '}
+      <style>
+        {`
+          .ant-image-img {
+            transition: all 0.3s ease;
+          }
+          .ant-image-img:hover {
+            transform: scale(1.05);
+          }
+          .ant-image-img[src=""],
+          .ant-image-img[src*="undefined"],
+          .ant-image-img[src*="null"] {
+            display: none !important;
+          }
+          .ant-image-img[src=""]:after,
+          .ant-image-img[src*="undefined"]:after,
+          .ant-image-img[src*="null"]:after {
+            content: "Không có ảnh";
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            background: #f5f5f5;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            font-size: 10px;
+            color: #999;
+          }
+        `}
+      </style>{' '}
       {!isEmpty(selectedProject) && isEmpty(initialValues) ? (
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
           <Spin size="large" tip="Đang tải thông tin dự án..." />
@@ -570,36 +756,43 @@ export default function AddEditProjectForm(props) {
                       <p className="ant-upload-hint">
                         Chỉ cho phép upload 1 file mỗi lần. Chấp nhận file ảnh (JPG, PNG, GIF...)
                       </p>
-                    </Upload.Dragger>
-
+                    </Upload.Dragger>{' '}
                     {/* Hiển thị danh sách hình ảnh đã upload */}
-                    {uploadedImages.length > 0 && (
-                      <Card title="Hình ảnh đã upload" size="small">
-                        <List
-                          dataSource={uploadedImages}
-                          renderItem={(image) => (
-                            <List.Item
-                              actions={[
-                                <Button
-                                  type="text"
-                                  icon={<DeleteOutlined />}
-                                  onClick={() => handleImageDelete(image.id)}
-                                  danger
-                                  size="small"
-                                >
-                                  Xóa
-                                </Button>,
-                              ]}
-                            >
-                              <List.Item.Meta
-                                avatar={<Avatar src={image.url} shape="square" />}
-                                title={image.name}
-                                description="Hình ảnh dự án"
-                              />
-                            </List.Item>
-                          )}
-                        />
+                    {loadingDocuments ? (
+                      <Card title="Đang tải hình ảnh..." size="small">
+                        <div style={{ textAlign: 'center', padding: '20px' }}>
+                          <Spin size="default" />
+                        </div>
                       </Card>
+                    ) : (
+                      uploadedImages.length > 0 && (
+                        <Card title="Hình ảnh đã upload" size="small">
+                          <List
+                            dataSource={uploadedImages}
+                            renderItem={(image) => (
+                              <List.Item
+                                actions={[
+                                  <Button
+                                    type="text"
+                                    icon={<DeleteOutlined />}
+                                    onClick={() => handleImageDelete(image.id)}
+                                    danger
+                                    size="small"
+                                  >
+                                    Xóa
+                                  </Button>,
+                                ]}
+                                extra={<ProjectImageDisplay image={image} size="small" />}
+                              >
+                                <List.Item.Meta
+                                  title={image.name || 'Không có tên'}
+                                  description={`Hình ảnh dự án • ID: ${image.id}`}
+                                />
+                              </List.Item>
+                            )}
+                          />
+                        </Card>
+                      )
                     )}
                   </Form.Item>
                 </Col>
@@ -632,35 +825,42 @@ export default function AddEditProjectForm(props) {
                       <p className="ant-upload-hint">
                         Chỉ cho phép upload 1 file mỗi lần. Chấp nhận các định dạng: PDF, DOC, DOCX, XLS, XLSX, TXT
                       </p>
-                    </Upload.Dragger>
-
+                    </Upload.Dragger>{' '}
                     {/* Hiển thị danh sách tài liệu đã upload */}
-                    {uploadedDocuments.length > 0 && (
-                      <Card title="Tài liệu đã upload" size="small">
-                        <List
-                          dataSource={uploadedDocuments}
-                          renderItem={(document) => (
-                            <List.Item
-                              actions={[
-                                <Button
-                                  type="text"
-                                  icon={<DeleteOutlined />}
-                                  onClick={() => handleDocumentDelete(document.id)}
-                                  danger
-                                  size="small"
-                                >
-                                  Xóa
-                                </Button>,
-                              ]}
-                            >
-                              <List.Item.Meta
-                                title={document.name}
-                                description={`Tài liệu dự án • ${document.size || 'N/A'}`}
-                              />
-                            </List.Item>
-                          )}
-                        />
+                    {loadingDocuments ? (
+                      <Card title="Đang tải tài liệu..." size="small">
+                        <div style={{ textAlign: 'center', padding: '20px' }}>
+                          <Spin size="default" />
+                        </div>
                       </Card>
+                    ) : (
+                      uploadedDocuments.length > 0 && (
+                        <Card title="Tài liệu đã upload" size="small">
+                          <List
+                            dataSource={uploadedDocuments}
+                            renderItem={(document) => (
+                              <List.Item
+                                actions={[
+                                  <Button
+                                    type="text"
+                                    icon={<DeleteOutlined />}
+                                    onClick={() => handleDocumentDelete(document.id)}
+                                    danger
+                                    size="small"
+                                  >
+                                    Xóa
+                                  </Button>,
+                                ]}
+                              >
+                                <List.Item.Meta
+                                  title={document.name}
+                                  description={`Tài liệu dự án • ${document.size || 'N/A'}`}
+                                />
+                              </List.Item>
+                            )}
+                          />
+                        </Card>
+                      )
                     )}
                   </Form.Item>
                 </Col>
