@@ -1,11 +1,8 @@
 import {
   CalendarOutlined,
   DollarOutlined,
-  FileExcelOutlined,
   FileOutlined,
-  FilePdfOutlined,
   FileTextOutlined,
-  FileWordOutlined,
   ProjectOutlined,
   TeamOutlined,
 } from '@ant-design/icons';
@@ -30,6 +27,7 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { useAppDispatch } from '../../../redux/store';
+import { ProjectDocumentList } from '../../project';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -258,7 +256,6 @@ export default function ViewContractAddendum(props) {
       description: 'Phụ lục đã được phê duyệt và có hiệu lực thi hành',
     },
   ];
-
   // Mock documents for contract addendum
   const mockDocuments = [
     { name: 'Phụ lục hợp đồng.pdf', type: 'pdf', size: '2.8MB', date: '30/05/2025' },
@@ -266,22 +263,6 @@ export default function ViewContractAddendum(props) {
     { name: 'Bảng dự toán bổ sung.xlsx', type: 'xlsx', size: '1.1MB', date: '29/05/2025' },
     { name: 'Bản vẽ điều chỉnh.dwg', type: 'dwg', size: '5.2MB', date: '28/05/2025' },
   ];
-
-  // Helper function to get document icon
-  const getDocumentIcon = (type) => {
-    switch (type.toLowerCase()) {
-      case 'pdf':
-        return <FilePdfOutlined style={{ color: '#ff4d4f', fontSize: '24px' }} />;
-      case 'xlsx':
-      case 'xls':
-        return <FileExcelOutlined style={{ color: '#52c41a', fontSize: '24px' }} />;
-      case 'doc':
-      case 'docx':
-        return <FileWordOutlined style={{ color: '#1890ff', fontSize: '24px' }} />;
-      default:
-        return <FileOutlined style={{ color: '#8c8c8c', fontSize: '24px' }} />;
-    }
-  };
 
   // Tabs for the detail view
   const tabItems = [
@@ -409,33 +390,14 @@ export default function ViewContractAddendum(props) {
         </Space>
       ),
       children: (
-        <div>
-          <Alert
-            message="Tài liệu đính kèm"
-            description="Các tài liệu liên quan đến phụ lục hợp đồng"
-            type="info"
-            showIcon
-            style={{ marginBottom: 16 }}
-          />
-          <Row gutter={[16, 16]}>
-            {mockDocuments.map((doc, index) => (
-              <Col xs={24} sm={12} md={12} lg={8} key={index}>
-                <DocumentCard>
-                  <Space>
-                    {getDocumentIcon(doc.type)}
-                    <div>
-                      <Text strong>{doc.name}</Text>
-                      <br />
-                      <Text type="secondary" style={{ fontSize: '12px' }}>
-                        {doc.size} • {doc.date}
-                      </Text>
-                    </div>
-                  </Space>
-                </DocumentCard>
-              </Col>
-            ))}
-          </Row>
-        </div>
+        <ProjectDocumentList
+          documents={mockDocuments}
+          loading={loading}
+          title="Tài liệu đính kèm"
+          entityType="phụ lục hợp đồng"
+          showUploadButton={false}
+          formatDate={formatDate}
+        />
       ),
     },
   ];
@@ -498,22 +460,6 @@ const InfoCard = styled(Card)`
   &:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
-  }
-`;
-
-const DocumentCard = styled(Card)`
-  border: 1px solid ${themeColors.border};
-  border-radius: 12px;
-  padding: 16px;
-  display: flex;
-  align-items: center;
-  transition: all 0.3s ease;
-  cursor: pointer;
-
-  &:hover {
-    background-color: #f5f5f5;
-    transform: translateY(-2px);
-    box-shadow: ${themeColors.cardShadow};
   }
 `;
 

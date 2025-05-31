@@ -44,6 +44,8 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { getProjectDocumentList, uploadProjectDocumentThunk } from '../redux/project.slice';
+import ProjectDocumentList from './ProjectDocumentList';
+import ProjectImageList from './ProjectImageList';
 const { Title, Paragraph, Text } = Typography;
 
 const initialState = {};
@@ -927,79 +929,18 @@ export default function ViewProject(props) {
         </span>
       ),
       children: (
-        <StyledCard
-          title={
-            <Space>
-              <FileOutlined style={{ color: themeColors.primary }} />
-              <span>Tài liệu dự án</span>{' '}
-              <StyledBadge count={projectDocuments.length} style={{ backgroundColor: themeColors.primary }} />
-            </Space>
-          }
-          extra={
-            <AnimatedButton type="primary" icon={<UploadOutlined />} onClick={showUploadModal}>
-              Tải lên tài liệu
-            </AnimatedButton>
-          }
-        >
-          {loadingDocuments ? (
-            <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
-              <Spin size="large" tip="Đang tải tài liệu..." />
-            </div>
-          ) : projectDocuments.length > 0 ? (
-            <DocumentList>
-              {getFilteredAndSortedDocuments(projectDocuments).map((doc, index) => (
-                <DocumentListItem key={index} onClick={() => showDocumentPreview(doc)}>
-                  <div className="document-info">
-                    <div className="document-icon">{getDocumentIcon(doc.type)}</div>
-                    <div className="document-details">
-                      <Tooltip title={doc.name}>
-                        <div className="document-title">{doc.name}</div>
-                      </Tooltip>
-                      <div className="document-meta">
-                        <Space size="middle">
-                          <Tag color="blue">{doc.type?.toUpperCase()}</Tag>
-                          {doc.size && <span>{doc.size}</span>}
-                          {doc.date && <span>Ngày tạo: {formatDate(doc.date)}</span>}
-                          {doc.creator && <span>Người tạo: {doc.creator}</span>}
-                        </Space>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="document-actions">
-                    <Tooltip title="Xem trước">
-                      <AnimatedButton
-                        type="default"
-                        icon={<EyeOutlined />}
-                        size="small"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          showDocumentPreview(doc);
-                        }}
-                      />
-                    </Tooltip>
-                    <Tooltip title="Tải xuống">
-                      <AnimatedButton
-                        type="primary"
-                        icon={<DownloadOutlined />}
-                        size="small"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          downloadFile(doc.url, doc.name);
-                        }}
-                      />
-                    </Tooltip>
-                  </div>
-                </DocumentListItem>
-              ))}
-            </DocumentList>
-          ) : (
-            <Empty
-              description="Chưa có tài liệu nào cho dự án này"
-              image={Empty.PRESENTED_IMAGE_SIMPLE}
-              style={{ margin: '40px 0' }}
-            />
-          )}
-        </StyledCard>
+        <ProjectDocumentList
+          documents={projectDocuments}
+          loading={loadingDocuments}
+          title="Tài liệu dự án"
+          entityType="dự án"
+          showUploadButton={true}
+          onUpload={showUploadModal}
+          onPreview={showDocumentPreview}
+          onDownload={downloadFile}
+          formatDate={formatDate}
+          getFilteredAndSortedDocuments={getFilteredAndSortedDocuments}
+        />
       ),
     },
     {
@@ -1011,88 +952,17 @@ export default function ViewProject(props) {
         </span>
       ),
       children: (
-        <StyledCard
-          title={
-            <Space>
-              <FileOutlined style={{ color: themeColors.primary }} />
-              <span>Hình ảnh dự án</span>
-              <StyledBadge count={projectImages.length} style={{ backgroundColor: themeColors.primary }} />
-            </Space>
-          }
-          extra={
-            <AnimatedButton type="primary" icon={<UploadOutlined />} onClick={showUploadModal}>
-              Tải lên hình ảnh
-            </AnimatedButton>
-          }
-        >
-          {loadingDocuments ? (
-            <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
-              <Spin size="large" tip="Đang tải hình ảnh..." />
-            </div>
-          ) : projectImages.length > 0 ? (
-            <DocumentList>
-              {projectImages.map((image, index) => (
-                <ImageListItem key={index} onClick={() => showDocumentPreview(image)}>
-                  <div className="document-info">
-                    <div className="image-thumbnail">
-                      <img
-                        src={image.url}
-                        alt={image.name}
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = 'https://via.placeholder.com/60x60?text=Lỗi';
-                        }}
-                      />
-                    </div>
-                    <div className="document-details">
-                      <Tooltip title={image.name}>
-                        <div className="document-title">{image.name}</div>
-                      </Tooltip>
-                      <div className="document-meta">
-                        <Space size="middle">
-                          <Tag color="green">Hình ảnh</Tag>
-                          {image.size && <span>{image.size}</span>}
-                          {image.date && <span>Ngày tạo: {formatDate(image.date)}</span>}
-                          {image.creator && <span>Người tạo: {image.creator}</span>}
-                        </Space>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="document-actions">
-                    <Tooltip title="Xem ảnh">
-                      <AnimatedButton
-                        type="default"
-                        icon={<EyeOutlined />}
-                        size="small"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          showDocumentPreview(image);
-                        }}
-                      />
-                    </Tooltip>
-                    <Tooltip title="Tải xuống">
-                      <AnimatedButton
-                        type="primary"
-                        icon={<DownloadOutlined />}
-                        size="small"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          downloadFile(image.url, image.name);
-                        }}
-                      />
-                    </Tooltip>
-                  </div>
-                </ImageListItem>
-              ))}
-            </DocumentList>
-          ) : (
-            <Empty
-              description="Chưa có hình ảnh nào cho dự án này"
-              image={Empty.PRESENTED_IMAGE_SIMPLE}
-              style={{ margin: '40px 0' }}
-            />
-          )}
-        </StyledCard>
+        <ProjectImageList
+          images={projectImages}
+          loading={loadingDocuments}
+          title="Hình ảnh dự án"
+          entityType="dự án"
+          showUploadButton={true}
+          onUpload={showUploadModal}
+          onPreview={showDocumentPreview}
+          onDownload={downloadFile}
+          formatDate={formatDate}
+        />
       ),
     },
   ];

@@ -6,6 +6,7 @@ import {
   FileOutlined,
   FileTextOutlined,
   HistoryOutlined,
+  PictureOutlined,
   ProjectOutlined,
   TeamOutlined,
   UploadOutlined,
@@ -36,6 +37,7 @@ import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import http from '../../../utils/http';
+import { ProjectDocumentList, ProjectImageList } from '../../project';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -198,30 +200,38 @@ export default function ViewContract(props) {
     { time: '29/05/2025', title: 'Tạo hợp đồng', description: 'Hợp đồng được tạo và khởi tạo trong hệ thống' },
     { time: '30/05/2025', title: 'Gửi phê duyệt', description: 'Hợp đồng được gửi đi để phê duyệt' },
     { time: '01/06/2025', title: 'Đang thực hiện', description: 'Bắt đầu thực hiện theo điều khoản hợp đồng' },
-  ];
-
-  // Mock documents
+  ]; // Mock documents
   const mockDocuments = [
     { name: 'Hợp đồng gốc.pdf', type: 'pdf', size: '2.5MB', date: '29/05/2025' },
     { name: 'Phụ lục điều khoản.pdf', type: 'pdf', size: '1.8MB', date: '29/05/2025' },
     { name: 'Bảng thanh toán.xlsx', type: 'xlsx', size: '1.2MB', date: '30/05/2025' },
   ];
 
-  // Helper function to get document icon
-  const getDocumentIcon = (type) => {
-    const iconStyle = { fontSize: 32, marginRight: 12 };
+  // Mock images
+  const mockImages = [
+    {
+      name: 'Ảnh ký kết hợp đồng.jpg',
+      url: 'https://picsum.photos/400/300?random=1',
+      size: '1.2MB',
+      date: '29/05/2025',
+      creator: 'Nguyễn Văn A',
+    },
+    {
+      name: 'Ảnh hiện trường công trình.jpg',
+      url: 'https://picsum.photos/400/300?random=2',
+      size: '2.1MB',
+      date: '30/05/2025',
+      creator: 'Trần Thị B',
+    },
+    {
+      name: 'Ảnh bản vẽ thiết kế.png',
+      url: 'https://picsum.photos/400/300?random=3',
+      size: '3.5MB',
+      date: '31/05/2025',
+      creator: 'Lê Văn C',
+    },
+  ];
 
-    switch (type.toLowerCase()) {
-      case 'pdf':
-        return <FileOutlined style={{ ...iconStyle, color: '#f5222d' }} />;
-      case 'xlsx':
-        return <FileOutlined style={{ ...iconStyle, color: '#52c41a' }} />;
-      case 'dwg':
-        return <FileOutlined style={{ ...iconStyle, color: '#1890ff' }} />;
-      default:
-        return <FileOutlined style={iconStyle} />;
-    }
-  };
   // Tabs for the detail view
   const tabItems = [
     {
@@ -427,45 +437,39 @@ export default function ViewContract(props) {
         </span>
       ),
       children: (
-        <StyledCard
-          title={
-            <Space>
-              <FileOutlined style={{ color: themeColors.primary }} />
-              <span>Tài liệu hợp đồng</span>
-              <Badge count={mockDocuments.length} style={{ backgroundColor: themeColors.primary }} />
-            </Space>
-          }
-          extra={
-            <Button type="primary" icon={<UploadOutlined />}>
-              Tải lên tài liệu
-            </Button>
-          }
-        >
-          <Row gutter={[24, 24]}>
-            {mockDocuments.map((doc, index) => (
-              <Col xs={24} sm={12} md={8} key={index}>
-                <DocumentCard hoverable>
-                  <Space align="start">
-                    {getDocumentIcon(doc.type)}
-                    <div style={{ flex: 1 }}>
-                      <Paragraph strong style={{ margin: 0, color: themeColors.primary }}>
-                        {doc.name}
-                      </Paragraph>
-                      <Space size="small">
-                        <Tag color="blue">{doc.type.toUpperCase()}</Tag>
-                        <Text type="secondary">{doc.size}</Text>
-                        <Text type="secondary">{doc.date}</Text>
-                      </Space>
-                    </div>
-                    <Tooltip title="Tải xuống">
-                      <Button type="text" shape="circle" icon={<DownloadOutlined />} />
-                    </Tooltip>
-                  </Space>
-                </DocumentCard>
-              </Col>
-            ))}
-          </Row>
-        </StyledCard>
+        <ProjectDocumentList
+          documents={mockDocuments}
+          loading={false}
+          title="Tài liệu hợp đồng"
+          entityType="hợp đồng"
+          showUploadButton={true}
+          onUpload={() => message.info('Chức năng tải lên đang phát triển')}
+          onPreview={(doc) => message.info(`Xem trước: ${doc.name}`)}
+          onDownload={(url, name) => message.info(`Tải xuống: ${name}`)}
+          formatDate={(dateString) => dateString}
+        />
+      ),
+    },
+    {
+      key: '5',
+      label: (
+        <span>
+          <PictureOutlined style={{ marginRight: 8 }} />
+          Hình ảnh
+        </span>
+      ),
+      children: (
+        <ProjectImageList
+          images={mockImages}
+          loading={false}
+          title="Hình ảnh hợp đồng"
+          entityType="hợp đồng"
+          showUploadButton={true}
+          onUpload={() => message.info('Chức năng tải lên hình ảnh đang phát triển')}
+          onPreview={(image) => message.info(`Xem ảnh: ${image.name}`)}
+          onDownload={(url, name) => message.info(`Tải xuống: ${name}`)}
+          formatDate={(dateString) => dateString}
+        />
       ),
     },
   ];
@@ -594,22 +598,6 @@ const InfoCard = styled(Card)`
   &:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
-  }
-`;
-
-const DocumentCard = styled(Card)`
-  border: 1px solid ${themeColors.border};
-  border-radius: 12px;
-  padding: 16px;
-  display: flex;
-  align-items: center;
-  transition: all 0.3s ease;
-  cursor: pointer;
-
-  &:hover {
-    background-color: #f5f5f5;
-    transform: translateY(-2px);
-    box-shadow: ${themeColors.cardShadow};
   }
 `;
 
