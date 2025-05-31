@@ -1,11 +1,19 @@
-import { CloseCircleOutlined, FileTextOutlined, InboxOutlined, SaveOutlined } from '@ant-design/icons';
-import { Avatar, Button, Col, Drawer, Form, Input, notification, Row, Select, Space, Spin, Upload } from 'antd';
+import { CloseCircleOutlined, FileTextOutlined, SaveOutlined } from '@ant-design/icons';
+import { Avatar, Button, Col, Drawer, Form, Input, notification, Row, Select, Space, Spin } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import { isEmpty } from 'lodash';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { DocumentImageUpload } from '../../../components/upload';
 import { useAppDispatch } from '../../../redux/store';
+import {
+  deleteContractDocument,
+  deleteContractImage,
+  getContractDocuments,
+  uploadContractDocument,
+  uploadContractImage,
+} from '../../../services/uploadService';
 import { getBusinessList } from '../../business/redux/business.slice';
 import { getConstructionList } from '../../construction/redux/construction.slice';
 import { getProjectList } from '../../project/redux/project.slice';
@@ -19,15 +27,6 @@ const initialState = {
   cong_trinh_id: '',
   ben_a_id: '',
   ben_b_id: '',
-  contractImages: [],
-  contractDocuments: [],
-};
-
-const normFile = (e) => {
-  if (Array.isArray(e)) {
-    return e;
-  }
-  return e?.fileList;
 };
 
 export default function AddEditContractForm(props) {
@@ -43,6 +42,28 @@ export default function AddEditContractForm(props) {
   const loading = useSelector((state) => state.contract.loading);
   const selectedContract = useSelector((state) => state.contract.editingContract);
   const dispatch = useAppDispatch();
+  // Upload handlers for contract
+  const handleContractImageUpload = async (file, contractId) => {
+    const parentId = null;
+    return await uploadContractImage(file, contractId, parentId);
+  };
+
+  const handleContractDocumentUpload = async (file, contractId) => {
+    const parentId = null;
+    return await uploadContractDocument(file, contractId, parentId);
+  };
+
+  const handleContractImageDelete = async (imageId, contractId) => {
+    return await deleteContractImage(imageId, contractId);
+  };
+
+  const handleContractDocumentDelete = async (documentId, contractId) => {
+    return await deleteContractDocument(documentId, contractId);
+  };
+
+  const handleLoadContractDocuments = async (contractId) => {
+    return await getContractDocuments(contractId);
+  };
   // Fetch data when component mounts
   useEffect(() => {
     const fetchData = async () => {
@@ -93,14 +114,11 @@ export default function AddEditContractForm(props) {
     } finally {
       setLoadingConstructions(false);
     }
-  };
-  // Set initial values for editing
+  }; // Set initial values for editing
   useEffect(() => {
     if (selectedContract) {
       const formattedContract = {
         ...selectedContract,
-        contractImages: selectedContract.contractImages || [],
-        contractDocuments: selectedContract.contractDocuments || [],
       };
       setInitialValues(formattedContract);
 
@@ -143,8 +161,6 @@ export default function AddEditContractForm(props) {
           cong_trinh_id: values.cong_trinh_id,
           ben_a_id: values.ben_a_id,
           ben_b_id: values.ben_b_id,
-          contractImages: values.contractImages || [],
-          contractDocuments: values.contractDocuments || [],
         };
 
         try {
@@ -184,8 +200,6 @@ export default function AddEditContractForm(props) {
           cong_trinh_id: values.cong_trinh_id,
           ben_a_id: values.ben_a_id,
           ben_b_id: values.ben_b_id,
-          contractImages: values.contractImages || [],
-          contractDocuments: values.contractDocuments || [],
         };
         try {
           await dispatch(updateContract(payload)).unwrap();
@@ -365,64 +379,26 @@ export default function AddEditContractForm(props) {
                   filterOption={(input, option) => option.label.toLowerCase().includes(input.toLowerCase())}
                   allowClear
                 />
-              </Form.Item>
+              </Form.Item>{' '}
             </Col>
           </Row>
-          {/* Trường upload ảnh */}
-          <Row gutter={16}>
-            <Col span={24}>
-              <Form.Item
-                label="Hình ảnh hợp đồng"
-                name="contractImages"
-                valuePropName="fileList"
-                getValueFromEvent={normFile}
-                rules={[{ required: false, message: 'Vui lòng upload hình ảnh hợp đồng' }]}
-              >
-                <Upload.Dragger
-                  name="contractImages"
-                  listType="picture-card"
-                  multiple
-                  beforeUpload={() => false}
-                  accept="image/*"
-                >
-                  <p className="ant-upload-drag-icon">
-                    <InboxOutlined />
-                  </p>
-                  <p className="ant-upload-text">Kéo thả hoặc nhấp để tải lên hình ảnh</p>
-                  <p className="ant-upload-hint">
-                    Hỗ trợ tải lên nhiều file cùng lúc. Chỉ chấp nhận file ảnh (JPG, PNG, GIF...)
-                  </p>
-                </Upload.Dragger>
-              </Form.Item>
-            </Col>
-          </Row>
-          {/* Trường upload file */}
-          <Row gutter={16}>
-            <Col span={24}>
-              <Form.Item
-                label="Tài liệu hợp đồng"
-                name="contractDocuments"
-                valuePropName="fileList"
-                getValueFromEvent={normFile}
-                rules={[{ required: false, message: 'Vui lòng upload tài liệu hợp đồng' }]}
-              >
-                <Upload.Dragger
-                  name="contractDocuments"
-                  multiple
-                  beforeUpload={() => false}
-                  accept=".pdf,.doc,.docx,.xls,.xlsx,.txt"
-                >
-                  <p className="ant-upload-drag-icon">
-                    <InboxOutlined />
-                  </p>
-                  <p className="ant-upload-text">Kéo thả hoặc nhấp để tải lên tài liệu</p>
-                  <p className="ant-upload-hint">
-                    Hỗ trợ tải lên nhiều file cùng lúc. Chấp nhận các định dạng: PDF, DOC, DOCX, XLS, XLSX, TXT
-                  </p>
-                </Upload.Dragger>
-              </Form.Item>
-            </Col>
-          </Row>
+
+          {/* Upload section - only show in edit mode */}
+          {selectedContract && (
+            <DocumentImageUpload
+              entityId={selectedContract.id}
+              entityType="contract"
+              onUploadImage={handleContractImageUpload}
+              onUploadDocument={handleContractDocumentUpload}
+              onDeleteImage={handleContractImageDelete}
+              onDeleteDocument={handleContractDocumentDelete}
+              onLoadDocuments={handleLoadContractDocuments}
+              showImageUpload={true}
+              showDocumentUpload={true}
+              imageTitle="Hình ảnh hợp đồng"
+              documentTitle="Tài liệu hợp đồng"
+            />
+          )}
         </Form>
       )}
       {loading && (

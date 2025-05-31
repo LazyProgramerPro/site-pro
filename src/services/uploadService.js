@@ -230,3 +230,64 @@ export const deleteContractAppendix = async (appendixId, contractId) => {
     id: appendixId,
   });
 };
+
+/**
+ * Upload hình ảnh hợp đồng
+ */
+export const uploadContractImage = async (file, contractId, parentId, name = '', description = '') => {
+  return uploadFile({
+    file,
+    ownerId: contractId,
+    ownerType: 'HOP_DONG',
+    parentId: parentId,
+    name: name || file.name,
+    description: description || `Hình ảnh hợp đồng - ${file.name}`,
+  });
+};
+
+/**
+ * Upload tài liệu hợp đồng
+ */
+export const uploadContractDocument = async (file, contractId, parentId, name = '', description = '') => {
+  return uploadFile({
+    file,
+    ownerId: contractId,
+    ownerType: 'HOP_DONG',
+    parentId: parentId,
+    name: name || file.name,
+    description: description || `Tài liệu hợp đồng - ${file.name}`,
+
+  });
+};
+
+/**
+ * Xóa hình ảnh hợp đồng
+ */
+export const deleteContractImage = async (imageId, contractId) => {
+  return deleteFile({
+    ownerId: contractId,
+    ownerType: 'HOP_DONG',
+    id: imageId,
+  });
+};
+
+/**
+ * Xóa tài liệu hợp đồng
+ */
+export const deleteContractDocument = async (documentId, contractId) => {
+  return deleteFile({
+    ownerId: contractId,
+    ownerType: 'HOP_DONG',
+    id: documentId,
+  });
+};
+
+/**
+ * Lấy danh sách tài liệu của hợp đồng
+ */
+export const getContractDocuments = async (contractId) => {
+  return getDocumentList({
+    ownerId: contractId,
+    ownerType: 'HOP_DONG',
+  });
+};
