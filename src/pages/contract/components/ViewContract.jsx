@@ -204,51 +204,6 @@ export default function ViewContract(props) {
     { time: '01/06/2025', title: 'Đang thực hiện', description: 'Bắt đầu thực hiện theo điều khoản hợp đồng' },
   ];
 
-  // Upload handlers for documents
-  const handleDocumentUpload = async (file) => {
-    if (!selectedContract?.id) {
-      message.error('Không tìm thấy thông tin hợp đồng');
-      return;
-    }
-
-    try {
-      await dispatch(
-        uploadContractDocumentThunk({
-          file,
-          contractId: selectedContract.id,
-          name: file.name,
-          description: `Tài liệu hợp đồng - ${file.name}`,
-        }),
-      ).unwrap();
-      message.success('Upload tài liệu thành công');
-    } catch (error) {
-      console.error('Upload error:', error);
-      message.error('Upload tài liệu thất bại');
-    }
-  };
-
-  const handleImageUpload = async (file) => {
-    if (!selectedContract?.id) {
-      message.error('Không tìm thấy thông tin hợp đồng');
-      return;
-    }
-
-    try {
-      await dispatch(
-        uploadContractDocumentThunk({
-          file,
-          contractId: selectedContract.id,
-          name: file.name,
-          description: `Hình ảnh hợp đồng - ${file.name}`,
-        }),
-      ).unwrap();
-      message.success('Upload hình ảnh thành công');
-    } catch (error) {
-      console.error('Upload error:', error);
-      message.error('Upload hình ảnh thất bại');
-    }
-  };
-
   // Tabs for the detail view
   const tabItems = [
     {
@@ -460,10 +415,11 @@ export default function ViewContract(props) {
           title="Tài liệu hợp đồng"
           entityType="hợp đồng"
           showUploadButton={true}
-          onUpload={handleDocumentUpload}
-          onPreview={(doc) => message.info(`Xem trước: ${doc.name}`)}
-          onDownload={(url, name) => message.info(`Tải xuống: ${name}`)}
           formatDate={formatDate}
+          selectedEntity={selectedContract}
+          uploadDocumentThunk={uploadContractDocumentThunk}
+          getDocumentListThunk={getContractDocumentList}
+          dispatch={dispatch}
         />
       ),
     },
@@ -471,7 +427,7 @@ export default function ViewContract(props) {
       key: '5',
       label: (
         <span>
-          <PictureOutlined style={{ marginRight: 8 }} />
+          <FileOutlined style={{ marginRight: 8 }} />
           Hình ảnh
         </span>
       ),
@@ -482,10 +438,11 @@ export default function ViewContract(props) {
           title="Hình ảnh hợp đồng"
           entityType="hợp đồng"
           showUploadButton={true}
-          onUpload={handleImageUpload}
-          onPreview={(image) => message.info(`Xem ảnh: ${image.name}`)}
-          onDownload={(url, name) => message.info(`Tải xuống: ${name}`)}
           formatDate={formatDate}
+          selectedEntity={selectedContract}
+          uploadImageThunk={uploadContractDocumentThunk}
+          getImageListThunk={getContractDocumentList}
+          dispatch={dispatch}
         />
       ),
     },

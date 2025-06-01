@@ -360,7 +360,7 @@ export default function ViewContractAddendum(props) {
               <InfoCard>
                 <CalendarOutlined style={{ fontSize: '32px', color: themeColors.warning, marginBottom: '12px' }} />
                 <Title level={4} style={{ margin: 0, color: themeColors.textPrimary }}>
-                  {formatDate(contractAddendumDetail?.created_at).split(' ')[0]}
+                  {formatDate(contractAddendumDetail?.created_at)}
                 </Title>
                 <Text type="secondary">Ngày tạo phụ lục</Text>
               </InfoCard>
@@ -447,10 +447,11 @@ export default function ViewContractAddendum(props) {
           title="Tài liệu đính kèm"
           entityType="phụ lục hợp đồng"
           showUploadButton={true}
-          onUpload={handleDocumentUpload}
-          onPreview={(doc) => message.info(`Xem trước: ${doc.name}`)}
-          onDownload={(url, name) => message.info(`Tải xuống: ${name}`)}
           formatDate={formatDate}
+          selectedEntity={selectedContractAddendum}
+          uploadDocumentThunk={uploadContractAddendumDocumentThunk}
+          getDocumentListThunk={getContractAddendumDocumentList}
+          dispatch={dispatch}
         />
       ),
     },
