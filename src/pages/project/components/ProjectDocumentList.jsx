@@ -391,7 +391,11 @@ const DocumentPreview = ({ document, onDownload }) => {
             <AnimatedButton icon={<DownloadOutlined />} onClick={() => onDownload(document.url, document.name)}>
               Tải xuống
             </AnimatedButton>
-            <AnimatedButton type="primary" icon={<EyeOutlined />} onClick={() => window.open(document.url, '_blank')}>
+            <AnimatedButton
+              type="primary"
+              icon={<EyeOutlined />}
+              onClick={() => window.open(document.url, '_blank', 'noopener')}
+            >
               Xem trong tab mới
             </AnimatedButton>
           </Space>
@@ -434,7 +438,7 @@ const DocumentPreview = ({ document, onDownload }) => {
             Tải xuống
           </AnimatedButton>
           {document.url && (
-            <AnimatedButton icon={<EyeOutlined />} onClick={() => window.open(document.url, '_blank')}>
+            <AnimatedButton icon={<EyeOutlined />} onClick={() => window.open(document.url, '_blank', 'noopener')}>
               Mở trong tab mới
             </AnimatedButton>
           )}
@@ -478,19 +482,7 @@ const DocumentPreviewModal = ({ visible, onCancel, document, onDownload }) => (
         <span style={{ fontWeight: 500 }}>{document?.name || 'Xem trước tài liệu'}</span>
       </Space>
     }
-    footer={[
-      <AnimatedButton
-        key="download"
-        type="primary"
-        icon={<DownloadOutlined />}
-        onClick={() => document && onDownload(document.url, document.name)}
-      >
-        Tải xuống
-      </AnimatedButton>,
-      <AnimatedButton key="close" onClick={onCancel}>
-        Đóng
-      </AnimatedButton>,
-    ]}
+    footer={null}
     className="document-preview-modal"
   >
     <DocumentPreview document={document} onDownload={onDownload} />
@@ -622,22 +614,21 @@ export default function ProjectDocumentList({
     setUploadModalVisible(true);
   }, []);
 
-  const handleDownloadFile = useCallback((url, fileName) => {
+  const handleDownloadFile = useCallback(async (url, fileName) => {
     if (!url) {
       message.error('URL tài liệu không hợp lệ');
       return;
     }
 
-    try {
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = fileName || 'document';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (error) {
-      message.error('Không thể tải xuống tài liệu');
-    }
+    // Sử dụng phương pháp tạo link và click để mở/tải file
+    const link = document.createElement('a');
+    link.href = url;
+    // Loại bỏ dòng sau để ưu tiên mở trong tab mới thay vì bắt buộc tải xuống:
+    // link.download = fileName || 'document';
+    link.target = '_blank'; // Mở trong tab mới nếu trình duyệt hỗ trợ
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }, []);
   const handleUpload = useCallback(async () => {
     if (fileList.length === 0) {
@@ -736,7 +727,7 @@ export default function ProjectDocumentList({
                 document={doc}
                 formatDate={formatDate}
                 onPreview={onPreview || handleDocumentPreview}
-                onDownload={onDownload || handleDownloadFile}
+                onDownload={handleDownloadFile} // Luôn sử dụng handleDownloadFile nội bộ
               />
             ))}
           </DocumentList>

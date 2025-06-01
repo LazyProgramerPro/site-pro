@@ -370,19 +370,7 @@ const ImagePreviewModal = ({ visible, onCancel, image, onDownload }) => (
         <span style={{ fontWeight: 500 }}>{image?.name || 'Xem trước hình ảnh'}</span>
       </Space>
     }
-    footer={[
-      <AnimatedButton
-        key="download"
-        type="primary"
-        icon={<DownloadOutlined />}
-        onClick={() => image && onDownload(image.url, image.name)}
-      >
-        Tải xuống
-      </AnimatedButton>,
-      <AnimatedButton key="close" onClick={onCancel}>
-        Đóng
-      </AnimatedButton>,
-    ]}
+    footer={null}
     className="image-preview-modal"
   >
     <ImagePreview image={image} onDownload={onDownload} />
@@ -524,21 +512,74 @@ export default function ProjectImageList({
     setUploadModalVisible(true);
   }, []);
 
-  const handleDownloadFile = useCallback((url, fileName) => {
+  const handleDownloadFile = useCallback(async (url, fileName) => {
     if (!url) {
-      message.error('URL hình ảnh không hợp lệ');
+      // message.error('URL hình ảnh không hợp lệ');
+      console.error('URL hình ảnh không hợp lệ');
       return;
     }
 
+    // message.loading({ content: 'Đang chuẩn bị tải xuống...', key: 'downloadingFile', duration: 0 });
+
     try {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Không thể tải dữ liệu hình ảnh. Máy chủ trả về: ${response.status}`);
+      }
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+
       const link = document.createElement('a');
-      link.href = url;
-      link.download = fileName || 'image';
+      link.href = blobUrl;
+
+      // Cố gắng lấy tên file và phần mở rộng từ URL nếu fileName không có, hoặc đặt tên mặc định
+      let downloadFileName = fileName;
+      if (!downloadFileName) {
+        try {
+          const urlPath = new URL(url).pathname;
+          const lastSegment = urlPath.substring(urlPath.lastIndexOf('/') + 1);
+          if (lastSegment.includes('.')) {
+            downloadFileName = lastSegment;
+          } else {
+            // Đoán phần mở rộng từ blob type nếu có thể, hoặc mặc định là png
+            const extension = blob.type.split('/')[1] || 'png';
+            downloadFileName = `image.${extension}`;
+          }
+        } catch (e) {
+          // Nếu URL không hợp lệ hoặc không thể phân tích, dùng tên mặc định
+          const extension = blob.type.split('/')[1] || 'png';
+          downloadFileName = `downloaded_image.${extension}`;
+        }
+      }
+
+      link.download = downloadFileName;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+      // message.success({ content: 'Tải xuống hoàn tất!', key: 'downloadingFile', duration: 2 });
     } catch (error) {
-      message.error('Không thể tải xuống hình ảnh');
+      console.error('Lỗi khi tải xuống hình ảnh bằng fetch:', error);
+      // message.info({ content: 'Thử tải xuống bằng phương pháp khác...', key: 'downloadingFile', duration: 1.5 });
+      try {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName || 'image'; // Giữ lại tên file gốc hoặc 'image' nếu không có
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        // Không thể chắc chắn thành công ở đây, chỉ là đã cố gắng
+        // message.success({ content: 'Yêu cầu tải xuống đã được gửi!', key: 'downloadingFile', duration: 2 });
+        // Xóa message loading vì không biết chắc chắn trạng thái
+        // message.destroy('downloadingFile');
+      } catch (fallbackError) {
+        console.error('Lỗi khi tải xuống hình ảnh (phương pháp dự phòng):', fallbackError);
+        // message.error({
+        //   content: 'Không thể tải xuống hình ảnh: ' + (error.message || 'Lỗi không xác định'),
+        //   key: 'downloadingFile',
+        //   duration: 3,
+        // });
+      }
     }
   }, []);
 
