@@ -2,8 +2,6 @@ import {
   BuildOutlined,
   CalendarOutlined,
   ClockCircleOutlined,
-  DownloadOutlined,
-  EyeOutlined,
   FileExcelOutlined,
   FileOutlined,
   FilePdfOutlined,
@@ -12,7 +10,6 @@ import {
   HistoryOutlined,
   ProjectOutlined,
   TeamOutlined,
-  UploadOutlined,
 } from '@ant-design/icons';
 import {
   Avatar,
@@ -23,8 +20,6 @@ import {
   Descriptions,
   Divider,
   Drawer,
-  Empty,
-  Modal,
   Progress,
   Row,
   Skeleton,
@@ -34,16 +29,14 @@ import {
   Tabs,
   Tag,
   Timeline,
-  Tooltip,
   Typography,
-  Upload,
   message,
 } from 'antd';
 import { isEmpty } from 'lodash';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { getProjectDocumentList, uploadProjectDocumentThunk } from '../redux/project.slice';
+import { getProjectDocumentList, uploadProjectDocumentThunk, uploadProjectImageThunk } from '../redux/project.slice';
 import ProjectDocumentList from './ProjectDocumentList';
 import ProjectImageList from './ProjectImageList';
 const { Title, Paragraph, Text } = Typography;
@@ -123,40 +116,6 @@ const StyledCard = styled(Card)`
 
   .ant-card-body {
     padding: 20px;
-  }
-`;
-
-const MemberCard = styled(Card)`
-  border: 1px solid ${themeColors.border};
-  border-radius: 12px;
-  box-shadow: ${themeColors.cardShadow};
-  padding: 20px;
-  text-align: center;
-  transition: all 0.3s ease;
-  height: 100%;
-
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
-    border-color: ${themeColors.primary}20;
-  }
-`;
-
-const DocumentCard = styled(Card)`
-  border: 1px solid ${themeColors.border};
-  border-radius: 12px;
-  padding: 16px;
-  display: flex;
-  align-items: center;
-  transition: all 0.3s ease;
-  cursor: pointer;
-  height: 100%;
-
-  &:hover {
-    background-color: #f8f9ff;
-    transform: translateY(-2px);
-    box-shadow: ${themeColors.cardShadow};
-    border-color: ${themeColors.primary}30;
   }
 `;
 
@@ -256,7 +215,6 @@ const StatusTag = styled(Tag)`
   }
 `;
 
-// Thêm các styled-components mới
 const AnimatedAvatar = styled(Avatar)`
   transition: all 0.3s ease;
 
@@ -285,44 +243,6 @@ const StatisticCard = styled(Card)`
   .ant-statistic-content {
     color: ${themeColors.textPrimary};
     font-weight: 500;
-  }
-`;
-
-const ImageCard = styled(Card)`
-  border-radius: 12px;
-  overflow: hidden;
-  transition: all 0.4s ease;
-  height: 100%;
-
-  .image-container {
-    height: 160px;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #f5f5f5;
-    border-radius: 8px 8px 0 0;
-
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.5s ease;
-    }
-  }
-
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-
-    .image-container img {
-      transform: scale(1.05);
-    }
-  }
-
-  .ant-card-actions {
-    background: #fafafa;
-    border-top: 1px solid #f0f0f0;
   }
 `;
 
@@ -523,15 +443,6 @@ export default function ViewProject(props) {
   const [initialValues, setInitialValues] = useState(initialState);
   const [activeTab, setActiveTab] = useState('1');
 
-  // State cho modal xem trước tài liệu
-  const [previewVisible, setPreviewVisible] = useState(false);
-  const [currentDocument, setCurrentDocument] = useState(null);
-
-  // State và handlers cho upload tài liệu
-  const [uploadModalVisible, setUploadModalVisible] = useState(false);
-  const [uploadLoading, setUploadLoading] = useState(false);
-  const [fileList, setFileList] = useState([]);
-
   // State cho tìm kiếm và sắp xếp tài liệu
   const [searchText, setSearchText] = useState('');
   const [sortType, setSortType] = useState('name-asc'); // name-asc, name-desc, date-asc, date-desc
@@ -555,17 +466,16 @@ export default function ViewProject(props) {
         return 0;
       });
   };
-
   // Xử lý hiển thị modal upload
   const showUploadModal = () => {
-    setFileList([]);
-    setUploadModalVisible(true);
+    // Legacy function - sẽ được xử lý bởi ProjectDocumentList
+    console.log('showUploadModal called - handled by ProjectDocumentList');
   };
 
   // Hàm mở modal xem trước tài liệu
   const showDocumentPreview = (document) => {
-    setCurrentDocument(document);
-    setPreviewVisible(true);
+    // Legacy function - sẽ được xử lý bởi ProjectDocumentList
+    console.log('showDocumentPreview called - handled by ProjectDocumentList');
   };
 
   const dispatch = useDispatch();
@@ -683,24 +593,10 @@ export default function ViewProject(props) {
   const openDocument = (url) => {
     if (url) window.open(url, '_blank');
   };
-
-  // Function để download file
+  // Function để download file - legacy function
   const downloadFile = (url, fileName) => {
-    if (!url) {
-      message.error('URL tài liệu không hợp lệ');
-      return;
-    }
-
-    try {
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = fileName || 'document';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (error) {
-      message.error('Không thể tải xuống tài liệu');
-    }
+    // Handled by ProjectDocumentList
+    console.log('downloadFile called - handled by ProjectDocumentList');
   };
 
   // Component hiển thị skeleton loading
@@ -935,11 +831,12 @@ export default function ViewProject(props) {
           title="Tài liệu dự án"
           entityType="dự án"
           showUploadButton={true}
-          onUpload={showUploadModal}
-          onPreview={showDocumentPreview}
-          onDownload={downloadFile}
           formatDate={formatDate}
           getFilteredAndSortedDocuments={getFilteredAndSortedDocuments}
+          selectedEntity={selectedProject}
+          uploadDocumentThunk={uploadProjectDocumentThunk}
+          getDocumentListThunk={getProjectDocumentList}
+          dispatch={dispatch}
         />
       ),
     },
@@ -958,287 +855,15 @@ export default function ViewProject(props) {
           title="Hình ảnh dự án"
           entityType="dự án"
           showUploadButton={true}
-          onUpload={showUploadModal}
-          onPreview={showDocumentPreview}
-          onDownload={downloadFile}
           formatDate={formatDate}
+          selectedEntity={selectedProject}
+          uploadImageThunk={uploadProjectImageThunk}
+          getImageListThunk={getProjectDocumentList}
+          dispatch={dispatch}
         />
       ),
     },
   ];
-  // Component hiển thị chi tiết tài liệu
-  const DocumentPreview = ({ document, onDownload }) => {
-    console.log('Previewing document:', document);
-
-    // Xác định loại tài liệu dựa vào phần mở rộng
-    const isPreviewable = (doc) => {
-      if (!doc || !doc.name) return false;
-
-      const lowerName = doc.name.toLowerCase();
-      return (
-        lowerName.endsWith('.pdf') ||
-        lowerName.endsWith('.txt') ||
-        lowerName.endsWith('.jpg') ||
-        lowerName.endsWith('.jpeg') ||
-        lowerName.endsWith('.png') ||
-        lowerName.endsWith('.gif')
-      );
-    };
-
-    const renderPreview = () => {
-      if (!document) {
-        console.log('No document to preview');
-        return (
-          <Empty
-            description="Không có tài liệu để xem trước"
-            image={Empty.PRESENTED_IMAGE_SIMPLE}
-            style={{ margin: '40px 0' }}
-          />
-        );
-      }
-
-      // Kiểm tra URL hợp lệ
-      if (!document.url) {
-        console.log('Document URL is missing');
-        return (
-          <div style={{ textAlign: 'center', padding: '40px 20px' }}>
-            <div style={{ marginBottom: '20px' }}>
-              <FileUnknownOutlined style={{ fontSize: '64px', color: themeColors.error }} />
-            </div>
-            <Title level={4}>Không thể xem trước tài liệu</Title>
-            <Paragraph>URL tài liệu không hợp lệ hoặc bị thiếu</Paragraph>
-            <Button type="primary" onClick={() => setPreviewVisible(false)}>
-              Đóng
-            </Button>
-          </div>
-        );
-      }
-
-      const lowerName = document.name.toLowerCase();
-      const fileType = document.type || lowerName.split('.').pop();
-      console.log('Document type:', fileType);
-      if (lowerName.endsWith('.pdf')) {
-        return (
-          <div className="pdf-container" style={{ position: 'relative', height: '70vh' }}>
-            <div
-              style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 1 }}
-            >
-              <Spin size="large" tip="Đang tải PDF..." />
-            </div>
-            <iframe
-              src={`${document.url}#view=FitH`}
-              style={{
-                width: '100%',
-                height: '100%',
-                border: 'none',
-                borderRadius: '8px',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                backgroundColor: '#fff',
-              }}
-              title={document.name}
-              onLoad={(e) => {
-                const container = e.target.closest('.pdf-container');
-                if (container) {
-                  const spinner = container.querySelector('.ant-spin');
-                  if (spinner) spinner.style.display = 'none';
-                }
-              }}
-            />
-          </div>
-        );
-      } else if (
-        lowerName.endsWith('.jpg') ||
-        lowerName.endsWith('.jpeg') ||
-        lowerName.endsWith('.png') ||
-        lowerName.endsWith('.gif') ||
-        ['jpg', 'jpeg', 'png', 'gif'].includes(fileType)
-      ) {
-        return (
-          <div
-            style={{
-              textAlign: 'center',
-              padding: '20px',
-              height: '70vh',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: '#f7f7f7',
-              borderRadius: '8px',
-            }}
-          >
-            <div style={{ position: 'relative', maxHeight: '65vh', maxWidth: '100%', marginBottom: '16px' }}>
-              <Spin
-                spinning={true}
-                style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}
-              />
-              <img
-                src={document.url}
-                alt={document.name}
-                style={{
-                  maxWidth: '100%',
-                  maxHeight: '65vh',
-                  objectFit: 'contain',
-                  boxShadow: '0 4px 16px rgba(0, 0, 0, 0.1)',
-                  borderRadius: '4px',
-                  backgroundColor: '#fff',
-                }}
-                onLoad={(e) => {
-                  const spinner = e.target.previousSibling;
-                  if (spinner) spinner.style.display = 'none';
-                }}
-                onError={(e) => {
-                  console.log('Image load error');
-                  e.target.onerror = null;
-                  e.target.src = 'https://via.placeholder.com/800x600?text=Không+tải+được+ảnh';
-                  const spinner = e.target.previousSibling;
-                  if (spinner) spinner.style.display = 'none';
-                }}
-              />
-            </div>
-            <Space>
-              <AnimatedButton icon={<DownloadOutlined />} onClick={() => onDownload(document.url, document.name)}>
-                Tải xuống
-              </AnimatedButton>
-              <AnimatedButton type="primary" icon={<EyeOutlined />} onClick={() => window.open(document.url, '_blank')}>
-                Xem trong tab mới
-              </AnimatedButton>
-            </Space>
-          </div>
-        );
-      } else if (lowerName.endsWith('.txt')) {
-        return (
-          <div style={{ position: 'relative', height: '70vh' }}>
-            <div
-              style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 1 }}
-            >
-              <Spin size="large" tip="Đang tải tài liệu..." />
-            </div>
-            <iframe
-              src={document.url}
-              style={{
-                width: '100%',
-                height: '70vh',
-                border: 'none',
-                borderRadius: '8px',
-                backgroundColor: 'white',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-              }}
-              title={document.name}
-              onLoad={(e) => {
-                const spinner = e.target.previousSibling;
-                if (spinner) spinner.style.display = 'none';
-              }}
-            />
-          </div>
-        );
-      }
-
-      return (
-        <div
-          style={{
-            textAlign: 'center',
-            padding: '40px 20px',
-            backgroundColor: '#f5f5f5',
-            borderRadius: '8px',
-            height: '70vh',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
-          <div
-            style={{
-              fontSize: '64px',
-              marginBottom: '20px',
-              animation: 'pulse 1.5s infinite ease-in-out',
-            }}
-          >
-            {getDocumentIcon(document.type || 'unknown')}
-          </div>
-          <Title level={4}>{document.name}</Title>
-          <Paragraph>Không thể xem trước tài liệu này. Vui lòng tải xuống để xem.</Paragraph>
-          <Space style={{ marginTop: '20px' }}>
-            <AnimatedButton
-              type="primary"
-              icon={<DownloadOutlined />}
-              onClick={() => onDownload(document.url, document.name)}
-            >
-              Tải xuống
-            </AnimatedButton>
-            {document.url && (
-              <AnimatedButton icon={<EyeOutlined />} onClick={() => window.open(document.url, '_blank')}>
-                Mở trong tab mới
-              </AnimatedButton>
-            )}
-          </Space>
-
-          <style jsx>{`
-            @keyframes pulse {
-              0% {
-                transform: scale(1);
-                opacity: 0.8;
-              }
-              50% {
-                transform: scale(1.05);
-                opacity: 1;
-              }
-              100% {
-                transform: scale(1);
-                opacity: 0.8;
-              }
-            }
-          `}</style>
-        </div>
-      );
-    };
-
-    return renderPreview();
-  };
-  // Xử lý upload tài liệu
-  const handleUpload = async () => {
-    if (fileList.length === 0) {
-      message.warning('Vui lòng chọn ít nhất một tài liệu để tải lên!');
-      return;
-    }
-
-    setUploadLoading(true);
-    try {
-      // Upload các tài liệu từ fileList
-      const uploadPromises = fileList.map((file) => {
-        console.log('Uploading file:', file.name);
-        // Gọi action thunk để upload tài liệu dự án
-        return dispatch(
-          uploadProjectDocumentThunk({
-            file: file.originFileObj,
-            projectId: selectedProject.id,
-            name: file.name,
-            description: `Tài liệu dự án - ${file.name}`,
-          }),
-        );
-      });
-
-      await Promise.all(uploadPromises);
-
-      message.success('Tải lên tài liệu thành công!');
-      setUploadModalVisible(false);
-      setFileList([]);
-
-      // Tải lại danh sách tài liệu
-      dispatch(getProjectDocumentList(selectedProject.id));
-    } catch (error) {
-      console.error('Upload error:', error);
-      message.error('Tải lên tài liệu thất bại: ' + (error.message || 'Lỗi không xác định'));
-    } finally {
-      setUploadLoading(false);
-    }
-  };
-
-  // Xử lý thay đổi file trong upload
-  const handleFileChange = ({ fileList }) => {
-    setFileList(fileList);
-  };
 
   return (
     <StyledDrawer
@@ -1313,102 +938,6 @@ export default function ViewProject(props) {
           style={{ marginTop: 16 }}
         />
       )}{' '}
-      {/* Modal xem trước tài liệu */}
-      <Modal
-        open={previewVisible}
-        onCancel={() => setPreviewVisible(false)}
-        width="90%"
-        style={{ top: 20 }}
-        title={
-          <Space align="center">
-            {currentDocument && getDocumentIcon(currentDocument.type || 'unknown')}
-            <Text strong style={{ fontSize: 16 }}>
-              {currentDocument ? currentDocument.name : 'Xem tài liệu'}
-            </Text>
-          </Space>
-        }
-        footer={[
-          <AnimatedButton
-            key="download"
-            type="primary"
-            icon={<DownloadOutlined />}
-            onClick={() => currentDocument && downloadFile(currentDocument.url, currentDocument.name)}
-          >
-            Tải xuống
-          </AnimatedButton>,
-          <AnimatedButton key="close" onClick={() => setPreviewVisible(false)}>
-            Đóng
-          </AnimatedButton>,
-        ]}
-        className="document-preview-modal"
-      >
-        {currentDocument && <DocumentPreview document={currentDocument} onDownload={downloadFile} />}
-      </Modal>{' '}
-      {/* Modal tải lên tài liệu */}{' '}
-      <Modal
-        open={uploadModalVisible}
-        onCancel={() => setUploadModalVisible(false)}
-        width="600px"
-        title={
-          <Space>
-            <UploadOutlined style={{ color: themeColors.primary, fontSize: 20 }} />
-            <span style={{ fontWeight: 500 }}>Tải lên tài liệu dự án</span>
-          </Space>
-        }
-        footer={[
-          <AnimatedButton key="cancel" onClick={() => setUploadModalVisible(false)}>
-            Huỷ
-          </AnimatedButton>,
-          <AnimatedButton
-            key="upload"
-            type="primary"
-            loading={uploadLoading}
-            onClick={handleUpload}
-            disabled={fileList.length === 0}
-          >
-            Tải lên
-          </AnimatedButton>,
-        ]}
-      >
-        <div style={{ padding: '16px 0' }}>
-          <Upload.Dragger
-            fileList={fileList}
-            onChange={handleFileChange}
-            multiple
-            showUploadList={{
-              showPreviewIcon: true,
-              showRemoveIcon: true,
-              showDownloadIcon: false,
-              removeIcon: <span style={{ color: themeColors.error }}>Xoá</span>,
-            }}
-            beforeUpload={() => false} // Prevent automatic upload
-            accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.jpg,.jpeg,.png,.gif"
-          >
-            <p className="ant-upload-drag-icon">
-              <UploadOutlined style={{ fontSize: '48px', color: themeColors.primary }} />
-            </p>
-            <p className="ant-upload-text">Kéo thả tài liệu vào đây hoặc nhấp để chọn tệp</p>
-            <p className="ant-upload-hint" style={{ color: themeColors.textSecondary }}>
-              Hỗ trợ tải lên nhiều tệp cùng lúc
-            </p>
-          </Upload.Dragger>
-        </div>
-        <div
-          style={{
-            marginTop: '16px',
-            color: themeColors.textSecondary,
-            fontSize: 14,
-            background: '#f5f5f5',
-            padding: '12px',
-            borderRadius: '4px',
-          }}
-        >
-          <div style={{ marginBottom: '8px', fontWeight: 500, color: themeColors.textPrimary }}>Lưu ý:</div>
-          <p>• Định dạng hỗ trợ: PDF, DOC, XLS, JPG, PNG, TXT, GIF.</p>
-          <p>• Kích thước tối đa: 10MB mỗi tệp.</p>
-          <p>• Tài liệu sẽ được gắn với dự án hiện tại.</p>
-        </div>
-      </Modal>
     </StyledDrawer>
   );
 }

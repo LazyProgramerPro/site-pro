@@ -162,6 +162,43 @@ export const uploadProjectDocumentThunk = createAsyncThunk(
   },
 );
 
+/**
+ * Upload hình ảnh dự án
+ */
+export const uploadProjectImageThunk = createAsyncThunk(
+  'project/uploadProjectImage',
+  async ({ file, projectId, parentId, name, description }, thunkAPI) => {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('owner_id', projectId);
+      formData.append('owner_type', 'DU_AN');
+      formData.append('parent_id', parentId || '');
+      formData.append('name', name || file.name);
+      formData.append('description', description || `Hình ảnh dự án - ${file.name}`);
+
+      const { rc } = await http.post('/auth/document/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (rc?.code !== 0) {
+        message.error(rc?.desc || 'Không thể upload hình ảnh');
+        return thunkAPI.rejectWithValue(rc?.desc || 'Không thể upload hình ảnh');
+      }
+
+      // Sau khi upload thành công, lấy lại danh sách tài liệu (bao gồm cả hình ảnh)
+      thunkAPI.dispatch(getProjectDocumentList(projectId));
+      return rc.code;
+    } catch (error) {
+      console.error('Upload project image error:', error);
+      message.error('Không thể upload hình ảnh dự án');
+      return thunkAPI.rejectWithValue('Không thể upload hình ảnh dự án');
+    }
+  },
+);
+
 const projectSlice = createSlice({
   name: 'project',
   initialState,
@@ -290,15 +327,23 @@ const projectSlice = createSlice({
         state.loadingDocuments = false;
         state.projectImages = [];
         state.projectDocuments = [];
-      })
-
-      .addCase(uploadProjectDocumentThunk.pending, (state) => {
+      })      .addCase(uploadProjectDocumentThunk.pending, (state) => {
         state.loading = true;
       })
       .addCase(uploadProjectDocumentThunk.fulfilled, (state) => {
         state.loading = false;
       })
       .addCase(uploadProjectDocumentThunk.rejected, (state) => {
+        state.loading = false;
+      })
+
+      .addCase(uploadProjectImageThunk.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(uploadProjectImageThunk.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(uploadProjectImageThunk.rejected, (state) => {
         state.loading = false;
       })
 
